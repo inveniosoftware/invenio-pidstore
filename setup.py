@@ -108,6 +108,9 @@ setup(
             'Sphinx>=1.3',
             'sphinx_rtd_theme>=0.1.7'
         ],
+        'datacite': [
+            'datacite>=0.1.0',
+        ],
         'tests': test_requirements
     },
     classifiers=[
