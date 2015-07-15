@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,25 +17,20 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""
-    invenio.modules.pid_store.providers.local_doi_provider
-    ----------------------------------------------------------
-
-"""
+"""Define provider for locally unmanaged DOIs."""
 
 from invenio.base.globals import cfg
 
-from invenio.modules.pidstore.provider import PidProvider, LocalPidProvider
+from ..provider import LocalPidProvider, PidProvider
+
 
 class LocalDOI(LocalPidProvider):
-    """
-    Provider for locally unmanaged DOIs.
-    """
+
+    """Provider for locally unmanaged DOIs."""
+
     pid_type = 'doi'
 
     @classmethod
     def is_provider_for_pid(cls, pid_str):
-        """
-        Check if DOI is not the local datacite managed one.
-        """
+        """Check if DOI is not the local datacite managed one."""
         return not pid_str.startswith("%s/" % cfg['CFG_DATACITE_DOI_PREFIX'])

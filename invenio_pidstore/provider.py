@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+"""Define APIs for PID providers."""
+
 from werkzeug.utils import import_string
 
 from invenio.base.globals import cfg
@@ -23,8 +26,8 @@ from invenio.utils.datastructures import LazyDict
 
 
 class PidProvider(object):
-    """
-    Abstract class for persistent identifier provider classes.
+
+    """Abstract class for persistent identifier provider classes.
 
     Subclasses must implement register, update, delete and is_provider_for_pid
     methods and register itself:
@@ -62,9 +65,9 @@ class PidProvider(object):
     DataCitePidProvider.
 
     Each method takes variable number of argument and keywords arguments. This
-   can be used to pass additional information to the provider when registering
-    a persistent identifier. E.g. a DOI requires URL and metadata to be able
-    to register the DOI.
+    can be used to pass additional information to the provider when registering
+    a persistent identifier. E.g. a DOI requires URL and metadata to be able to
+    register the DOI.
     """
 
     def __load_providers():
@@ -87,7 +90,7 @@ class PidProvider(object):
                 registry[pid_type].append(provider)
         return registry
     registry = LazyDict(__load_providers)
-    """ Registry of possible providers """
+    """Registry of possible providers."""
 
     pid_type = None
     """
@@ -96,10 +99,7 @@ class PidProvider(object):
 
     @staticmethod
     def create(pid_type, pid_str, pid_provider, *args, **kwargs):
-        """
-        Create a new instance of a PidProvider for the
-        given type and pid.
-        """
+        """Create a new instance for the given type and pid."""
         providers = PidProvider.registry.get(pid_type.lower(), None)
         for p in providers:
             if p.is_provider_for_pid(pid_str):
@@ -110,8 +110,7 @@ class PidProvider(object):
     # API methods which must be implemented by each provider.
     #
     def reserve(self, pid, *args, **kwargs):
-        """
-        Reserve a new persistent identifier
+        """Reserve a new persistent identifier.
 
         This might or might not be useful depending on the service of the
         provider.
@@ -119,21 +118,19 @@ class PidProvider(object):
         raise NotImplementedError
 
     def register(self, pid, *args, **kwargs):
-        """ Register a new persistent identifier """
+        """Register a new persistent identifier."""
         raise NotImplementedError
 
     def update(self, pid, *args, **kwargs):
-        """ Update information about a persistent identifier """
+        """Update information about a persistent identifier."""
         raise NotImplementedError
 
     def delete(self, pid, *args, **kwargs):
-        """ Delete a persistent identifier """
+        """Delete a persistent identifier."""
         raise NotImplementedError
 
     def sync_status(self, pid, *args, **kwargs):
-        """
-        Synchronize persistent identifier status with remote service provider.
-        """
+        """Synchronize PIDstatus with remote service provider."""
         return True
 
     @classmethod
@@ -141,17 +138,18 @@ class PidProvider(object):
         raise NotImplementedError
 
     #
-    # API methods which might need to be implemented depending on each provider.
+    # API methods which might need to be implemented depending on each
+    # provider.
     #
     def create_new_pid(self, pid_value):
-        """ Some PidProvider might have the ability to create new values """
+        """Some PidProvider might have the ability to create new values."""
         return pid_value
 
+
 class LocalPidProvider(PidProvider):
-    """
-    Abstract class for local persistent identifier provides (i.e locally
-    unmanaged DOIs).
-    """
+
+    """Abstract class for local PIDs (i.e locally unmanaged DOIs)."""
+
     def reserve(self, pid, *args, **kwargs):
         pid.log("RESERVE", "Successfully reserved locally")
         return True
@@ -165,6 +163,6 @@ class LocalPidProvider(PidProvider):
         return True
 
     def delete(self, pid, *args, **kwargs):
-        """ Delete a registered DOI """
+        """Delete a registered DOI."""
         pid.log("DELETE", "Successfully deleted locally")
         return True

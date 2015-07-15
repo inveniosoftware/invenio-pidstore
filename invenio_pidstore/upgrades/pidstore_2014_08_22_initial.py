@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014 CERN.
+# Copyright (C) 2014, 2015 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,17 +17,20 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+"""Initial creation of tables for pidstore module."""
+
 import warnings
+
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-from invenio.modules.upgrader.api import op
 
+from invenio.modules.upgrader.api import op
 
 depends_on = []
 
 
 def info():
-    return "Initial creation of tables for pidstore module."
+    return __doc__
 
 
 def do_upgrade():
@@ -45,7 +48,8 @@ def do_upgrade():
             sa.Column('created', sa.DateTime(), nullable=False),
             sa.Column('last_modified', sa.DateTime(), nullable=False),
             sa.PrimaryKeyConstraint('id'),
-            sa.Index('idx_object', 'object_type', 'object_value', unique=False),
+            sa.Index('idx_object', 'object_type', 'object_value',
+                     unique=False),
             sa.Index('uidx_type_pid', 'pid_type', 'pid_value', unique=True),
         )
     else:
@@ -55,9 +59,11 @@ def do_upgrade():
         op.create_table(
             'pidLOG',
             sa.Column('id', mysql.INTEGER(display_width=15), nullable=False),
-            sa.Column('id_pid', mysql.INTEGER(display_width=15), nullable=True),
+            sa.Column('id_pid', mysql.INTEGER(display_width=15),
+                      nullable=True),
             sa.Column('timestamp', sa.DateTime(), nullable=False),
-            sa.Column('action', sa.String(length=10), nullable=False, index=True),
+            sa.Column('action', sa.String(length=10), nullable=False,
+                      index=True),
             sa.Column('message', sa.Text(), nullable=False),
             sa.ForeignKeyConstraint(['id_pid'], ['pidSTORE.id'], ),
             sa.PrimaryKeyConstraint('id')
