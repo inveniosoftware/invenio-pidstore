@@ -42,3 +42,5 @@
 
 
 Invenio module that stores and registers persistent identifiers.
+
+*This is an experimental development preview release.*
