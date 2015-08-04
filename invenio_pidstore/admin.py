@@ -62,14 +62,14 @@ class PidLogAdmin(ModelView):
 
 
 def register_admin(app, admin):
-    """
-    Called on app initialization to register administration interface.
-    """
+    """Called on app initialization to register administration interface."""
+    category = "Persistent Identifiers"
+    admin.category_icon_classes[category] = "fa fa-compass"
     admin.add_view(PersistentIdentifierAdmin(
         PersistentIdentifier, db.session,
-        name='Persistent identifiers', category="Persistent Identifiers")
+        name='Persistent identifiers', category=category)
     )
     admin.add_view(PidLogAdmin(
         PidLog, db.session,
-        name='Log', category="Persistent Identifiers")
+        name='Log', category=category)
     )

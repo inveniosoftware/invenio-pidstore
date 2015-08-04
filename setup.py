@@ -40,7 +40,7 @@ requirements = [
 ]
 
 test_requirements = [
-    'pytest>=2.7.0',
+    'pytest>=2.6.4',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
     'coverage>=3.7.1',
