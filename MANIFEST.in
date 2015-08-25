@@ -25,8 +25,9 @@
 include *.py
 include *.rst
 include *.txt
-include .dockerignore .editorconfig
+include .dockerignore .editorconfig .travis.yml
 include LICENSE
+include babel.ini
 include pytest.ini
 include tox.ini
 recursive-include docs *.bat

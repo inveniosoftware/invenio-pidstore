@@ -6,9 +6,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: invenio-pidstore 0.1.1.dev20150804\n"
+"Project-Id-Version: invenio-pidstore 0.1.1\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-08-04 13:45+0200\n"
+"POT-Creation-Date: 2015-08-25 17:42+0200\n"
 "PO-Revision-Date: 2015-08-04 13:46+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: fr <LL@li.org>\n"

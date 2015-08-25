@@ -24,6 +24,23 @@
 Changes
 =======
 
-Version 0.1.0 (release 2015-07-16)
+Version 0.1.1 (released 2015-08-25)
+-----------------------------------
+
+Improved features
+~~~~~~~~~~~~~~~~~
+
+- Adds category icon for the main sidebar-menu in the admin UI.
+
+Bug fixes
+~~~~~~~~~
+
+- Adds missing `invenio_upgrader` dependency following its separation
+  into standalone package.
+
+- Fixes import of invenio_upgrader.
+
+Version 0.1.0 (released 2015-07-16)
+-----------------------------------
 
 - Initial public release.
