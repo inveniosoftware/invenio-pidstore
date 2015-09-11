@@ -21,7 +21,7 @@
 
 from werkzeug.utils import import_string
 
-from invenio.base.globals import cfg
+from invenio_base.globals import cfg
 from invenio.utils.datastructures import LazyDict
 
 

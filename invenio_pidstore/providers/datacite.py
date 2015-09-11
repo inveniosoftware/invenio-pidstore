@@ -25,7 +25,7 @@ from datacite import DataCiteMDSClient
 from datacite.errors import DataCiteError, DataCiteGoneError, \
     DataCiteNoContentError, DataCiteNotFoundError, HttpError
 
-from invenio.base.globals import cfg
+from invenio_base.globals import cfg
 
 from ..provider import PidProvider
 

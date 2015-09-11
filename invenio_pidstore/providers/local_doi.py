@@ -19,7 +19,7 @@
 
 """Define provider for locally unmanaged DOIs."""
 
-from invenio.base.globals import cfg
+from invenio_base.globals import cfg
 
 from ..provider import LocalPidProvider, PidProvider
 

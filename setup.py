@@ -36,6 +36,7 @@ history = open('CHANGES.rst').read()
 requirements = [
     'Flask>=0.10.1',
     'six>=1.7.2',
+    'invenio-base>=0.1.0',
     'invenio-upgrader>=0.1.0',
     # FIXME 'Invenio>=2.1',
 ]

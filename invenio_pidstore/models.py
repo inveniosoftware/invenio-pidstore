@@ -56,7 +56,7 @@ from datetime import datetime
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from invenio.base.globals import cfg
+from invenio_base.globals import cfg
 from invenio.ext.sqlalchemy import db
 from invenio.utils.text import to_unicode
 
