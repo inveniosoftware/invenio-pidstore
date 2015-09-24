@@ -133,6 +133,7 @@ class PersistentIdentifier(db.Model):
                         pid_type, pid_value, pid_provider)
                 )
 
+        db.session.begin_nested()
         try:
             obj = cls(pid_type=provider.pid_type,
                       pid_value=provider.create_new_pid(pid_value),
@@ -140,7 +141,6 @@ class PersistentIdentifier(db.Model):
                       status=cfg['PIDSTORE_STATUS_NEW'])
             obj._provider = provider
             db.session.add(obj)
-            db.session.commit()
             obj.log("CREATE", "Created")
             return obj
         except SQLAlchemyError:
@@ -207,36 +207,37 @@ class PersistentIdentifier(db.Model):
                 "You cannot assign objects to a deleted persistent identifier."
             )
 
-        # Check for an existing object assigned to this pid
-        existing_obj_id = self.get_assigned_object(object_type)
+        with db.session.begin_nested():
+            # Check for an existing object assigned to this pid
+            existing_obj_id = self.get_assigned_object(object_type)
 
-        if existing_obj_id and existing_obj_id != object_value:
-            if not overwrite:
-                raise Exception(
-                    "Persistent identifier is already assigned to another "
-                    "object"
-                )
-            else:
-                self.log(
-                    "ASSIGN",
-                    "Unassigned object %s:%s (overwrite requested)" % (
-                        self.object_type, self.object_value)
-                )
-                self.object_type = None
-                self.object_value = None
-        elif existing_obj_id and existing_obj_id == object_value:
-            # The object is already assigned to this pid.
+            if existing_obj_id and existing_obj_id != object_value:
+                if not overwrite:
+                    raise Exception(
+                        "Persistent identifier is already assigned to another "
+                        "object"
+                    )
+                else:
+                    self.log(
+                        "ASSIGN",
+                        "Unassigned object %s:%s (overwrite requested)" % (
+                            self.object_type, self.object_value)
+                    )
+                    self.object_type = None
+                    self.object_value = None
+            elif existing_obj_id and existing_obj_id == object_value:
+                # The object is already assigned to this pid.
+                return True
+
+            self.object_type = object_type
+            self.object_value = object_value
+            db.session.commit()
+            self.log("ASSIGN", "Assigned object %s:%s" % (self.object_type,
+                                                        self.object_value))
             return True
 
-        self.object_type = object_type
-        self.object_value = object_value
-        db.session.commit()
-        self.log("ASSIGN", "Assigned object %s:%s" % (self.object_type,
-                                                      self.object_value))
-        return True
-
     def update(self, with_deleted=False, *args, **kwargs):
-        """Update the persistent identifier with the provider.."""
+        """Update the persistent identifier with the provider."""
         if self.is_new() or self.is_reserved():
             raise Exception(
                 "Persistent identifier has not yet been registered."
@@ -245,16 +246,16 @@ class PersistentIdentifier(db.Model):
         if not with_deleted and self.is_deleted():
             raise Exception("Persistent identifier has been deleted.")
 
-        provider = self.get_provider()
-        if provider is None:
-            self.log("UPDATE", "No provider found.")
-            raise Exception("No provider found.")
+        with db.session.begin_nested():
+            provider = self.get_provider()
+            if provider is None:
+                self.log("UPDATE", "No provider found.")
+                raise Exception("No provider found.")
 
-        if provider.update(self, *args, **kwargs):
-            if with_deleted and self.is_deleted():
-                self.status = cfg['PIDSTORE_STATUS_REGISTERED']
-                db.session.commit()
-            return True
+            if provider.update(self, *args, **kwargs):
+                if with_deleted and self.is_deleted():
+                    self.status = cfg['PIDSTORE_ST):TUS_REGISTERED']
+                return True
         return False
 
     def reserve(self, *args, **kwargs):
@@ -268,15 +269,15 @@ class PersistentIdentifier(db.Model):
                 "Persistent identifier has already been registered."
             )
 
-        provider = self.get_provider()
-        if provider is None:
-            self.log("RESERVE", "No provider found.")
-            raise Exception("No provider found.")
+        with db.session.begin_nested():
+            provider = self.get_provider()
+            if provider is None:
+                self.log("RESERVE", "No provider found.")
+                raise Exception("No provider found.")
 
-        if provider.reserve(self, *args, **kwargs):
-            self.status = cfg['PIDSTORE_STATUS_RESERVED']
-            db.session.commit()
-            return True
+            if provider.reserve(self, *args, **kwargs):
+                self.status = cfg['PIDSTORE_STATUS_RESERVED']
+                return True
         return False
 
     def register(self, *args, **kwargs):
@@ -286,33 +287,33 @@ class PersistentIdentifier(db.Model):
                 "Persistent identifier has already been registered."
             )
 
-        provider = self.get_provider()
-        if provider is None:
-            self.log("REGISTER", "No provider found.")
-            raise Exception("No provider found.")
+        with db.session.begin_nested():
+            provider = self.get_provider()
+            if provider is None:
+                self.log("REGISTER", "No provider found.")
+                raise Exception("No provider found.")
 
-        if provider.register(self, *args, **kwargs):
-            self.status = cfg['PIDSTORE_STATUS_REGISTERED']
-            db.session.commit()
-            return True
+            if provider.register(self, *args, **kwargs):
+                self.status = cfg['PIDSTORE_STATUS_REGISTERED']
+                return True
         return False
 
     def delete(self, *args, **kwargs):
         """Delete the persistent identifier."""
-        if self.is_new():
-            # New persistent identifier which haven't been registered yet. Just
-            #  delete it completely but keep log)
-            # Remove links to log entries (but otherwise leave the log entries)
-            PidLog.query.filter_by(id_pid=self.id).update({'id_pid': None})
-            db.session.delete(self)
-            self.log("DELETE", "Unregistered PID successfully deleted")
-        else:
-            provider = self.get_provider()
-            if not provider.delete(self, *args, **kwargs):
-                return False
-            self.status = cfg['PIDSTORE_STATUS_DELETED']
-            db.session.commit()
-        return True
+        with db.session.begin_nested():
+            if self.is_new():
+                # New persistent identifier which haven't been registered yet.
+                # Just delete it completely but keep log)
+                # Remove links to log entries (leave the otherwise)
+                PidLog.query.filter_by(id_pid=self.id).update({'id_pid': None})
+                db.session.delete(self)
+                self.log("DELETE", "Unregistered PID successfully deleted")
+            else:
+                provider = self.get_provider()
+                if not provider.delete(self, *args, **kwargs):
+                    return False
+                self.status = cfg['PIDSTORE_STATUS_DELETED']
+            return True
 
     def sync_status(self, *args, **kwargs):
         """Synchronize persistent identifier status.
@@ -320,10 +321,10 @@ class PersistentIdentifier(db.Model):
         Used when the provider uses an external service, which might have been
         modified outside of our system.
         """
-        provider = self.get_provider()
-        result = provider.sync_status(self, *args, **kwargs)
-        db.session.commit()
-        return result
+        with db.session.begin_nested():
+            provider = self.get_provider()
+            result = provider.sync_status(self, *args, **kwargs)
+            return result
 
     def get_assigned_object(self, object_type=None):
         """Return an assigned object."""
@@ -351,9 +352,9 @@ class PersistentIdentifier(db.Model):
         """Store action and message in log."""
         if self.pid_type and self.pid_value:
             message = "[%s:%s] %s" % (self.pid_type, self.pid_value, message)
-        p = PidLog(id_pid=self.id, action=action, message=message)
-        db.session.add(p)
-        db.session.commit()
+        with db.session.begin_nested():
+            p = PidLog(id_pid=self.id, action=action, message=message)
+            db.session.add(p)
 
 
 class PidLog(db.Model):
