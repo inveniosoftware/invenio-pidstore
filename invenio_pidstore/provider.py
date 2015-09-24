@@ -22,7 +22,7 @@
 from werkzeug.utils import import_string
 
 from invenio_base.globals import cfg
-from invenio.utils.datastructures import LazyDict
+from invenio_utils.datastructures import LazyDict
 
 
 class PidProvider(object):

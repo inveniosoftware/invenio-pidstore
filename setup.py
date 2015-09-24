@@ -38,6 +38,7 @@ requirements = [
     'six>=1.7.2',
     'invenio-base>=0.1.0',
     'invenio-upgrader>=0.1.0',
+    'invenio-utils>=0.1.1',
     # FIXME 'Invenio>=2.1',
 ]
 
