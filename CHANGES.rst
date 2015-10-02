@@ -24,6 +24,17 @@
 Changes
 =======
 
+Version 0.1.2 (released 2015-10-02)
+-----------------------------------
+
+Bug fixes
+~~~~~~~~~
+
+- Removes calls to PluginManager consider_setuptools_entrypoints()
+  removed in PyTest 2.8.0.
+- Uses nested transactions instead of sub-transactions.
+- Adds missing `invenio_base` dependency.
+
 Version 0.1.1 (released 2015-08-25)
 -----------------------------------
 
