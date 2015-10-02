@@ -232,8 +232,9 @@ class PersistentIdentifier(db.Model):
             self.object_type = object_type
             self.object_value = object_value
             db.session.commit()
-            self.log("ASSIGN", "Assigned object %s:%s" % (self.object_type,
-                                                        self.object_value))
+            self.log("ASSIGN", "Assigned object {0}:{1}".format(
+                self.object_type, self.object_value
+            ))
             return True
 
     def update(self, with_deleted=False, *args, **kwargs):
