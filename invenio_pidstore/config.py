@@ -21,11 +21,23 @@
 
 from __future__ import unicode_literals
 
+import pkg_resources
+
 PIDSTORE_PROVIDERS = [
-    'invenio_pidstore.providers.datacite:DataCite',
     'invenio_pidstore.providers.local_doi:LocalDOI',
     'invenio_records.providers.recid:RecordID',
 ]
+
+try:
+    pkg_resources.get_distribution('datacite')
+except pkg_resources.DistributionNotFound:
+    import warnings
+    warnings.warn(
+        "To use DataCite provider you need to run `pip install datacite` first"
+    )
+else:
+    PIDSTORE_PROVIDERS.append('invenio_pidstore.providers.datacite:DataCite')
+
 
 PIDSTORE_OBJECT_TYPES = ['rec', ]
 """
