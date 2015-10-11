@@ -24,6 +24,14 @@
 Changes
 =======
 
+Version 0.1.3 (released 2015-10-11)
+-----------------------------------
+
+Improved features
+~~~~~~~~~~~~~~~~~
+
+- Makes Datacite provider optional.
+
 Version 0.1.2 (released 2015-10-02)
 -----------------------------------
 
