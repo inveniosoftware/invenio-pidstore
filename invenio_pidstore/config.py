@@ -25,19 +25,22 @@ import pkg_resources
 
 PIDSTORE_PROVIDERS = [
     'invenio_pidstore.providers.local_doi:LocalDOI',
-    'invenio_records.providers.recid:RecordID',
 ]
 
-try:
-    pkg_resources.get_distribution('datacite')
-except pkg_resources.DistributionNotFound:
-    import warnings
-    warnings.warn(
-        "To use DataCite provider you need to run `pip install datacite` first"
-    )
-else:
-    PIDSTORE_PROVIDERS.append('invenio_pidstore.providers.datacite:DataCite')
+EXTRA_PIDSTORE_PROVIDERS = [
+    ('datacite', 'invenio_pidstore.providers.datacite:DataCite', ),
+    ('invenio_records', 'invenio_records.providers.recid:RecordID', ),
+]
 
+for dependency, provider in EXTRA_PIDSTORE_PROVIDERS:
+    try:
+        pkg_resources.get_distribution(dependency)
+    except pkg_resources.DistributionNotFound:
+        import warnings
+        warnings.warn("Dependency {0} is required to provider {1}".format(
+            dependency, provider.split(":")[-1]))
+    else:
+        PIDSTORE_PROVIDERS.append(provider)
 
 PIDSTORE_OBJECT_TYPES = ['rec', ]
 """
@@ -56,32 +59,5 @@ Field name in record model (JSONAlchemy)
 
 PIDSTORE_DATACITE_SITE_URL = None
 """
-Site URL to use when minting records. Defaults to CFG_SITE_URL.
-"""
-
-#
-# Internal configuration values. Normally you will not need to edit
-# any of the configuration values below.
-#
-PIDSTORE_STATUS_NEW = 'N'
-"""
-The pid has *not* yet been registered with the service provider.
-"""
-
-PIDSTORE_STATUS_REGISTERED = 'R'
-"""
-The pid has been registered with the service provider.
-"""
-
-PIDSTORE_STATUS_DELETED = 'D'
-"""
-The pid has been deleted/inactivated with the service proivider. This should
-very rarely happen, and must be kept track of, as the PID should not be
-reused for something else.
-"""
-
-PIDSTORE_STATUS_RESERVED = 'K'
-"""
-The pid has been reserved in the service provider but not yet fully
-registered.
+Site URL to use when minting records.
 """

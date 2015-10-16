@@ -26,7 +26,40 @@
 
 from __future__ import absolute_import, print_function
 
-from .ext import InvenioPIDStore
-from .version import __version__
+from flask import Blueprint
+from flask_babelex import gettext as _
+from flask_cli import FlaskCLI
+from invenio_db import InvenioDB
 
-__all__ = ('__version__', 'InvenioPIDStore')
+from . import config
+from .models import PersistentIdentifier
+
+
+def pid_exists(value, pidtype="doi"):
+    """Check if a persistent identifier exists."""
+    return PersistentIdentifier.get(pidtype, value) is not None
+
+
+class InvenioPIDStore(object):
+    """Invenio-PIDStore extension."""
+
+    def __init__(self, app=None):
+        """Extension initialization."""
+        _('A translation string')
+        if app:
+            self.init_app(app)
+
+    def init_app(self, app):
+        """Flask application initialization."""
+        self.init_config(app)
+        app.extensions['invenio-pidstore'] = self
+
+    def init_config(self, app):
+        """Initialize configuration."""
+        # Set default configuration
+        for k in dir(config):
+            if k.startswith("PIDSTORE_"):
+                app.config.setdefault(k, getattr(config, k))
+
+        # Register template filter
+        app.jinja_env.filters['pid_exists'] = pid_exists

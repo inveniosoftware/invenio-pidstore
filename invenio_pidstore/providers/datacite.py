@@ -25,13 +25,12 @@ from datacite import DataCiteMDSClient
 from datacite.errors import DataCiteError, DataCiteGoneError, \
     DataCiteNoContentError, DataCiteNotFoundError, HttpError
 
-from invenio_base.globals import cfg
+from flask import current_app
 
 from ..provider import PidProvider
 
 
 class DataCite(PidProvider):
-
     """DOI provider using DataCite API."""
 
     pid_type = 'doi'
@@ -39,11 +38,12 @@ class DataCite(PidProvider):
     def __init__(self):
         """Initialize provider."""
         self.api = DataCiteMDSClient(
-            username=cfg.get('CFG_DATACITE_USERNAME'),
-            password=cfg.get('CFG_DATACITE_PASSWORD'),
-            prefix=cfg.get('CFG_DATACITE_DOI_PREFIX'),
-            test_mode=cfg.get('CFG_DATACITE_TESTMODE', False),
-            url=cfg.get('CFG_DATACITE_URL')
+            username=current_app.config.get('PIDSTORE_DATACITE_USERNAME'),
+            password=current_app.config.get('PIDSTORE_DATACITE_PASSWORD'),
+            prefix=current_app.config.get('PIDSTORE_DATACITE_DOI_PREFIX'),
+            test_mode=current_app.config.get(
+                'PIDSTORE_DATACITE_TESTMODE', False),
+            url=current_app.config.get('PIDSTORE_DATACITE_URL')
         )
 
     def _get_url(self, kwargs):
@@ -146,11 +146,11 @@ class DataCite(PidProvider):
 
         try:
             self.api.doi_get(pid.pid_value)
-            status = cfg['PIDSTORE_STATUS_REGISTERED']
+            status = PIDStatus.REGISTERED
         except DataCiteGoneError:
-            status = cfg['PIDSTORE_STATUS_DELETED']
+            status = PIDStatus.DELETED
         except DataCiteNoContentError:
-            status = cfg['PIDSTORE_STATUS_REGISTERED']
+            status = PIDStatus.REGISTERED
         except DataCiteNotFoundError:
             pass
         except DataCiteError as e:
@@ -163,11 +163,11 @@ class DataCite(PidProvider):
         if status is None:
             try:
                 self.api.metadata_get(pid.pid_value)
-                status = cfg['PIDSTORE_STATUS_RESERVED']
+                status = PIDStatus.RESERVED
             except DataCiteGoneError:
-                status = cfg['PIDSTORE_STATUS_DELETED']
+                status = PIDStatus.DELETED
             except DataCiteNoContentError:
-                status = cfg['PIDSTORE_STATUS_REGISTERED']
+                status = PIDStatus.REGISTERED
             except DataCiteNotFoundError:
                 pass
             except DataCiteError as e:
@@ -178,7 +178,7 @@ class DataCite(PidProvider):
                 return False
 
         if status is None:
-            status = cfg['PIDSTORE_STATUS_NEW']
+            status = PIDStatus.NEW
 
         if pid.status != status:
             pid.log(
@@ -196,4 +196,5 @@ class DataCite(PidProvider):
         then this provider can only update and register DOIs for the new
         prefix.
         """
-        return pid_str.startswith("%s/" % cfg['CFG_DATACITE_DOI_PREFIX'])
+        return pid_str.startswith(
+            "%s/" % current_app.config['PIDSTORE_DATACITE_DOI_PREFIX'])

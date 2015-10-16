@@ -22,8 +22,28 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-[tox]
-envlist = py27
 
-[testenv]
-commands = {envpython} setup.py test
+"""Minimal Flask application example for development.
+
+Run example development server:
+
+.. code-block:: console
+
+   $ flask --app app run
+"""
+
+from __future__ import absolute_import, print_function
+
+from flask import Flask
+from flask_babelex import Babel
+from flask_cli import FlaskCLI
+from invenio_db import InvenioDB
+
+from invenio_pidstore import InvenioPIDStore
+
+# Create Flask application
+app = Flask(__name__)
+Babel(app)
+FlaskCLI(app)
+InvenioDB(app)
+InvenioPIDStore(app)

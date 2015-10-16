@@ -17,19 +17,39 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""Travis-CI configuration."""
+"""Column namechange for pidSTORE from 'last_modified' to 'updated'."""
 
-import getpass
+import warnings
 
-CFG_BIBSCHED_PROCESS_USER = getpass.getuser()
+import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
-DEBUG = False
-SECRET_KEY = 'MY_SECRET'
+from invenio_upgrader.api import op
+from sqlalchemy.exc import OperationalError
 
-# Disable all automatic asset building - false is /usr/bin/false.
-ASSETS_AUTO_BUILD = False
+depends_on = []
 
-PACKAGES = [
-    'invenio_pidstore',
-    'invenio_base',
-]
+
+def info():
+    """Return the information about the upgrade recipe."""
+    return __doc__
+
+
+def do_upgrade():
+    """Implement your upgrades here."""
+    op.alter_column('pidSTORE', 'last_modified', new_column_name='updated')
+
+
+def estimate():
+    """Estimate running time of upgrade in seconds (optional)."""
+    return 1
+
+
+def pre_upgrade():
+    """Run pre-upgrade checks (optional)."""
+    pass
+
+
+def post_upgrade():
+    """Run post-upgrade checks (optional)."""
+    pass

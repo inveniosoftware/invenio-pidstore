@@ -54,17 +54,16 @@ Usage example for registering new identifiers::
 
 from datetime import datetime
 
+import six
+from flask import current_app
+from invenio_db import db
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy_utils.models import Timestamp
 
-from invenio_base.globals import cfg
-from invenio_ext.sqlalchemy import db
-from invenio_utils.text import to_unicode
-
-from .provider import PidProvider
+from .provider import PidProvider, PIDStatus
 
 
-class PersistentIdentifier(db.Model):
-
+class PersistentIdentifier(db.Model, Timestamp):
     """Store and register persistent identifiers.
 
     Assumptions:
@@ -80,7 +79,9 @@ class PersistentIdentifier(db.Model):
         db.Index('idx_object', 'object_type', 'object_value'),
     )
 
-    id = db.Column(db.Integer(15, unsigned=True), primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True)
     """Id of persistent identifier entry."""
 
     pid_type = db.Column(db.String(6), nullable=False)
@@ -100,15 +101,6 @@ class PersistentIdentifier(db.Model):
 
     object_value = db.Column(db.String(length=255), nullable=True)
     """Object ID - e.g. a record id."""
-
-    created = db.Column(db.DateTime(), nullable=False, default=datetime.now)
-    """Creation datetime of entry."""
-
-    last_modified = db.Column(
-        db.DateTime(), nullable=False, default=datetime.now,
-        onupdate=datetime.now
-    )
-    """Last modification datetime of entry."""
 
     #
     # Class methods
@@ -132,20 +124,18 @@ class PersistentIdentifier(db.Model):
                     "No provider found for %s:%s (%s)" % (
                         pid_type, pid_value, pid_provider)
                 )
-
-        db.session.begin_nested()
         try:
-            obj = cls(pid_type=provider.pid_type,
-                      pid_value=provider.create_new_pid(pid_value),
-                      pid_provider=pid_provider,
-                      status=cfg['PIDSTORE_STATUS_NEW'])
-            obj._provider = provider
-            db.session.add(obj)
+            with db.session.begin_nested():
+                obj = cls(pid_type=provider.pid_type,
+                          pid_value=provider.create_new_pid(pid_value),
+                          pid_provider=pid_provider,
+                          status=PIDStatus.NEW)
+                obj._provider = provider
+                db.session.add(obj)
             obj.log("CREATE", "Created")
             return obj
         except SQLAlchemyError:
-            db.session.rollback()
-            obj.log("CREATE", "Failed to created. Already exists.")
+            obj.log("CREATE", "Failed to create. Already exists.")
             return None
 
     @classmethod
@@ -154,7 +144,7 @@ class PersistentIdentifier(db.Model):
 
         Return None if not found.
         """
-        pid_value = to_unicode(pid_value)
+        pid_value = six.text_type(pid_value)
         obj = cls.query.filter_by(
             pid_type=pid_type, pid_value=pid_value, pid_provider=pid_provider
         ).first()
@@ -169,10 +159,10 @@ class PersistentIdentifier(db.Model):
     #
     def has_object(self, object_type, object_value):
         """Determine if this PID is assigned to a specific object."""
-        if object_type not in cfg['PIDSTORE_OBJECT_TYPES']:
+        if object_type not in current_app.config['PIDSTORE_OBJECT_TYPES']:
             raise Exception("Invalid object type %s." % object_type)
 
-        object_value = to_unicode(object_value)
+        object_value = six.text_type(object_value)
 
         return self.object_type == object_type and \
             self.object_value == object_value
@@ -192,9 +182,9 @@ class PersistentIdentifier(db.Model):
         if an exsiting object is already assigned to the pid, it will raise an
         exception unless overwrite=True.
         """
-        if object_type not in cfg['PIDSTORE_OBJECT_TYPES']:
+        if object_type not in current_app.config['PIDSTORE_OBJECT_TYPES']:
             raise Exception("Invalid object type %s." % object_type)
-        object_value = to_unicode(object_value)
+        object_value = six.text_type(object_value)
 
         if not self.id:
             raise Exception(
@@ -231,7 +221,6 @@ class PersistentIdentifier(db.Model):
 
             self.object_type = object_type
             self.object_value = object_value
-            db.session.commit()
             self.log("ASSIGN", "Assigned object {0}:{1}".format(
                 self.object_type, self.object_value
             ))
@@ -255,7 +244,7 @@ class PersistentIdentifier(db.Model):
 
             if provider.update(self, *args, **kwargs):
                 if with_deleted and self.is_deleted():
-                    self.status = cfg['PIDSTORE_ST):TUS_REGISTERED']
+                    self.status = PIDStatus.REGISTERED
                 return True
         return False
 
@@ -277,7 +266,7 @@ class PersistentIdentifier(db.Model):
                 raise Exception("No provider found.")
 
             if provider.reserve(self, *args, **kwargs):
-                self.status = cfg['PIDSTORE_STATUS_RESERVED']
+                self.status = PIDStatus.RESERVED
                 return True
         return False
 
@@ -295,7 +284,7 @@ class PersistentIdentifier(db.Model):
                 raise Exception("No provider found.")
 
             if provider.register(self, *args, **kwargs):
-                self.status = cfg['PIDSTORE_STATUS_REGISTERED']
+                self.status = PIDStatus.REGISTERED
                 return True
         return False
 
@@ -308,12 +297,13 @@ class PersistentIdentifier(db.Model):
                 # Remove links to log entries (leave the otherwise)
                 PidLog.query.filter_by(id_pid=self.id).update({'id_pid': None})
                 db.session.delete(self)
-                self.log("DELETE", "Unregistered PID successfully deleted")
+                self.log("DELETE", "Unregistered PID successfully deleted",
+                         id_pid_as_null=True)
             else:
                 provider = self.get_provider()
                 if not provider.delete(self, *args, **kwargs):
                     return False
-                self.status = cfg['PIDSTORE_STATUS_DELETED']
+                self.status = PIDStatus.DELETED
             return True
 
     def sync_status(self, *args, **kwargs):
@@ -335,31 +325,35 @@ class PersistentIdentifier(db.Model):
 
     def is_registered(self):
         """Return true if the persistent identifier has been registered."""
-        return self.status == cfg['PIDSTORE_STATUS_REGISTERED']
+        return self.status == PIDStatus.REGISTERED
 
     def is_deleted(self):
         """Return true if the persistent identifier has been deleted."""
-        return self.status == cfg['PIDSTORE_STATUS_DELETED']
+        return self.status == PIDStatus.DELETED
 
     def is_new(self):
         """Return true if the PIDhas not yet been registered or reserved."""
-        return self.status == cfg['PIDSTORE_STATUS_NEW']
+        return self.status == PIDStatus.NEW
 
     def is_reserved(self):
         """Return true if the PID has not yet been reserved."""
-        return self.status == cfg['PIDSTORE_STATUS_RESERVED']
+        return self.status == PIDStatus.RESERVED
 
-    def log(self, action, message):
-        """Store action and message in log."""
+    def log(self, action, message, id_pid_as_null=False):
+        """
+        Store action and message in log.
+
+        If 'id_pid_as_null' the foreign key to PID will not be set.
+        """
         if self.pid_type and self.pid_value:
             message = "[%s:%s] %s" % (self.pid_type, self.pid_value, message)
+        id_pid = None if id_pid_as_null else self.id
         with db.session.begin_nested():
-            p = PidLog(id_pid=self.id, action=action, message=message)
+            p = PidLog(id_pid=id_pid, action=action, message=message)
             db.session.add(p)
 
 
 class PidLog(db.Model):
-
     """Audit log of actions happening to persistent identifiers.
 
     This model is primarily used through PersistentIdentifier.log and rarely
@@ -371,11 +365,15 @@ class PidLog(db.Model):
         db.Index('idx_action', 'action'),
     )
 
-    id = db.Column(db.Integer(15, unsigned=True), primary_key=True)
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
     """Id of persistent identifier entry."""
 
     id_pid = db.Column(
-        db.Integer(15, unsigned=True), db.ForeignKey(PersistentIdentifier.id),
+        db.Integer,
+        db.ForeignKey(PersistentIdentifier.id),
         nullable=True,
     )
     """PID."""

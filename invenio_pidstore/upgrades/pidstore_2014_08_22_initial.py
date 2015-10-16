@@ -30,6 +30,7 @@ depends_on = []
 
 
 def info():
+    """Return the information in the module docstring."""
     return __doc__
 
 

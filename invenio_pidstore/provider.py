@@ -19,78 +19,53 @@
 
 """Define APIs for PID providers."""
 
-from werkzeug.utils import import_string
+from collections import defaultdict
 
-from invenio_base.globals import cfg
-from invenio_utils.datastructures import LazyDict
+from .registry import pidproviders
+
+
+class PIDStatus:
+    """Constants for possible status of any given PID."""
+
+    NEW = 'N'
+    """
+    The pid has *not* yet been registered with the service provider.
+    """
+
+    REGISTERED = 'R'
+    """
+    The pid has been registered with the service provider.
+    """
+
+    DELETED = 'D'
+    """
+    The pid has been deleted/inactivated with the service proivider.
+    This should very rarely happen, and must be kept track of, as the PID
+    should not be reused for something else.
+    """
+
+    RESERVED = 'K'
+    """
+    The pid has been reserved in the service provider but not yet fully
+    registered.
+    """
 
 
 class PidProvider(object):
-
     """Abstract class for persistent identifier provider classes.
 
     Subclasses must implement register, update, delete and is_provider_for_pid
-    methods and register itself:
-
-        class MyProvider(PidProvider):
-            pid_type = "mypid"
-
-            def reserve(self, pid, *args, **kwargs):
-                return True
-
-            def register(self, pid, *args, **kwargs):
-                return True
-
-            def update(self, pid, *args, **kwargs):
-                return True
-
-            def delete(self, pid, *args, **kwargs):
-                try:
-                    ...
-                except Exception as e:
-                    pid.log("DELETE","Deletion failed")
-                    return False
-                else:
-                    pid.log("DELETE","Successfully deleted")
-                    return True
-
-            def is_provider_for_pid(self, pid_str):
-                pass
-
-        PidProvider.register_provider(MyProvider)
-
+    methods as well be added to the app.config['PIDSTORE_PROVIDERS']
+    or manually added to the registry dict (see static field 'registry' below).
 
     The provider is responsible for handling of errors, as well as logging of
-    actions happening to the pid. See example above as well as the
-    DataCitePidProvider.
+    actions happening to the pid (see invenio_pidstore.providers.DataCite).
 
     Each method takes variable number of argument and keywords arguments. This
     can be used to pass additional information to the provider when registering
     a persistent identifier. E.g. a DOI requires URL and metadata to be able to
     register the DOI.
     """
-
-    def __load_providers():
-        registry = dict()
-        for provider_str in cfg['PIDSTORE_PROVIDERS']:
-            provider = import_string(provider_str)
-            if not issubclass(provider, PidProvider):
-                raise TypeError("Argument not an instance of PidProvider.")
-            pid_type = getattr(provider, 'pid_type', None)
-            if pid_type is None:
-                raise AttributeError(
-                    "Provider must specify class variable pid_type."
-                )
-            pid_type = pid_type.lower()
-            if pid_type not in registry:
-                registry[pid_type] = []
-
-            # Prevent double registration
-            if provider not in registry[pid_type]:
-                registry[pid_type].append(provider)
-        return registry
-    registry = LazyDict(__load_providers)
-    """Registry of possible providers."""
 
     pid_type = None
     """
@@ -100,7 +75,7 @@ class PidProvider(object):
     @staticmethod
     def create(pid_type, pid_str, pid_provider, *args, **kwargs):
         """Create a new instance for the given type and pid."""
-        providers = PidProvider.registry.get(pid_type.lower(), None)
+        providers = pidproviders[pid_type.lower()]
         for p in providers:
             if p.is_provider_for_pid(pid_str):
                 return p(*args, **kwargs)
@@ -115,19 +90,19 @@ class PidProvider(object):
         This might or might not be useful depending on the service of the
         provider.
         """
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def register(self, pid, *args, **kwargs):
         """Register a new persistent identifier."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def update(self, pid, *args, **kwargs):
         """Update information about a persistent identifier."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def delete(self, pid, *args, **kwargs):
         """Delete a persistent identifier."""
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def sync_status(self, pid, *args, **kwargs):
         """Synchronize PIDstatus with remote service provider."""
@@ -135,7 +110,8 @@ class PidProvider(object):
 
     @classmethod
     def is_provider_for_pid(cls, pid_str):
-        raise NotImplementedError
+        """Determine whether this class is the provider of given PID."""
+        raise NotImplementedError  # pragma: no cover
 
     #
     # API methods which might need to be implemented depending on each
@@ -147,18 +123,20 @@ class PidProvider(object):
 
 
 class LocalPidProvider(PidProvider):
-
     """Abstract class for local PIDs (i.e locally unmanaged DOIs)."""
 
     def reserve(self, pid, *args, **kwargs):
+        """Reserve given pid."""
         pid.log("RESERVE", "Successfully reserved locally")
         return True
 
     def register(self, pid, *args, **kwargs):
+        """Register given pid."""
         pid.log("REGISTER", "Successfully registered in locally")
         return True
 
     def update(self, pid, *args, **kwargs):
+        """Update given pid."""
         # No logging necessary as status of PID is not changing
         return True
 

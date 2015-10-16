@@ -22,42 +22,25 @@
     as an Intergovernmental Organization or submit itself to any jurisdiction.
 
 
-.. include:: ../README.rst
+API Docs
+========
 
-User's Guide
-------------
+.. automodule:: invenio_pidstore.ext
+   :members:
+   :undoc-members:
 
-This part of the documentation will show you how to get started in using
-Invenio-Base.
+.. automodule:: invenio_pidstore.models
+   :members:
+   :undoc-members:
 
-.. toctree::
-   :maxdepth: 2
+.. automodule:: invenio_pidstore.provider
+   :members:
+   :undoc-members:
 
-   installation
-   usage
+.. automodule:: invenio_pidstore.providers.datacite
+   :members:
+   :undoc-members:
 
-
-API Reference
--------------
-
-If you are looking for information on a specific function, class or method,
-this part of the documentation is for you.
-
-.. toctree::
-   :maxdepth: 2
-
-   api
-
-Additional Notes
-----------------
-
-Notes on how to contribute, legal information and changes are here for the
-interested.
-
-.. toctree::
-   :maxdepth: 1
-
-   contributing
-   changes
-   license
-   authors
+.. automodule:: invenio_pidstore.providers.local_doi
+   :members:
+   :undoc-members:
