@@ -29,6 +29,7 @@ Invenio module that stores and registers persistent identifiers.
 - Esteban J. G. Gabancho <esteban.gabancho@gmail.com>
 - Jan Aage Lavik <jan.age.lavik@cern.ch>
 - Jiri Kuncar <jiri.kuncar@cern.ch>
+- Krzysztof Nowak <k.nowak@cern.ch>
 - Lars Holm Nielsen <lars.holm.nielsen@cern.ch>
 - Leonardo Rossi <leonardo.r@cern.ch>
 - Tibor Simko <tibor.simko@cern.ch>

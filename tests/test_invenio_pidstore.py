@@ -29,10 +29,7 @@ from __future__ import absolute_import, print_function
 
 import pytest
 from flask import Flask
-from flask_babelex import Babel
-from flask_cli import FlaskCLI
-from invenio_db import InvenioDB, db
-from invenio_db.cli import db as db_cmd
+from invenio_db import db
 
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.models import PersistentIdentifier, PidLog
@@ -99,7 +96,7 @@ def test_pid_model_class_methods(app):
 
 
 def test_pid_model_instance_methods(app):
-    """Tests general instance methods of the PersistentIdentifier class."""
+    """Test general instance methods of the PersistentIdentifier class."""
     with app.app_context():
         # Try to get not yet assigned object
         pid0 = PersistentIdentifier.create('mock_t', 'pid_val0', 'pid_provi0')

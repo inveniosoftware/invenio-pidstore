@@ -24,4 +24,3 @@
 
 -e git+git://github.com/inveniosoftware/invenio-db#egg=Invenio-DB
 -e git+https://github.com/inveniosoftware/datacite.git#egg=datacite
--e git+https://github.com/mitsuhiko/werkzeug.git#egg=Werkzeug

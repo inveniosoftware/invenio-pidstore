@@ -21,7 +21,7 @@
 
 from flask import current_app
 
-from ..provider import LocalPidProvider, PidProvider
+from ..provider import LocalPidProvider
 
 
 class LocalDOI(LocalPidProvider):

@@ -27,7 +27,7 @@ from datacite.errors import DataCiteError, DataCiteGoneError, \
 
 from flask import current_app
 
-from ..provider import PidProvider
+from ..provider import PidProvider, PIDStatus
 
 
 class DataCite(PidProvider):

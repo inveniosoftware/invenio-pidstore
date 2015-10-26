@@ -35,7 +35,7 @@ import pytest
 from click.testing import CliRunner
 from flask import Flask
 from flask_cli import FlaskCLI, ScriptInfo
-from invenio_db import InvenioDB, db
+from invenio_db import InvenioDB
 from invenio_db.cli import db as db_cmd
 
 from invenio_pidstore import InvenioPIDStore
@@ -44,7 +44,6 @@ from invenio_pidstore import InvenioPIDStore
 @pytest.fixture()
 def app(request):
     """Flask application fixture."""
-
     # Set temporary instance path for sqlite
     instance_path = tempfile.mkdtemp()
     app = Flask('testapp', instance_path=instance_path)

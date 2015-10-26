@@ -19,8 +19,6 @@
 
 """Define APIs for PID providers."""
 
-from collections import defaultdict
-
 from .registry import pidproviders
 
 

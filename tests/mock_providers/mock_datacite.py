@@ -21,13 +21,10 @@
 
 from __future__ import absolute_import
 
-from flask import current_app
-
 from invenio_pidstore.provider import PidProvider
 
 
 class MockDataCite(PidProvider):
-
     """This is a Mock of a DOI provider, using DataCite API."""
 
     pid_type = 'mock_t'
@@ -73,5 +70,5 @@ class MockDataCite(PidProvider):
 
     @classmethod
     def is_provider_for_pid(cls, pid_str):
-        """Returns whether provider is for pid."""
+        """Return provider for a given pid."""
         return True

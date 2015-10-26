@@ -19,13 +19,7 @@
 
 """Column namechange for pidSTORE from 'last_modified' to 'updated'."""
 
-import warnings
-
-import sqlalchemy as sa
-from sqlalchemy.dialects import mysql
-
 from invenio_upgrader.api import op
-from sqlalchemy.exc import OperationalError
 
 depends_on = []
 
