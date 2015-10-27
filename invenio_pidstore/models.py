@@ -120,10 +120,8 @@ class PersistentIdentifier(db.Model, Timestamp):
         if provider is None:
             provider = PidProvider.create(pid_type, pid_value, pid_provider)
             if not provider:
-                raise Exception(
-                    "No provider found for %s:%s (%s)" % (
-                        pid_type, pid_value, pid_provider)
-                )
+                raise Exception("No provider found for {0}:{1} ({2})".format(
+                    pid_type, pid_value, pid_provider))
         try:
             with db.session.begin_nested():
                 obj = cls(pid_type=provider.pid_type,
@@ -160,7 +158,7 @@ class PersistentIdentifier(db.Model, Timestamp):
     def has_object(self, object_type, object_value):
         """Determine if this PID is assigned to a specific object."""
         if object_type not in current_app.config['PIDSTORE_OBJECT_TYPES']:
-            raise Exception("Invalid object type %s." % object_type)
+            raise Exception("Invalid object type {0}.".format(object_type))
 
         object_value = six.text_type(object_value)
 
@@ -183,7 +181,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         exception unless overwrite=True.
         """
         if object_type not in current_app.config['PIDSTORE_OBJECT_TYPES']:
-            raise Exception("Invalid object type %s." % object_type)
+            raise Exception("Invalid object type {0}.".format(object_type))
         object_value = six.text_type(object_value)
 
         if not self.id:
@@ -208,11 +206,10 @@ class PersistentIdentifier(db.Model, Timestamp):
                         "object"
                     )
                 else:
-                    self.log(
-                        "ASSIGN",
-                        "Unassigned object %s:%s (overwrite requested)" % (
-                            self.object_type, self.object_value)
-                    )
+                    self.log("ASSIGN",
+                             "Unassigned object {0}:{1} "
+                             "(overwrite requested)".format(
+                                 self.object_type, self.object_value))
                     self.object_type = None
                     self.object_value = None
             elif existing_obj_id and existing_obj_id == object_value:
@@ -236,17 +233,20 @@ class PersistentIdentifier(db.Model, Timestamp):
         if not with_deleted and self.is_deleted():
             raise Exception("Persistent identifier has been deleted.")
 
+        raise_provider_error = False
         with db.session.begin_nested():
             provider = self.get_provider()
             if provider is None:
                 self.log("UPDATE", "No provider found.")
-                raise Exception("No provider found.")
-
-            if provider.update(self, *args, **kwargs):
+                raise_provider_error = True
+            elif provider.update(self, *args, **kwargs):
                 if with_deleted and self.is_deleted():
                     self.status = PIDStatus.REGISTERED
                 return True
-        return False
+        if raise_provider_error:
+            raise Exception("No provider found.")
+        else:
+            return False
 
     def reserve(self, *args, **kwargs):
         """Reserve the persistent identifier with the provider.
@@ -259,16 +259,19 @@ class PersistentIdentifier(db.Model, Timestamp):
                 "Persistent identifier has already been registered."
             )
 
+        raise_provider_error = False
         with db.session.begin_nested():
             provider = self.get_provider()
             if provider is None:
                 self.log("RESERVE", "No provider found.")
-                raise Exception("No provider found.")
-
-            if provider.reserve(self, *args, **kwargs):
+                raise_provider_error = True
+            elif provider.reserve(self, *args, **kwargs):
                 self.status = PIDStatus.RESERVED
                 return True
-        return False
+        if raise_provider_error:
+            raise Exception("No provider found.")
+        else:
+            return False
 
     def register(self, *args, **kwargs):
         """Register the persistent identifier with the provider."""
@@ -277,16 +280,19 @@ class PersistentIdentifier(db.Model, Timestamp):
                 "Persistent identifier has already been registered."
             )
 
+        raise_provider_error = False
         with db.session.begin_nested():
             provider = self.get_provider()
             if provider is None:
                 self.log("REGISTER", "No provider found.")
-                raise Exception("No provider found.")
-
-            if provider.register(self, *args, **kwargs):
+                raise_provider_error = True
+            elif provider.register(self, *args, **kwargs):
                 self.status = PIDStatus.REGISTERED
                 return True
-        return False
+        if raise_provider_error:
+            raise Exception("No provider found.")
+        else:
+            return False
 
     def delete(self, *args, **kwargs):
         """Delete the persistent identifier."""
@@ -346,7 +352,8 @@ class PersistentIdentifier(db.Model, Timestamp):
         If 'id_pid_as_null' the foreign key to PID will not be set.
         """
         if self.pid_type and self.pid_value:
-            message = "[%s:%s] %s" % (self.pid_type, self.pid_value, message)
+            message = "[{0}:{1}] {2}".format(
+                self.pid_type, self.pid_value, message)
         id_pid = None if id_pid_as_null else self.id
         with db.session.begin_nested():
             p = PidLog(id_pid=id_pid, action=action, message=message)

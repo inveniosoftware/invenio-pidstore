@@ -21,6 +21,7 @@
 
 from __future__ import absolute_import
 
+import six
 from datacite import DataCiteMDSClient
 from datacite.errors import DataCiteError, DataCiteGoneError, \
     DataCiteNoContentError, DataCiteNotFoundError, HttpError
@@ -66,10 +67,11 @@ class DataCite(PidProvider):
         try:
             self.api.metadata_post(doc)
         except DataCiteError as e:
-            pid.log("RESERVE", "Failed with %s" % e.__class__.__name__)
+            pid.log("RESERVE", "Failed with {0}".format(e.__class__.__name__))
             return False
         except HttpError as e:
-            pid.log("RESERVE", "Failed with HttpError - %s" % unicode(e))
+            pid.log("RESERVE", "Failed with HttpError - {0}".format(
+                six.text_type(e)))
             return False
         else:
             pid.log("RESERVE", "Successfully reserved in DataCite")
@@ -86,10 +88,11 @@ class DataCite(PidProvider):
             # Mint DOI
             self.api.doi_post(pid.pid_value, url)
         except DataCiteError as e:
-            pid.log("REGISTER", "Failed with %s" % e.__class__.__name__)
+            pid.log("REGISTER", "Failed with {0}".format(e.__class__.__name__))
             return False
         except HttpError as e:
-            pid.log("REGISTER", "Failed with HttpError - %s" % unicode(e))
+            pid.log("REGISTER", "Failed with HttpError - {0}".format(
+                six.text_type(e)))
             return False
         else:
             pid.log("REGISTER", "Successfully registered in DataCite")
@@ -111,10 +114,11 @@ class DataCite(PidProvider):
             self.api.metadata_post(doc)
             self.api.doi_post(pid.pid_value, url)
         except DataCiteError as e:
-            pid.log("UPDATE", "Failed with %s" % e.__class__.__name__)
+            pid.log("UPDATE", "Failed with {0}".format(e.__class__.__name__))
             return False
         except HttpError as e:
-            pid.log("UPDATE", "Failed with HttpError - %s" % unicode(e))
+            pid.log("UPDATE", "Failed with HttpError - {0}".format(
+                six.text_type(e)))
             return False
         else:
             if pid.is_deleted():
@@ -131,10 +135,11 @@ class DataCite(PidProvider):
         try:
             self.api.metadata_delete(pid.pid_value)
         except DataCiteError as e:
-            pid.log("DELETE", "Failed with %s" % e.__class__.__name__)
+            pid.log("DELETE", "Failed with {0}".format(e.__class__.__name__))
             return False
         except HttpError as e:
-            pid.log("DELETE", "Failed with HttpError - %s" % unicode(e))
+            pid.log("DELETE", "Failed with HttpError - {0}".format(
+                six.text_type(e)))
             return False
         else:
             pid.log("DELETE", "Successfully deleted in DataCite")
@@ -154,10 +159,11 @@ class DataCite(PidProvider):
         except DataCiteNotFoundError:
             pass
         except DataCiteError as e:
-            pid.log("SYNC", "Failed with %s" % e.__class__.__name__)
+            pid.log("SYNC", "Failed with {0}".format(e.__class__.__name__))
             return False
         except HttpError as e:
-            pid.log("SYNC", "Failed with HttpError - %s" % unicode(e))
+            pid.log("SYNC", "Failed with HttpError - {0}".format(
+                six.text_type(e)))
             return False
 
         if status is None:
@@ -171,19 +177,19 @@ class DataCite(PidProvider):
             except DataCiteNotFoundError:
                 pass
             except DataCiteError as e:
-                pid.log("SYNC", "Failed with %s" % e.__class__.__name__)
+                pid.log("SYNC", "Failed with {0}".format(e.__class__.__name__))
                 return False
             except HttpError as e:
-                pid.log("SYNC", "Failed with HttpError - %s" % unicode(e))
+                pid.log("SYNC", "Failed with HttpError - {0}".format(
+                    six.text_type(e)))
                 return False
 
         if status is None:
             status = PIDStatus.NEW
 
         if pid.status != status:
-            pid.log(
-                "SYNC", "Fixed status from %s to %s." % (pid.status, status)
-            )
+            pid.log("SYNC", "Fixed status from {0} to {1}.".format(
+                pid.status, status))
             pid.status = status
 
         return True
@@ -196,5 +202,5 @@ class DataCite(PidProvider):
         then this provider can only update and register DOIs for the new
         prefix.
         """
-        return pid_str.startswith(
-            "%s/" % current_app.config['PIDSTORE_DATACITE_DOI_PREFIX'])
+        return pid_str.startswith("{0}/".format(
+            current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']))

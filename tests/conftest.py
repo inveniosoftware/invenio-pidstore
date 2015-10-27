@@ -52,9 +52,8 @@ def app(request):
     InvenioDB(app)
     InvenioPIDStore(app)
 
-    app.config.update(
-        {'PIDSTORE_PROVIDERS':
-            ['tests.mock_providers.mock_datacite:MockDataCite', ]})
+    app.config['PIDSTORE_PROVIDERS'] = app.config['PIDSTORE_PROVIDERS'] + \
+        ['tests.mock_providers.mock_datacite:MockDataCite', ]
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
         'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'

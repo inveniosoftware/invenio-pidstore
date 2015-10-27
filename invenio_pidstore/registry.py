@@ -20,8 +20,6 @@
 """Registry for PidProviders."""
 
 
-from collections import defaultdict
-
 from flask import _app_ctx_stack, current_app
 from werkzeug.local import LocalProxy
 from werkzeug.utils import import_string
@@ -32,7 +30,7 @@ __all__ = ("pidproviders", )
 def _collect_pidproviders():
     """Register the providers from the configuration."""
     from .provider import PidProvider
-    registry_dict = defaultdict(lambda: [])
+    registry_dict = dict()
     for provider_str in current_app.config['PIDSTORE_PROVIDERS']:
         provider = import_string(provider_str)
         if not issubclass(provider, PidProvider):

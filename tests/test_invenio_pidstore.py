@@ -34,6 +34,7 @@ from invenio_db import db
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.models import PersistentIdentifier, PidLog
 from invenio_pidstore.provider import PidProvider, PIDStatus
+from invenio_pidstore.registry import _collect_pidproviders
 
 
 def test_version():
@@ -178,6 +179,12 @@ def test_pid_model_provider(app):
             'Exception: Persistent identifier has already been registered.'
         db.session.commit()
 
+        with pytest.raises(Exception) as exc_info:
+            assert not pid0.register()  # Can not register twice
+        assert exc_info.exconly() == \
+            'Exception: Persistent identifier has already been registered.'
+        db.session.commit()
+
         # Register method
         pid1 = PersistentIdentifier.create('mock_t', 'pid_val1', 'pid_provi1')
         assert pid1.register()
@@ -236,7 +243,6 @@ def test_model_pid_delete_new(app):
         pid0 = PersistentIdentifier.create('mock_t', 'pid_val0', 'pid_provi0')
         assert pid0.is_new()
         assert pid0.delete()
-        # import ipdb; ipdb.set_trace()
         pidlog0a, pidlog0b = PidLog.query.all()[-2:]
         assert pidlog0a.action == 'CREATE'
         assert pidlog0a.message == '[mock_t:pid_val0] Created'
@@ -246,6 +252,26 @@ def test_model_pid_delete_new(app):
         assert pidlog0b.message == \
             '[mock_t:pid_val0] Unregistered PID successfully deleted'
         assert pidlog0b.id_pid is None
+
+
+def test_model_pid_reserve_provider_not_found(app):
+    """
+    Corner-case for the test PID reserve method.
+
+    This test covers the raising of the Exception('No provider found') in the
+    'PersistentIdentifier.reserve' method
+    """
+    with app.app_context():
+        pid0 = PersistentIdentifier.create('mock_t', 'pid_val0', 'pid_provi0')
+        pid0._provider = None
+        pid0.pid_type = 'foo_t'
+        with pytest.raises(Exception) as exc_info:
+            pid0.reserve()
+        assert exc_info.exconly() == \
+            'Exception: No provider found.'
+        log0 = PidLog.query.all()[-1]
+        assert log0.action == 'RESERVE'
+        assert log0.message == '[foo_t:pid_val0] No provider found.'
 
 
 def test_model_pid_update(app):
@@ -266,8 +292,16 @@ def test_model_pid_update(app):
         assert pid0.update(with_deleted=True)
         assert pid0.is_registered()  # It should change status to REGISTERED
 
-        # Note: It is possible that the lines models.py:L241-243
-        # have no real entry point through API methods
+
+def test_model_pid_update_provider_not_found(app):
+    """
+    Corner case for the Test PID update method.
+
+    This test covers the raising of the Exception('No provider found') in the
+    'PersistentIdentifier.update' method. It is very possible that this
+    scenario has no real entry point through API methods.
+    """
+    with app.app_context():
         pid1 = PersistentIdentifier.create('mock_t', 'pid_val1', 'pid_provi1')
         pid1.register()
         # Manually change properties
@@ -277,6 +311,29 @@ def test_model_pid_update(app):
             pid1.update()
         assert exc_info.exconly() == \
             'Exception: No provider found.'
+        log1 = PidLog.query.all()[-1]
+        assert log1.action == 'UPDATE'
+        assert log1.message == '[foo_t:pid_val1] No provider found.'
+
+
+def test_model_pid_register_provider_not_found(app):
+    """
+    Corner-case for the test PID register method.
+
+    This test covers the raising of the Exception('No provider found') in the
+    'PersistentIdentifier.register' method
+    """
+    with app.app_context():
+        pid0 = PersistentIdentifier.create('mock_t', 'pid_val0', 'pid_provi0')
+        pid0._provider = None
+        pid0.pid_type = 'foo_t'
+        with pytest.raises(Exception) as exc_info:
+            pid0.register()
+        assert exc_info.exconly() == \
+            'Exception: No provider found.'
+        log0 = PidLog.query.all()[-1]
+        assert log0.action == 'REGISTER'
+        assert log0.message == '[foo_t:pid_val0] No provider found.'
 
 
 def test_model_pid_assign(app):
@@ -318,3 +375,393 @@ def test_template_filters(app):
         assert pid_exists('pid_val0', pidtype='mock_t')
         assert not pid_exists('foo', pidtype='mock_t')
         assert not pid_exists('pid_val0', pidtype='foo')
+
+
+class MockDataCiteMDSClient(object):
+    """Mock of the datacite.DataCiteMDSClient class."""
+
+    def __init__(self):
+        """Init the DataCiteMDSClass with connection config."""
+        # Testing environment should set these to simulate failing
+        self.METADATA_POST_RAISE = None
+        self.METADATA_GET_RAISE = None
+        self.METADATA_DELETE_RAISE = None
+        self.DOI_GET_RAISE = None
+
+    def metadata_post(self, doc):
+        """
+        Metadata post method mock.
+
+        Depending on the value of self.METADATA_POST_RAISE can raise errors.
+        """
+        if self.METADATA_POST_RAISE is not None:
+            raise self.METADATA_POST_RAISE("POST_ERROR_MSG")
+
+    def metadata_get(self, doc):
+        """
+        Metadata get method mock.
+
+        Depending on the value of self.METADATA_GET_RAISE can raise errors.
+        """
+        if self.METADATA_GET_RAISE is not None:
+            raise self.METADATA_GET_RAISE("GET_ERROR_MSG")
+
+    def metadata_delete(self, doc):
+        """
+        Metadata delete method mock.
+
+        Depending on the value of self.METADATA_DELETE_RAISE can raise errors.
+        """
+        if self.METADATA_DELETE_RAISE is not None:
+            raise self.METADATA_DELETE_RAISE("DELETE_ERROR_MSG")
+
+    def doi_get(self, pid_value):
+        """
+        DOI get method.
+
+        Depending on the value of self.DOI_GET_RAISE can raise errors.
+        """
+        if self.DOI_GET_RAISE is not None:
+            raise self.DOI_GET_RAISE("DOI_GET_ERROR_MSG")
+
+    def doi_post(self, pid_value, url):
+        """DOI post method mock."""
+        pass
+
+
+def test_mocking_datacite_and_local_doi(app):
+    """
+    Test the datacite and local PID providers.
+
+    This long test simulates the lifetime of a single PID, testing the API
+    in the following order:
+    create -> reserve -> register -> update -> delete -> update -> sync_status
+    And simulate various error raising on DataCite side.
+    The second 'update' is repeated to test the behaviour on a deleted PID.
+    """
+    from datacite.errors import DataCiteError, DataCiteGoneError, \
+        DataCiteNoContentError, DataCiteNotFoundError, HttpError
+
+    # This config variable is usually provided from the environment
+    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = 'doi_datacite'
+
+    # Test the lifetime of DataCite PID
+    with app.app_context():
+        from invenio_pidstore.providers.datacite import DataCite
+        from invenio_pidstore.providers.local_doi import LocalDOI
+
+        # Create new PID:
+        # PID with type 'doi' and correct doi_value with a DataCite
+        # prefix (for the purpose of the test set as 'doi_datacite/',
+        # see conftest.py) should return DataCite provider.
+        pid_dc = PersistentIdentifier.create(pid_type='doi',
+                                             pid_value='doi_datacite/0001',
+                                             pid_provider='datacite')
+        assert isinstance(pid_dc._provider, DataCite)
+
+        pid_dc._provider.api = MockDataCiteMDSClient()
+        pid_dc_api = pid_dc._provider.api
+
+        # Reserve the PID:
+        # Call 'reserve' without 'doc' kwarg
+        with pytest.raises(Exception) as exc_info:
+            pid_dc.reserve()
+        assert pid_dc.is_new()  # PIDStatus should remain 'NEW'
+        assert exc_info.exconly() == \
+            "Exception: doc keyword argument must be specified."
+
+        # Call 'reserve' and simulate DataCiteError
+        pid_dc_api.METADATA_POST_RAISE = DataCiteError  # Enable DataCiteError
+        assert not pid_dc.reserve(doc='some doc')  # Shoulr return 'False'
+        assert pid_dc.is_new()  # PIDStatus should remain 'NEW'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "RESERVE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with DataCiteError'
+
+        # Call 'reserve' and simulate HttpError
+        pid_dc_api.METADATA_POST_RAISE = HttpError  # Enable HttpError
+        assert not pid_dc.reserve(doc='some doc')  # Should return 'False'
+        assert pid_dc.is_new()  # PIDStatus should remain 'NEW'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "RESERVE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with HttpError - POST_ERROR_MSG'
+
+        # Call 'reserve' with success on DataCite side
+        pid_dc_api.METADATA_POST_RAISE = None  # Disable error raising
+        assert pid_dc.reserve(doc='some doc')  # Should return 'True'
+        assert pid_dc.is_reserved()  # PIDStatus should change to 'RESERVED'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "RESERVE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Successfully reserved in DataCite'
+
+        # Register the PID:
+        # Call 'register' without 'url' kwarg
+        with pytest.raises(Exception) as exc_info:
+            pid_dc.register(doc='some_doc')
+        assert pid_dc.is_reserved()  # PIDStatus should remain 'RESERVED'
+        assert exc_info.exconly() == \
+            "Exception: url keyword argument must be specified."
+
+        # Call 'register' and simulate DataCiteError
+        pid_dc_api.METADATA_POST_RAISE = DataCiteError  # Enable DataCiteError
+        assert not pid_dc.register(doc='d', url='u')  # Should return 'False'
+        assert pid_dc.is_reserved()  # PIDStatus should remain 'RESERVED'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "REGISTER"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with DataCiteError'
+
+        # Call 'register' and simulate HttpError
+        pid_dc_api.METADATA_POST_RAISE = HttpError  # Enable HttpError
+        assert not pid_dc.register(doc='d', url='u')  # Should return 'False'
+        assert pid_dc.is_reserved()  # PIDStatus should remain 'RESERVED'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "REGISTER"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with HttpError - POST_ERROR_MSG'
+
+        # Call 'register' with success on DataCite side
+        pid_dc_api.METADATA_POST_RAISE = None  # Disable error raising
+        assert pid_dc.register(doc='d', url='u')  # Should return 'True'
+        assert pid_dc.is_registered()  # PIDStatus change to 'REGISTERED'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "REGISTER"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Successfully registered in DataCite'
+
+        # Update the PID:
+        # Call 'update' and simulate DataCiteError
+        pid_dc_api.METADATA_POST_RAISE = DataCiteError  # Enable DataCiteError
+        assert not pid_dc.update(doc='d', url='u')  # Should return 'False'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "UPDATE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with DataCiteError'
+
+        # Call 'update' and simulate HttpError
+        pid_dc_api.METADATA_POST_RAISE = HttpError  # Enable DataCiteError
+        assert not pid_dc.update(doc='d', url='u')  # Should return 'False'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "UPDATE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with HttpError - POST_ERROR_MSG'
+
+        # Call 'update' with success on DataCite side
+        pid_dc_api.METADATA_POST_RAISE = None  # Disable error raising
+        assert pid_dc.update(doc='d', url='u')  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "UPDATE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Successfully updated in DataCite'
+
+        # Delete the PID:
+        # Call 'delete' and simulate DataCiteError
+        pid_dc_api.METADATA_DELETE_RAISE = DataCiteError  # Enable error
+        assert not pid_dc.delete()  # Should return 'False'
+        assert pid_dc.is_registered()  # PIDStatus remains 'REGISTERED'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "DELETE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with DataCiteError'
+
+        # Call 'delete' and simulate HttpError
+        pid_dc_api.METADATA_DELETE_RAISE = HttpError  # Enable error
+        assert not pid_dc.delete()  # Should return 'False'
+        assert pid_dc.is_registered()  # PIDStatus remains 'REGISTERED'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "DELETE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with HttpError - DELETE_ERROR_MSG'
+
+        # Call 'delete' successfully on DataCiteSide
+        pid_dc_api.METADATA_DELETE_RAISE = None  # Disable error
+        assert pid_dc.delete()  # Should return 'True'
+        assert pid_dc.is_deleted()  # PIDStatus changed to 'DELETED'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "DELETE"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Successfully deleted in DataCite'
+
+        # Update the deleted PID:
+        # Call 'update' with success on DataCite side
+        pid_dc_api.METADATA_POST_RAISE = None  # Disable error raising
+        assert pid_dc.update(with_deleted=True, doc='d', url='u')
+        # Last two PidLog entries should come from the update method
+        pidlog1, pidlog2 = PidLog.query.all()[-2:]
+        assert pidlog1.action == "UPDATE"
+        assert pidlog1.message == \
+            '[doi:doi_datacite/0001] Reactivate in DataCite'
+        assert pidlog2.action == "UPDATE"
+        assert pidlog2.message == \
+            '[doi:doi_datacite/0001] Successfully updated and possibly ' \
+            'registered in DataCite'
+        assert pid_dc.is_registered()  # Status change to 'REGISTERED'
+
+        # Sync the status with DataCite using 'sync_status':
+        # Call 'sync_status' and simulate DataCiteError
+        pid_dc_api.DOI_GET_RAISE = DataCiteError  # Enable error
+        assert not pid_dc.sync_status()  # Should return 'False'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with DataCiteError'
+
+        # Call 'sync_status' and simulate HttpError
+        pid_dc_api.DOI_GET_RAISE = HttpError  # Enable error
+        assert not pid_dc.sync_status()  # Should return 'False'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with HttpError - DOI_GET_ERROR_MSG'
+
+        # Call 'sync_status' and simulate DataCiteGoneError
+        pid_dc_api.DOI_GET_RAISE = DataCiteGoneError  # Enable error
+        assert pid_dc.sync_status()  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Fixed status from R to D.'
+        assert pid_dc.is_deleted()  # Should change status to DELETED
+
+        # Call 'sync_status' and simulate DataCiteNoContentError
+        pid_dc_api.DOI_GET_RAISE = DataCiteNoContentError  # Enable error
+        assert pid_dc.sync_status()  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Fixed status from D to R.'
+        assert pid_dc.is_registered()  # Should change status to REGISTERED
+
+        # Call 'sync_status'
+        # First simulate no record on DataCite (DataCiteNotFound on
+        # the call to api.doi_get) and then various errors on api.metadata_get
+        pid_dc_api.DOI_GET_RAISE = DataCiteNotFoundError  # Enable first error
+
+        # Call 'sync_status' with DataCiteError (on api.metadata_get)
+        pid_dc_api.METADATA_GET_RAISE = DataCiteError  # Enable second error
+        assert not pid_dc.sync_status()  # Should return 'False'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with DataCiteError'
+
+        # Call 'sync_status' with HttpError (on api.metadata_get)
+        pid_dc_api.METADATA_GET_RAISE = HttpError  # Enable error
+        assert not pid_dc.sync_status()  # Should return 'False'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Failed with HttpError - GET_ERROR_MSG'
+
+        # Call 'sync_status' with DataCiteGoneError (on api.metadata_get)
+        pid_dc_api.METADATA_GET_RAISE = DataCiteGoneError  # Enable error
+        assert pid_dc.sync_status()  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Fixed status from R to D.'
+        assert pid_dc.is_deleted()  # Should change status to DELETED
+
+        # Call 'sync_status' with DataCiteNoContentError (on api.metadata_get)
+        pid_dc_api.METADATA_GET_RAISE = DataCiteNoContentError  # Enable error
+        assert pid_dc.sync_status()  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Fixed status from D to R.'
+        assert pid_dc.is_registered()  # Should change status to REGISTERED
+
+        # Call 'sync_status' with DataCiteNotFoundError (on api.metadata_get)
+        pid_dc_api.METADATA_GET_RAISE = DataCiteNotFoundError  # Enable error
+        assert pid_dc.sync_status()  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Fixed status from R to N.'
+        assert pid_dc.is_new()  # Should change status to NEW
+
+        # Call 'sync_status' with success on api.metadata_get
+        pid_dc_api.METADATA_GET_RAISE = None  # Enable error
+        assert pid_dc.sync_status()  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Fixed status from N to K.'
+        assert pid_dc.is_reserved()  # Should change status to RESERVED
+
+        # Finally, call 'sync_status' and make it work :)
+        pid_dc_api.DOI_GET_RAISE = None  # Disable first error
+        pid_dc_api.METADATA_GET_RAISE = None  # Disable second error
+        assert pid_dc.sync_status()  # Should return 'True'
+        pidlog_last = PidLog.query.all()[-1]
+        assert pidlog_last.action == "SYNC"
+        assert pidlog_last.message == \
+            '[doi:doi_datacite/0001] Fixed status from K to R.'
+        assert pid_dc.is_registered()  # Should change status to REGISTERED
+
+    # Test the lifetime of LocalDOI provided PID
+    with app.app_context():
+        # PID with type 'doi' and non-DataCite prefix should assign a
+        # LocalDOI PID provider
+        pid_local = PersistentIdentifier.create(pid_type='doi',
+                                                pid_value='other_prefix/0001',
+                                                pid_provider='localdoi')
+        assert isinstance(pid_local._provider, LocalDOI)
+        assert pid_local.is_new()  # Should have status NEW
+
+        # Reserve local DOI:
+        assert pid_local.reserve()
+        assert pid_local.is_reserved()
+        pidlog_reserve = PidLog.query.all()[-1]
+        assert pidlog_reserve.action == "RESERVE"
+        assert pidlog_reserve.message == \
+            '[doi:other_prefix/0001] Successfully reserved locally'
+
+        # Register local DOI
+        assert pid_local.register()
+        assert pid_local.is_registered()
+        pidlog_register = PidLog.query.all()[-1]
+        assert pidlog_register.action == "REGISTER"
+        assert pidlog_register.message == \
+            '[doi:other_prefix/0001] Successfully registered locally'
+
+        # Update local DOI
+        assert pid_local.update()
+        pidlog_last_after_update = PidLog.query.all()[-1]
+        assert pidlog_last_after_update == pidlog_register
+        # Update does not generate new Log, so last PidLog should be as before
+
+        # Delete local DOI
+        assert pid_local.delete()
+        assert pid_local.is_deleted()
+        pidlog_delete = PidLog.query.all()[-1]
+        assert pidlog_delete.action == "DELETE"
+        assert pidlog_delete.message == \
+            '[doi:other_prefix/0001] Successfully deleted locally'
+
+        # Sync status of local DOI
+        assert pid_local.sync_status()
+
+
+def test_registry_collect_pidproviders(app):
+    """Test the collection of pidproviders from the config."""
+    with app.app_context():
+        config_pidstore_providers_orig = app.config['PIDSTORE_PROVIDERS']
+        app.config['PIDSTORE_PROVIDERS'] = \
+            ['tests.mock_providers.mock_datacite:MissingPidType', ]
+        with pytest.raises(AttributeError) as exc_info:
+            _collect_pidproviders()
+        assert exc_info.exconly() == \
+            'AttributeError: Provider must specify class variable pid_type.'
+
+        app.config['PIDSTORE_PROVIDERS'] = \
+            ['tests.mock_providers.mock_datacite:PidProviderNotInheriting', ]
+        with pytest.raises(TypeError) as exc_info:
+            _collect_pidproviders()
+        assert exc_info.exconly() == \
+            'TypeError: Argument not an instance of PidProvider.'
+
+        app.config['PIDSTORE_PROVIDERS'] = config_pidstore_providers_orig

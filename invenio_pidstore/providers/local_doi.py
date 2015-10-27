@@ -32,5 +32,5 @@ class LocalDOI(LocalPidProvider):
     @classmethod
     def is_provider_for_pid(cls, pid_str):
         """Check if DOI is not the local datacite managed one."""
-        return not pid_str.startswith(
-            "%s/" % current_app.config['PIDSTORE_DATACITE_DOI_PREFIX'])
+        return not pid_str.startswith("{0}/".format(
+            current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']))

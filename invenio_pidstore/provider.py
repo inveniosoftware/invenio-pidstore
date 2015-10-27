@@ -73,7 +73,7 @@ class PidProvider(object):
     @staticmethod
     def create(pid_type, pid_str, pid_provider, *args, **kwargs):
         """Create a new instance for the given type and pid."""
-        providers = pidproviders[pid_type.lower()]
+        providers = pidproviders.get(pid_type.lower(), [])
         for p in providers:
             if p.is_provider_for_pid(pid_str):
                 return p(*args, **kwargs)
@@ -130,7 +130,7 @@ class LocalPidProvider(PidProvider):
 
     def register(self, pid, *args, **kwargs):
         """Register given pid."""
-        pid.log("REGISTER", "Successfully registered in locally")
+        pid.log("REGISTER", "Successfully registered locally")
         return True
 
     def update(self, pid, *args, **kwargs):

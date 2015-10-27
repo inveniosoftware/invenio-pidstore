@@ -72,3 +72,23 @@ class MockDataCite(PidProvider):
     def is_provider_for_pid(cls, pid_str):
         """Return provider for a given pid."""
         return True
+
+
+class MissingPidType(PidProvider):
+    """
+    This is an invalid PidProvider definition.
+
+    This class is used for testing.
+    Each custom PID provider must define a class variable 'pid_type'.
+    """
+
+
+class PidProviderNotInheriting(object):
+    """
+    This is an invalid PidProvider definition.
+
+    This class is used for testing.
+    Each custom PID provider must inherit after PidProvider class.
+    """
+
+    pid_type = 'mytype'
