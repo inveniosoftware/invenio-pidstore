@@ -129,7 +129,14 @@ setup(
     zip_safe=False,
     include_package_data=True,
     platforms='any',
-    entry_points={},
+    entry_points={
+        'invenio_db.models': [
+            'invenio_pidstore = invenio_pidstore.models',
+        ],
+        'invenio_base.apps': [
+            'invenio_pidstore = invenio_pidstore:InvenioPIDStore',
+        ],
+    },
     extras_require=extras_require,
     install_requires=install_requires,
     setup_requires=setup_requires,
