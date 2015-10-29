@@ -22,20 +22,18 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Define provider for locally unmanaged DOIs."""
 
-from flask import current_app
+"""Module tests."""
 
-from ..provider import LocalPidProvider
+from __future__ import absolute_import, print_function
+
+from invenio_pidstore.providers.recordid import RecordID
 
 
-class LocalDOI(LocalPidProvider):
-    """Provider for locally unmanaged DOIs."""
-
-    pid_type = 'doi'
-
-    @classmethod
-    def is_provider_for_pid(cls, pid_str):
-        """Check if DOI is not the local datacite managed one."""
-        return not pid_str.startswith("{0}/".format(
-            current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']))
+def test_record_provider(app):
+    """Test the class methods of PersistentIdentifier class."""
+    with app.app_context():
+        provider = RecordID()
+        assert provider.is_provider_for_pid(1)
+        assert provider.is_provider_for_pid('1')
+        assert provider.pid_type == 'recid'

@@ -22,20 +22,19 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Define provider for locally unmanaged DOIs."""
+"""Record ID provider."""
 
-from flask import current_app
+from __future__ import absolute_import, print_function
 
 from ..provider import LocalPidProvider
 
 
-class LocalDOI(LocalPidProvider):
-    """Provider for locally unmanaged DOIs."""
+class RecordID(LocalPidProvider):
+    """Provider for recids."""
 
-    pid_type = 'doi'
+    pid_type = 'recid'
 
     @classmethod
     def is_provider_for_pid(cls, pid_str):
-        """Check if DOI is not the local datacite managed one."""
-        return not pid_str.startswith("{0}/".format(
-            current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']))
+        """Check if RecordID is a provider for ``pid_str``."""
+        return isinstance(pid_str, int) or pid_str.isdigit()

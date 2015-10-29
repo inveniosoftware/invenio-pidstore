@@ -22,20 +22,34 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Define provider for locally unmanaged DOIs."""
-
-from flask import current_app
-
-from ..provider import LocalPidProvider
+"""Errors for persistent identifiers."""
 
 
-class LocalDOI(LocalPidProvider):
-    """Provider for locally unmanaged DOIs."""
+class ResolverError(Exception):
+    """Base class for resolver errors."""
 
-    pid_type = 'doi'
+    def __init__(self, pid_type, pid_value, *args, **kwargs):
+        """Initialize exception."""
+        self.pid_value = pid_type
+        self.pid_value = pid_value
+        super(ResolverError, self).__init__(*args, **kwargs)
 
-    @classmethod
-    def is_provider_for_pid(cls, pid_str):
-        """Check if DOI is not the local datacite managed one."""
-        return not pid_str.startswith("{0}/".format(
-            current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']))
+
+class PIDDoesNotExistsError(ResolverError):
+    """Persistent identifier does not exists."""
+
+
+class PIDDeletedError(ResolverError):
+    """Persistent identifier is deleted."""
+
+
+class PIDMissingObjectError(ResolverError):
+    """Persistent identifier has no object."""
+
+
+class PIDUnregistered(ResolverError):
+    """Persistent identifier is not registered."""
+
+
+class PIDMergedError(ResolverError):
+    """Persistent identifier is merged into another."""
