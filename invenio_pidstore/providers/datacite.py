@@ -29,7 +29,6 @@ from __future__ import absolute_import
 from datacite import DataCiteMDSClient
 from datacite.errors import DataCiteError, DataCiteGoneError, \
     DataCiteNoContentError, DataCiteNotFoundError, HttpError
-
 from flask import current_app
 
 from ..models import PIDStatus, logger
