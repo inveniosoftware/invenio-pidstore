@@ -1,8 +1,8 @@
 =========================
- Invenio-PIDStore v0.1.3
+ Invenio-PIDStore v1.0.0
 =========================
 
-Invenio-PIDStore v0.1.3 was released on October 11, 2015.
+Invenio-PIDStore v1.0.0 was released on October 30, 2015.
 
 About
 -----
@@ -19,12 +19,12 @@ Improved features
 Installation
 ------------
 
-   $ pip install invenio-pidstore==0.1.3
+   $ pip install invenio-pidstore==1.0.0
 
 Documentation
 -------------
 
-   http://invenio-pidstore.readthedocs.org/en/v0.1.3
+   http://pythonhosted.org/invenio-pidstore/
 
 Happy hacking and thanks for flying Invenio-PIDStore.
 
