@@ -35,7 +35,7 @@ class ResolverError(Exception):
         super(ResolverError, self).__init__(*args, **kwargs)
 
 
-class PIDDoesNotExistsError(ResolverError):
+class PIDDoesNotExistError(ResolverError):
     """Persistent identifier does not exists."""
 
 

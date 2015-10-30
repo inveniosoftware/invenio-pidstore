@@ -30,7 +30,7 @@ from __future__ import absolute_import, print_function
 import pytest
 from invenio_db import db
 
-from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistsError, \
+from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError, \
     PIDMissingObjectError
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_pidstore.resolver import Resolver
@@ -67,11 +67,11 @@ def test_resolver(app):
 
         pytest.raises(PIDDeletedError, resolver.resolve, '2')
         pytest.raises(PIDMissingObjectError, resolver.resolve, '3')
-        pytest.raises(PIDDoesNotExistsError, resolver.resolve, '4')
+        pytest.raises(PIDDoesNotExistError, resolver.resolve, '4')
 
         doiresolver = Resolver(
             pid_type='doi',
             pid_provider='doi',
             obj_type='rec',
             getter=lambda x: x)
-        pytest.raises(PIDDoesNotExistsError, doiresolver.resolve, '1')
+        pytest.raises(PIDDoesNotExistError, doiresolver.resolve, '1')

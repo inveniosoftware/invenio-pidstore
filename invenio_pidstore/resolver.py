@@ -26,7 +26,7 @@
 
 from __future__ import absolute_import, print_function
 
-from .errors import PIDDeletedError, PIDDoesNotExistsError, \
+from .errors import PIDDeletedError, PIDDoesNotExistError, \
     PIDMissingObjectError
 from .models import PersistentIdentifier
 
@@ -60,7 +60,7 @@ class Resolver(object):
         pid = PersistentIdentifier.get(self.pid_type, pid_value,
                                        pid_provider=self.pid_provider)
         if pid is None:
-            raise PIDDoesNotExistsError(self.pid_type, pid_value)
+            raise PIDDoesNotExistError(self.pid_type, pid_value)
         if pid.is_deleted():
             raise PIDDeletedError(self.pid_type, pid_value)
 
