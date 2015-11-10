@@ -26,15 +26,34 @@
 
 from __future__ import absolute_import, print_function
 
-from ..provider import LocalPidProvider
+from ..models import PIDStatus, RecordIdentifier
+from .base import BaseProvider
 
 
-class RecordID(LocalPidProvider):
-    """Provider for recids."""
+class RecordIdProvider(BaseProvider):
+    """Record identifier provider."""
 
     pid_type = 'recid'
+    """Type of persistent identifier."""
+
+    pid_provider = None
+    """Provider name.
+
+    The provider name is not recorded in the PID since the provider does not
+    provide any additional features besides creation of record ids.
+    """
+
+    default_status = PIDStatus.RESERVED
+    """Record IDs are by default registered immediately."""
 
     @classmethod
-    def is_provider_for_pid(cls, pid_str):
-        """Check if RecordID is a provider for ``pid_str``."""
-        return isinstance(pid_str, int) or pid_str.isdigit()
+    def create(cls, object_type=None, object_uuid=None, **kwargs):
+        """Create a new record identifier."""
+        # Request next integer in recid sequence.
+        assert 'pid_value' not in kwargs
+        kwargs['pid_value'] = str(RecordIdentifier.next())
+        kwargs.setdefault('status', cls.default_status)
+        if object_type and object_uuid:
+            kwargs['status'] = PIDStatus.REGISTERED
+        return super(RecordIdProvider, cls).create(
+            object_type=object_type, object_uuid=object_uuid, **kwargs)

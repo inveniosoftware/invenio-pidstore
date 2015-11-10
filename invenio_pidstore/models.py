@@ -22,52 +22,48 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""PersistentIdentifier store and registration.
-
-Usage example for registering new identifiers::
-
-    from flask import url_for
-    from invenio_pidstore.models import PersistentIdentifier
-
-    # Reserve a new DOI internally first
-    pid = PersistentIdentifier.create('doi','10.0572/1234')
-
-    # Get an already reserved DOI
-    pid = PersistentIdentifier.get('doi', '10.0572/1234')
-
-    # Assign it to a record.
-    pid.assign('rec', 1234)
-
-    url = url_for("record.metadata", recid=1234, _external=True)
-    doc = "<resource ...."
-
-    # Pre-reserve the DOI in DataCite
-    pid.reserve(doc=doc)
-
-    # Register the DOI (note parameters depended on the provider and pid type)
-    pid.register(url=url, doc=doc)
-
-    # Reassign DOI to new record
-    pid.assign('rec', 5678, overwrite=True),
-
-    # Update provider with new information
-    pid.update(url=url, doc=doc)
-
-    # Delete the DOI (you shouldn't be doing this ;-)
-    pid.delete()
-"""
+"""Persistent identifier store and registration."""
 
 from __future__ import absolute_import, print_function
 
-from datetime import datetime
+import logging
+import uuid
 
 import six
-from flask import current_app
 from invenio_db import db
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.models import Timestamp
+from sqlalchemy_utils.types import UUIDType
 
-from .provider import PidProvider, PIDStatus
+from .errors import PIDAlreadyExists, PIDDoesNotExistError, PIDInvalidAction, \
+    PIDObjectAlreadyAssigned
+
+logger = logging.getLogger('invenio-pidstore')
+
+
+class PIDStatus(object):
+    """Constants for possible status of any given PID."""
+
+    NEW = 'N'
+    """PID has *not* yet been registered with the service provider."""
+
+    RESERVED = 'K'
+    """PID reserved in the service provider but not yet fully registered."""
+
+    REGISTERED = 'R'
+    """PID has been registered with the service provider."""
+
+    REDIRECTED = 'M'
+    """PID has been redirected to another persistent identifier."""
+
+    DELETED = 'D'
+    """PID has been deleted/inactivated with the service provider.
+
+    This should happen very rarely, and must be kept track of, as the PID
+    should not be reused for something else.
+    """
 
 
 class PersistentIdentifier(db.Model, Timestamp):
@@ -79,262 +75,290 @@ class PersistentIdentifier(db.Model, Timestamp):
       * A persistent identifier has one and only one object.
     """
 
-    __tablename__ = 'pidSTORE'
+    __tablename__ = 'pidstore_pid'
     __table_args__ = (
         db.Index('uidx_type_pid', 'pid_type', 'pid_value', unique=True),
         db.Index('idx_status', 'status'),
-        db.Index('idx_object', 'object_type', 'object_value'),
+        db.Index('idx_object', 'object_type', 'object_uuid'),
     )
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     """Id of persistent identifier entry."""
 
     pid_type = db.Column(db.String(6), nullable=False)
     """Persistent Identifier Schema."""
 
-    pid_value = db.Column(db.String(length=255), nullable=False)
+    pid_value = db.Column(db.String(255), nullable=False)
     """Persistent Identifier."""
 
-    pid_provider = db.Column(db.String(length=255), nullable=False)
+    pid_provider = db.Column(db.String(8), nullable=True)
     """Persistent Identifier Provider"""
 
-    status = db.Column(db.CHAR(length=1), nullable=False)
+    status = db.Column(db.CHAR(1), nullable=False)
     """Status of persistent identifier, e.g. registered, reserved, deleted."""
 
     object_type = db.Column(db.String(3), nullable=True)
     """Object Type - e.g. rec for record."""
 
-    object_value = db.Column(db.String(length=255), nullable=True)
+    object_uuid = db.Column(UUIDType, nullable=True)
     """Object ID - e.g. a record id."""
 
     #
     # Class methods
     #
     @classmethod
-    def create(cls, pid_type, pid_value, pid_provider='', provider=None):
-        """Internally reserve a new persistent identifier.
+    def create(cls, pid_type, pid_value, pid_provider=None,
+               status=PIDStatus.NEW, object_type=None, object_uuid=None,):
+        """Create a new persistent identifier with specific type and value.
 
-        A provider for the given persistent identifier type must exists. By
-        default the system will choose a provider according to the pid
-        type. If desired, the default system provider can be overridden via
-        the provider keyword argument.
-
-        Return PID object if successful otherwise None.
+        :param pid_type: Persistent identifier type.
+        :param pid_value: Persistent identifier value.
         """
-        # Ensure provider exists
-        if provider is None:
-            provider = PidProvider.create(pid_type, pid_value, pid_provider)
-            if not provider:
-                raise Exception("No provider found for {0}:{1} ({2})".format(
-                    pid_type, pid_value, pid_provider))
         try:
             with db.session.begin_nested():
-                obj = cls(pid_type=provider.pid_type,
-                          pid_value=provider.create_new_pid(pid_value),
+                obj = cls(pid_type=pid_type,
+                          pid_value=pid_value,
                           pid_provider=pid_provider,
-                          status=PIDStatus.NEW)
-                obj._provider = provider
+                          status=status)
+                if object_type and object_uuid:
+                    obj.assign(object_type, object_uuid)
                 db.session.add(obj)
-            obj.log("CREATE", "Created")
-            return obj
+            logger.info("Created PID {0}:{1}".format(pid_type, pid_value),
+                        extra={'pid': obj})
+        except IntegrityError:
+            logger.exception(
+                "PID already exists: {0}:{1}".format(pid_type, pid_value),
+                extra=dict(
+                    pid_type=pid_type,
+                    pid_value=pid_value,
+                    pid_provider=pid_provider,
+                    status=status,
+                    object_type=object_type,
+                    object_uuid=object_uuid,
+                ))
+            raise PIDAlreadyExists(pid_type=pid_type, pid_value=pid_value)
         except SQLAlchemyError:
-            obj.log("CREATE", "Failed to create. Already exists.")
-            return None
+            logger.exception(
+                "Failed to create PID: {0}:{1}".format(pid_type, pid_value),
+                extra=dict(
+                    pid_type=pid_type,
+                    pid_value=pid_value,
+                    pid_provider=pid_provider,
+                    status=status,
+                    object_type=object_type,
+                    object_uuid=object_uuid,
+                ))
+            raise
+        return obj
 
     @classmethod
-    def get(cls, pid_type, pid_value, pid_provider='', provider=None):
-        """Get persistent identifier.
-
-        Return None if not found.
-        """
-        pid_value = six.text_type(pid_value)
-        obj = cls.query.filter_by(
-            pid_type=pid_type, pid_value=pid_value, pid_provider=pid_provider
-        ).first()
-        if obj:
-            obj._provider = provider
-            return obj
-        else:
-            return None
+    def get(cls, pid_type, pid_value, pid_provider=None):
+        """Get persistent identifier."""
+        try:
+            args = dict(pid_type=pid_type, pid_value=six.text_type(pid_value))
+            if pid_provider:
+                args['pid_provider'] = pid_provider
+            return cls.query.filter_by(**args).one()
+        except NoResultFound:
+            raise PIDDoesNotExistError(pid_type, pid_value)
 
     #
-    # Instance methods
+    # Assigned object methods
     #
-    def has_object(self, object_type, object_value):
-        """Determine if this PID is assigned to a specific object."""
-        if object_type not in current_app.config['PIDSTORE_OBJECT_TYPES']:
-            raise Exception("Invalid object type {0}.".format(object_type))
+    def has_object(self):
+        """Determine if this PID has an assigned object."""
+        return bool(self.object_type and self.object_uuid)
 
-        object_value = six.text_type(object_value)
+    def get_assigned_object(self, object_type=None):
+        """Return an assigned object."""
+        if object_type is not None:
+            if self.object_type == object_type:
+                return self.object_uuid
+            else:
+                return None
+        return self.object_uuid
 
-        return self.object_type == object_type and \
-            self.object_value == object_value
-
-    def get_provider(self):
-        """Get the provider for this type of persistent identifier."""
-        if self._provider is None:
-            self._provider = PidProvider.create(
-                self.pid_type, self.pid_value, self.pid_provider
-            )
-        return self._provider
-
-    def assign(self, object_type, object_value, overwrite=False):
+    def assign(self, object_type, object_uuid, overwrite=False):
         """Assign this persistent identifier to a given object.
 
         Note, the persistent identifier must first have been reserved. Also,
-        if an exsiting object is already assigned to the pid, it will raise an
+        if an existing object is already assigned to the pid, it will raise an
         exception unless overwrite=True.
         """
-        if object_type not in current_app.config['PIDSTORE_OBJECT_TYPES']:
-            raise Exception("Invalid object type {0}.".format(object_type))
-        object_value = six.text_type(object_value)
-
-        if not self.id:
-            raise Exception(
-                "You must first create the persistent identifier before you "
-                "can assign objects to it."
-            )
-
         if self.is_deleted():
-            raise Exception(
-                "You cannot assign objects to a deleted persistent identifier."
+            raise PIDInvalidAction(
+                "You cannot assign objects to a deleted/redirected persistent"
+                " identifier."
             )
 
-        with db.session.begin_nested():
-            # Check for an existing object assigned to this pid
-            existing_obj_id = self.get_assigned_object(object_type)
+        if not isinstance(object_uuid, uuid.UUID):
+            object_uuid = uuid.UUID(object_uuid)
 
-            if existing_obj_id and existing_obj_id != object_value:
-                if not overwrite:
-                    raise Exception(
-                        "Persistent identifier is already assigned to another "
-                        "object"
-                    )
-                else:
-                    self.log("ASSIGN",
-                             "Unassigned object {0}:{1} "
-                             "(overwrite requested)".format(
-                                 self.object_type, self.object_value))
-                    self.object_type = None
-                    self.object_value = None
-            elif existing_obj_id and existing_obj_id == object_value:
-                # The object is already assigned to this pid.
+        if self.object_type or self.object_uuid:
+            # The object is already assigned to this pid.
+            if object_type == self.object_type and \
+               object_uuid == self.object_uuid:
                 return True
+            if not overwrite:
+                raise PIDObjectAlreadyAssigned(object_type,
+                                               object_uuid)
+            self.unassign()
 
-            self.object_type = object_type
-            self.object_value = object_value
-            self.log("ASSIGN", "Assigned object {0}:{1}".format(
-                self.object_type, self.object_value
-            ))
+        try:
+            with db.session.begin_nested():
+                self.object_type = object_type
+                self.object_uuid = object_uuid
+                db.session.add(self)
+        except SQLAlchemyError:
+            logger.exception("Failed to assign {0}:{1}".format(
+                object_type, object_uuid), extra=dict(pid=self))
+            raise
+        logger.info("Assigned object {0}:{1}".format(
+            object_type, object_uuid), extra=dict(pid=self))
+        return True
+
+    def unassign(self):
+        """Unassign the registered object."""
+        if self.object_uuid is None and self.object_type is None:
             return True
 
-    def update(self, with_deleted=False, *args, **kwargs):
-        """Update the persistent identifier with the provider."""
-        if self.is_new() or self.is_reserved():
-            raise Exception(
-                "Persistent identifier has not yet been registered."
-            )
-
-        if not with_deleted and self.is_deleted():
-            raise Exception("Persistent identifier has been deleted.")
-
-        raise_provider_error = False
-        with db.session.begin_nested():
-            provider = self.get_provider()
-            if provider is None:
-                self.log("UPDATE", "No provider found.")
-                raise_provider_error = True
-            elif provider.update(self, *args, **kwargs):
-                if with_deleted and self.is_deleted():
+        try:
+            with db.session.begin_nested():
+                if self.is_redirected():
+                    db.session.delete(Redirect.query.get(self.object_uuid))
+                    # Only registered PIDs can be redirected so we set it back
+                    # to registered
                     self.status = PIDStatus.REGISTERED
-                return True
-        if raise_provider_error:
-            raise Exception("No provider found.")
-        else:
-            return False
+                self.object_type = None
+                self.object_uuid = None
+                db.session.add(self)
+        except SQLAlchemyError:
+            logger.exception("Failed to unassign object.".format(self),
+                             extra=dict(pid=self))
+            raise
+        logger.info("Unassigned object from {0}.".format(self),
+                    extra=dict(pid=self))
+        return True
 
-    def reserve(self, *args, **kwargs):
-        """Reserve the persistent identifier with the provider.
+    def get_redirect(self):
+        """Get redirected persistent identifier."""
+        return Redirect.query.get(self.object_uuid).pid
+
+    #
+    # Status methods.
+    #
+    def redirect(self, pid):
+        """Redirect persistent identifier to another persistent identifier."""
+        if not (self.is_registered() or self.is_redirected()):
+            raise PIDInvalidAction("Persistent identifier is not registered.")
+
+        try:
+            with db.session.begin_nested():
+                if self.is_redirected():
+                    r = Redirect.query.get(self.object_uuid)
+                    r.pid = pid
+                else:
+                    with db.session.begin_nested():
+                        r = Redirect(pid=pid)
+                        db.session.add(r)
+
+                self.status = PIDStatus.REDIRECTED
+                self.object_type = None
+                self.object_uuid = r.id
+                db.session.add(self)
+        except IntegrityError:
+            raise PIDDoesNotExistError(pid.pid_type, pid.pid_value)
+        except SQLAlchemyError:
+            logger.exception("Failed to redirect to {0}".format(
+                pid), extra=dict(pid=self))
+            raise
+        logger.info("Redirected PID to {0}".format(pid), extra=dict(pid=self))
+        return True
+
+    def reserve(self):
+        """Reserve the persistent identifier.
 
         Note, the reserve method may be called multiple times, even if it was
         already reserved.
         """
         if not (self.is_new() or self.is_reserved()):
-            raise Exception(
-                "Persistent identifier has already been registered."
-            )
+            raise PIDInvalidAction(
+                "Persistent identifier is not new or reserved.")
 
-        raise_provider_error = False
-        with db.session.begin_nested():
-            provider = self.get_provider()
-            if provider is None:
-                self.log("RESERVE", "No provider found.")
-                raise_provider_error = True
-            elif provider.reserve(self, *args, **kwargs):
+        try:
+            with db.session.begin_nested():
                 self.status = PIDStatus.RESERVED
-                return True
-        if raise_provider_error:
-            raise Exception("No provider found.")
-        else:
-            return False
+                db.session.add(self)
+        except SQLAlchemyError:
+            logger.exception("Failed to reserve PID.", extra=dict(pid=self))
+            raise
+        logger.info("Reserved PID.", extra=dict(pid=self))
+        return True
 
-    def register(self, *args, **kwargs):
+    def register(self):
         """Register the persistent identifier with the provider."""
-        if self.is_registered() or self.is_deleted():
-            raise Exception(
-                "Persistent identifier has already been registered."
-            )
+        if self.is_registered() or self.is_deleted() or self.is_redirected():
+            raise PIDInvalidAction(
+                "Persistent identifier has already been registered"
+                " or is deleted.")
 
-        raise_provider_error = False
-        with db.session.begin_nested():
-            provider = self.get_provider()
-            if provider is None:
-                self.log("REGISTER", "No provider found.")
-                raise_provider_error = True
-            elif provider.register(self, *args, **kwargs):
+        try:
+            with db.session.begin_nested():
                 self.status = PIDStatus.REGISTERED
-                return True
-        if raise_provider_error:
-            raise Exception("No provider found.")
-        else:
-            return False
+                db.session.add(self)
+        except SQLAlchemyError:
+            logger.exception("Failed to register PID.", extra=dict(pid=self))
+            raise
+        logger.info("Registered PID.", extra=dict(pid=self))
+        return True
 
-    def delete(self, *args, **kwargs):
+    def delete(self):
         """Delete the persistent identifier."""
-        with db.session.begin_nested():
-            if self.is_new():
-                # New persistent identifier which haven't been registered yet.
-                # Just delete it completely but keep log)
-                # Remove links to log entries (leave the otherwise)
-                PidLog.query.filter_by(id_pid=self.id).update({'id_pid': None})
-                db.session.delete(self)
-                self.log("DELETE", "Unregistered PID successfully deleted",
-                         id_pid_as_null=True)
-            else:
-                provider = self.get_provider()
-                if not provider.delete(self, *args, **kwargs):
-                    return False
-                self.status = PIDStatus.DELETED
-            return True
+        removed = False
+        try:
+            with db.session.begin_nested():
+                if self.is_new():
+                    # New persistent identifier which haven't been registered
+                    # yet.
+                    db.session.delete(self)
+                    removed = True
+                else:
+                    self.status = PIDStatus.DELETED
+                    db.session.add(self)
+        except SQLAlchemyError:
+            logger.exception("Failed to delete PID.", extra=dict(pid=self))
+            raise
 
-    def sync_status(self, *args, **kwargs):
+        if removed:
+            logger.info("Deleted PID (removed).", extra=dict(pid=self))
+        else:
+            logger.info("Deleted PID.", extra=dict(pid=self))
+        return True
+
+    def sync_status(self, status):
         """Synchronize persistent identifier status.
 
         Used when the provider uses an external service, which might have been
         modified outside of our system.
         """
-        with db.session.begin_nested():
-            provider = self.get_provider()
-            result = provider.sync_status(self, *args, **kwargs)
-            return result
+        if self.status == status:
+            return True
 
-    def get_assigned_object(self, object_type=None):
-        """Return an assigned object."""
-        if object_type is not None and self.object_type == object_type:
-            return self.object_value
-        return None
+        try:
+            with db.session.begin_nested():
+                self.status = status
+                db.session.add(self)
+        except SQLAlchemyError:
+            logger.exception("Failed to sync status {0}.".format(status),
+                             extra=dict(pid=self))
+            raise
+        logger.info("Synced PID status to {0}.".format(status),
+                    extra=dict(pid=self))
+        return True
+
+    def is_redirected(self):
+        """Return true if the persistent identifier has been registered."""
+        return self.status == PIDStatus.REDIRECTED
 
     def is_registered(self):
         """Return true if the persistent identifier has been registered."""
@@ -352,60 +376,91 @@ class PersistentIdentifier(db.Model, Timestamp):
         """Return true if the PID has not yet been reserved."""
         return self.status == PIDStatus.RESERVED
 
-    def log(self, action, message, id_pid_as_null=False):
-        """
-        Store action and message in log.
-
-        If 'id_pid_as_null' the foreign key to PID will not be set.
-        """
-        if self.pid_type and self.pid_value:
-            message = "[{0}:{1}] {2}".format(
-                self.pid_type, self.pid_value, message)
-        id_pid = None if id_pid_as_null else self.id
-        with db.session.begin_nested():
-            p = PidLog(id_pid=id_pid, action=action, message=message)
-            db.session.add(p)
+    def __repr__(self):
+        """Get representation of object."""
+        return "<PersistentIdentifier {0}:{1}{3} ({2})>".format(
+            self.pid_type, self.pid_value, self.status,
+            " / {0}:{1}".format(self.object_type, self.object_uuid) if
+            self.object_type else ""
+        )
 
 
-class PidLog(db.Model):
-    """Audit log of actions happening to persistent identifiers.
+class Redirect(db.Model, Timestamp):
+    """Redirect for a persistent identifier."""
 
-    This model is primarily used through PersistentIdentifier.log and rarely
-    created manually.
+    __tablename__ = 'pidstore_redirect'
+    id = db.Column(UUIDType, default=uuid.uuid4, primary_key=True)
+    """Id of redirect entry."""
+
+    pid_id = db.Column(
+        db.Integer,
+        db.ForeignKey(PersistentIdentifier.id, onupdate="CASCADE",
+                      ondelete="RESTRICT"),
+        nullable=False)
+    """Persistent identifier."""
+
+    pid = db.relationship(PersistentIdentifier, backref='redirects')
+    """Relationship to persistent identifier."""
+
+
+class RecordIdentifier(db.Model):
+    """Sequence generator for integer record identifiers.
+
+    The sole purpose of this model is to generate integer record identifiers in
+    sequence using the underlying database's auto increment features in a
+    transaction friendly manner. The feature is primarily provided to support
+    legacy Invenio instances to continue their current record identifier
+    scheme. For new instances we strong encourage to not use auto incrementing
+    record identifiers, but instead use e.g. UUIDs as record identifiers.
     """
 
-    __tablename__ = 'pidLOG'
-    __table_args__ = (
-        db.Index('idx_action', 'action'),
-    )
+    __tablename__ = 'pidstore_recid'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-    """Id of persistent identifier entry."""
+    recid = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
 
-    id_pid = db.Column(
-        db.Integer,
-        db.ForeignKey(PersistentIdentifier.id),
-        nullable=True,
-    )
-    """PID."""
+    @classmethod
+    def next(cls):
+        """Return next available record identifier."""
+        try:
+            with db.session.begin_nested():
+                obj = cls()
+                db.session.add(obj)
+        except IntegrityError:  # pragma: no cover
+            with db.session.begin_nested():
+                # Someone has likely modified the table without using the
+                # models API. Let's fix the problem.
+                cls._set_sequence(cls.max())
+                obj = cls()
+                db.session.add(obj)
+        return obj.recid
 
-    timestamp = db.Column(db.DateTime(), nullable=False, default=datetime.now)
-    """Creation datetime of entry."""
+    @classmethod
+    def max(cls):
+        """Get max record identifier."""
+        max_recid = db.session.query(func.max(cls.recid)).scalar()
+        return max_recid if max_recid else 0
 
-    action = db.Column(db.String(10), nullable=False)
-    """Action identifier."""
+    @classmethod
+    def _set_sequence(cls, val):
+        """Internal function to reset sequence to specific value."""
+        if db.engine.dialect.name == 'postgresql':  # pragma: no cover
+            db.session.execute(
+                "SELECT setval(pg_get_serial_sequence("
+                "'{0}', 'recid'), :newval)".format(
+                    cls.__tablename__), dict(newval=val))
 
-    message = db.Column(db.Text(), nullable=False)
-    """Log message."""
-
-    # Relationship
-    pid = db.relationship("PersistentIdentifier", backref="logs")
+    @classmethod
+    def insert(cls, val):
+        """Insert a record identifier."""
+        with db.session.begin_nested():
+            obj = cls(recid=val)
+            db.session.add(obj)
+            cls._set_sequence(cls.max())
 
 
 __all__ = (
     'PersistentIdentifier',
-    'PidLog',
+    'PIDStatus',
+    'RecordIdentifier',
+    'Redirect',
 )

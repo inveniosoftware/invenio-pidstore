@@ -22,4 +22,4 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Module storing implementations of PID providers."""
+"""Implementations of different PID providers."""

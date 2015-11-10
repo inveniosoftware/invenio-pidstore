@@ -22,7 +22,6 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-
 """Pytest configuration."""
 
 from __future__ import absolute_import, print_function
@@ -32,11 +31,11 @@ import shutil
 import tempfile
 
 import pytest
-from click.testing import CliRunner
 from flask import Flask
-from flask_cli import FlaskCLI, ScriptInfo
-from invenio_db import InvenioDB
-from invenio_db.cli import db as db_cmd
+from flask_cli import FlaskCLI
+from invenio_db import InvenioDB, db
+from sqlalchemy_utils.functions import create_database, database_exists, \
+    drop_database
 
 from invenio_pidstore import InvenioPIDStore
 
@@ -52,23 +51,22 @@ def app(request):
     InvenioDB(app)
     InvenioPIDStore(app)
 
-    app.config['PIDSTORE_PROVIDERS'] = app.config['PIDSTORE_PROVIDERS'] + \
-        ['tests.mock_providers.mock_datacite:MockDataCite', ]
-
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-        'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'
+    app.config.update(
+        SQLALCHEMY_DATABASE_URI=os.environ.get(
+            'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'),
+        TESTING=True,
     )
-    app.config.update(TESTING=True)
 
-    runner = CliRunner()
-    script_info = ScriptInfo(create_app=lambda info: app)
-
-    runner.invoke(db_cmd, ['init'], obj=script_info)
-    runner.invoke(db_cmd, ['create'], obj=script_info)
+    with app.app_context():
+        if not database_exists(str(db.engine.url)):
+            create_database(str(db.engine.url))
+        db.drop_all()
+        db.create_all()
 
     def teardown():
+        with app.app_context():
+            drop_database(str(db.engine.url))
         shutil.rmtree(instance_path)
-        runner.invoke(db_cmd, ['destroy', '--yes-i-know'], obj=script_info)
 
     request.addfinalizer(teardown)
 

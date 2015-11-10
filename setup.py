@@ -36,7 +36,10 @@ history = open('CHANGES.rst').read()
 tests_require = [
     'check-manifest>=0.25',
     'coverage>=4.0',
+    'Flask-CLI>=0.2.1',
+    'invenio-records>=1.0.0a2',
     'isort>=4.2.2',
+    'mock>=1.3.0',
     'pep257>=0.7.0',
     'pytest-cache>=1.0',
     'pytest-cov>=1.8.0',
@@ -55,7 +58,7 @@ extras_require = {
         'psycopg2>=2.6.1',
     ],
     'docs': [
-        "Sphinx>=1.3",
+        'Sphinx>=1.3',
     ],
     'tests': tests_require,
 }
@@ -70,7 +73,7 @@ setup_requires = [
 
 install_requires = [
     'Flask-BabelEx>=0.9.2',
-    'invenio-db>=1.0.0a3',
+    'invenio-db>=1.0.0a6',
 ]
 
 packages = find_packages()
@@ -135,6 +138,9 @@ setup(
         ],
         'invenio_base.apps': [
             'invenio_pidstore = invenio_pidstore:InvenioPIDStore',
+        ],
+        'invenio_pidstore.minters': [
+            'recid_minter = invenio_pidstore.minters:recid_minter',
         ],
     },
     extras_require=extras_require,

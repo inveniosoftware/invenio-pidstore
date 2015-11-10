@@ -26,34 +26,72 @@
 
 from __future__ import absolute_import, print_function
 
-from . import config
-from .models import PersistentIdentifier
+import pkg_resources
+from flask import current_app
+from werkzeug.local import LocalProxy
+
+from .errors import PIDDoesNotExistError
+from .models import PersistentIdentifier, logger
+
+current_pidstore = LocalProxy(
+    lambda: current_app.extensions['invenio-pidstore'])
 
 
-def pid_exists(value, pidtype="doi"):
+def pid_exists(value, pidtype=None):
     """Check if a persistent identifier exists."""
-    return PersistentIdentifier.get(pidtype, value) is not None
+    try:
+        PersistentIdentifier.get(pidtype, value)
+        return True
+    except PIDDoesNotExistError:
+        return False
+
+
+class _PIDStoreState(object):
+    """Persistent identifier store state."""
+
+    def __init__(self, app, entry_point_group=None):
+        """Initialize state."""
+        self.app = app
+        self.minters = {}
+        if entry_point_group:
+            self.load_entry_point_group(entry_point_group)
+
+    def register_minter(self, name, minter):
+        """Register a minter."""
+        assert name not in self.minters
+        self.minters[name] = minter
+
+    def load_entry_point_group(self, entry_point_group):
+        """Load minters from an entry point group."""
+        for ep in pkg_resources.iter_entry_points(group=entry_point_group):
+            self.register_minter(ep.name, ep.load())
 
 
 class InvenioPIDStore(object):
     """Invenio-PIDStore extension."""
 
-    def __init__(self, app=None):
+    def __init__(self, app=None, entry_point_group='invenio_pidstore.minters'):
         """Extension initialization."""
         if app:
-            self.init_app(app)
+            self._state = self.init_app(
+                app, entry_point_group=entry_point_group)
 
-    def init_app(self, app):
+    def init_app(self, app, entry_point_group=None):
         """Flask application initialization."""
-        self.init_config(app)
-        app.extensions['invenio-pidstore'] = self
-
-    def init_config(self, app):
-        """Initialize configuration."""
-        # Set default configuration
-        for k in dir(config):
-            if k.startswith("PIDSTORE_"):
-                app.config.setdefault(k, getattr(config, k))
+        # Initialize logger
+        app.config.setdefault('PIDSTORE_APP_LOGGER_HANDLERS', app.debug)
+        if app.config['PIDSTORE_APP_LOGGER_HANDLERS']:
+            for handler in app.logger.handlers:
+                logger.addHandler(handler)
 
         # Register template filter
         app.jinja_env.filters['pid_exists'] = pid_exists
+
+        # Initialize extension state.
+        state = _PIDStoreState(app=app, entry_point_group=entry_point_group)
+        app.extensions['invenio-pidstore'] = state
+        return state
+
+    def __getattr__(self, name):
+        """Proxy to state object."""
+        return getattr(self._state, name, None)

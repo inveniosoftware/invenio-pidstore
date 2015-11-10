@@ -34,6 +34,8 @@ Run example development server:
 
 from __future__ import absolute_import, print_function
 
+import os
+
 from flask import Flask
 from flask_babelex import Babel
 from flask_cli import FlaskCLI
@@ -43,6 +45,8 @@ from invenio_pidstore import InvenioPIDStore
 
 # Create Flask application
 app = Flask(__name__)
+app.config.update(
+    SQLALCHEMY_DATABASE_URI=os.environ.get('SQLALCHEMY_DATABASE_URI'))
 Babel(app)
 FlaskCLI(app)
 InvenioDB(app)
