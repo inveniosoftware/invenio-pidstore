@@ -2,7 +2,7 @@
  Invenio-PIDStore v1.0.0
 =========================
 
-Invenio-PIDStore v1.0.0 was released on October 30, 2015.
+Invenio-PIDStore v1.0.0 was released on November 19, 2015.
 
 About
 -----
