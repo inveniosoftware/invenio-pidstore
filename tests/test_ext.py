@@ -30,7 +30,6 @@ from __future__ import absolute_import, print_function
 from flask import Flask
 from invenio_db import db
 
-
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.models import PersistentIdentifier
 
