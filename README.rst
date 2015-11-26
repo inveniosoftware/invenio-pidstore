@@ -41,6 +41,7 @@
         :target: https://github.com/inveniosoftware/invenio-pidstore/blob/master/LICENSE
 
 
-Invenio module that stores and registers persistent identifiers.
+Invenio module that mints, stores, registers and resolves persistent
+identifiers.
 
 *This is an experimental development preview release.*

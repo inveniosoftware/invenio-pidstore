@@ -22,12 +22,12 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Registry for PidProviders."""
+"""Internal resolver for persistent identifiers."""
 
 from __future__ import absolute_import, print_function
 
-from .errors import PIDDeletedError, PIDDoesNotExistError, \
-    PIDMissingObjectError
+from .errors import PIDDeletedError, PIDMissingObjectError, \
+    PIDRedirectedError, PIDUnregistered
 from .models import PersistentIdentifier
 
 
@@ -38,18 +38,16 @@ class Resolver(object):
     identifier.
     """
 
-    def __init__(self, pid_type=None, pid_provider=None, obj_type=None,
-                 getter=None):
-        """Initialize resovler.
+    def __init__(self, pid_type=None, object_type=None, getter=None):
+        """Initialize resolver.
 
         :param pid_type: Persistent identifier type.
-        :param obj_type: Object type.
+        :param object_type: Object type.
         :param getter: Callable that will take an object id for the given
             object type and retrieve the internal object.
         """
         self.pid_type = pid_type
-        self.pid_provider = pid_provider
-        self.obj_type = obj_type
+        self.object_type = object_type
         self.object_getter = getter
 
     def resolve(self, pid_value):
@@ -57,14 +55,21 @@ class Resolver(object):
 
         :param pid_value: Persistent identifier.
         """
-        pid = PersistentIdentifier.get(self.pid_type, pid_value,
-                                       pid_provider=self.pid_provider)
-        if pid is None:
-            raise PIDDoesNotExistError(self.pid_type, pid_value)
-        if pid.is_deleted():
-            raise PIDDeletedError(self.pid_type, pid_value)
+        pid = PersistentIdentifier.get(self.pid_type, pid_value)
 
-        obj_id = pid.get_assigned_object(object_type=self.obj_type)
+        if pid.is_new() or pid.is_reserved():
+            raise PIDUnregistered(pid)
+
+        if pid.is_deleted():
+            obj_id = pid.get_assigned_object(object_type=self.object_type)
+            raise PIDDeletedError(
+                pid,
+                self.object_getter(obj_id) if obj_id else None)
+
+        if pid.is_redirected():
+            raise PIDRedirectedError(pid, pid.get_redirect())
+
+        obj_id = pid.get_assigned_object(object_type=self.object_type)
         if not obj_id:
             raise PIDMissingObjectError(self.pid_type, pid_value)
 

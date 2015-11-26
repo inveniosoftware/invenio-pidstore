@@ -22,18 +22,17 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-
-"""Module tests."""
+"""Persistent identifier minters."""
 
 from __future__ import absolute_import, print_function
 
-from invenio_pidstore.providers.recordid import RecordID
+from .providers.recordid import RecordIdProvider
 
 
-def test_record_provider(app):
-    """Test the class methods of PersistentIdentifier class."""
-    with app.app_context():
-        provider = RecordID()
-        assert provider.is_provider_for_pid(1)
-        assert provider.is_provider_for_pid('1')
-        assert provider.pid_type == 'recid'
+def recid_minter(record_uuid, data):
+    """Mint record identifiers."""
+    assert 'control_number' not in data
+    provider = RecordIdProvider.create(
+        object_type='rec', object_uuid=record_uuid)
+    data['control_number'] = int(provider.pid.pid_value)
+    return provider.pid

@@ -35,6 +35,9 @@ services:
   - mysql
   - postgresql
 
+addons:
+   postgresql: "9.4"
+
 env:
   - REQUIREMENTS=lowest SQLALCHEMY_DATABASE_URI="sqlite:///test.db"
   - REQUIREMENTS=lowest SQLALCHEMY_DATABASE_URI="mysql+pymysql://travis@localhost:3306/travis"

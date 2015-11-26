@@ -26,186 +26,147 @@
 
 from __future__ import absolute_import
 
-import six
 from datacite import DataCiteMDSClient
 from datacite.errors import DataCiteError, DataCiteGoneError, \
     DataCiteNoContentError, DataCiteNotFoundError, HttpError
-
 from flask import current_app
 
-from ..provider import PidProvider, PIDStatus
+from ..models import PIDStatus, logger
+from .base import BaseProvider
 
 
-class DataCite(PidProvider):
+class DataCiteProvider(BaseProvider):
     """DOI provider using DataCite API."""
 
     pid_type = 'doi'
+    pid_provider = 'datacite'
+    default_status = PIDStatus.NEW
 
-    def __init__(self):
+    @classmethod
+    def create(cls, pid_value, **kwargs):
+        """Create a new record identifier."""
+        return super(DataCiteProvider, cls).create(
+            pid_value=pid_value, **kwargs)
+
+    def __init__(self, pid, client=None):
         """Initialize provider."""
-        self.api = DataCiteMDSClient(
-            username=current_app.config.get('PIDSTORE_DATACITE_USERNAME'),
-            password=current_app.config.get('PIDSTORE_DATACITE_PASSWORD'),
-            prefix=current_app.config.get('PIDSTORE_DATACITE_DOI_PREFIX'),
-            test_mode=current_app.config.get(
-                'PIDSTORE_DATACITE_TESTMODE', False),
-            url=current_app.config.get('PIDSTORE_DATACITE_URL')
-        )
+        super(DataCiteProvider, self).__init__(pid)
+        if client is not None:
+            self.api = client
+        else:
+            self.api = DataCiteMDSClient(
+                username=current_app.config.get('PIDSTORE_DATACITE_USERNAME'),
+                password=current_app.config.get('PIDSTORE_DATACITE_PASSWORD'),
+                prefix=current_app.config.get('PIDSTORE_DATACITE_DOI_PREFIX'),
+                test_mode=current_app.config.get(
+                    'PIDSTORE_DATACITE_TESTMODE', False),
+                url=current_app.config.get('PIDSTORE_DATACITE_URL'))
 
-    def _get_url(self, kwargs):
-        try:
-            return kwargs['url']
-        except KeyError:
-            raise Exception("url keyword argument must be specified.")
-
-    def _get_doc(self, kwargs):
-        try:
-            return kwargs['doc']
-        except KeyError:
-            raise Exception("doc keyword argument must be specified.")
-
-    def reserve(self, pid, *args, **kwargs):
+    def reserve(self, doc):
         """Reserve a DOI (amounts to upload metadata, but not to mint)."""
         # Only registered PIDs can be updated.
-        doc = self._get_doc(kwargs)
-
         try:
+            self.pid.reserve()
             self.api.metadata_post(doc)
-        except DataCiteError as e:
-            pid.log("RESERVE", "Failed with {0}".format(e.__class__.__name__))
-            return False
-        except HttpError as e:
-            pid.log("RESERVE", "Failed with HttpError - {0}".format(
-                six.text_type(e)))
-            return False
-        else:
-            pid.log("RESERVE", "Successfully reserved in DataCite")
+        except (DataCiteError, HttpError):
+            logger.exception("Failed to reserve in DataCite",
+                             extra=dict(pid=self.pid))
+            raise
+        logger.info("Successfully reserved in DataCite",
+                    extra=dict(pid=self.pid))
         return True
 
-    def register(self, pid, *args, **kwargs):
+    def register(self, url, doc):
         """Register a DOI via the DataCite API."""
-        url = self._get_url(kwargs)
-        doc = self._get_doc(kwargs)
-
         try:
+            self.pid.register()
             # Set metadata for DOI
             self.api.metadata_post(doc)
             # Mint DOI
-            self.api.doi_post(pid.pid_value, url)
-        except DataCiteError as e:
-            pid.log("REGISTER", "Failed with {0}".format(e.__class__.__name__))
-            return False
-        except HttpError as e:
-            pid.log("REGISTER", "Failed with HttpError - {0}".format(
-                six.text_type(e)))
-            return False
-        else:
-            pid.log("REGISTER", "Successfully registered in DataCite")
+            self.api.doi_post(self.pid.pid_value, url)
+        except (DataCiteError, HttpError):
+            logger.exception("Failed to register in DataCite",
+                             extra=dict(pid=self.pid))
+            raise
+        logger.info("Successfully registered in DataCite",
+                    extra=dict(pid=self.pid))
         return True
 
-    def update(self, pid, *args, **kwargs):
+    def update(self, url, doc):
         """Update metadata associated with a DOI.
 
         This can be called before/after a DOI is registered.
         """
-        url = self._get_url(kwargs)
-        doc = self._get_doc(kwargs)
-
-        if pid.is_deleted():
-            pid.log("UPDATE", "Reactivate in DataCite")
+        if self.pid.is_deleted():
+            logger.info("Reactivate in DataCite",
+                        extra=dict(pid=self.pid))
 
         try:
             # Set metadata
             self.api.metadata_post(doc)
-            self.api.doi_post(pid.pid_value, url)
-        except DataCiteError as e:
-            pid.log("UPDATE", "Failed with {0}".format(e.__class__.__name__))
-            return False
-        except HttpError as e:
-            pid.log("UPDATE", "Failed with HttpError - {0}".format(
-                six.text_type(e)))
-            return False
-        else:
-            if pid.is_deleted():
-                pid.log(
-                    "UPDATE",
-                    "Successfully updated and possibly registered in DataCite"
-                )
-            else:
-                pid.log("UPDATE", "Successfully updated in DataCite")
+            self.api.doi_post(self.pid.pid_value, url)
+        except (DataCiteError, HttpError):
+            logger.exception("Failed to update in DataCite",
+                             extra=dict(pid=self.pid))
+            raise
+
+        if self.pid.is_deleted():
+            self.pid.sync_status(PIDStatus.REGISTERED)
+        logger.info("Successfully updated in DataCite",
+                    extra=dict(pid=self.pid))
         return True
 
-    def delete(self, pid, *args, **kwargs):
+    def delete(self):
         """Delete a registered DOI."""
         try:
-            self.api.metadata_delete(pid.pid_value)
-        except DataCiteError as e:
-            pid.log("DELETE", "Failed with {0}".format(e.__class__.__name__))
-            return False
-        except HttpError as e:
-            pid.log("DELETE", "Failed with HttpError - {0}".format(
-                six.text_type(e)))
-            return False
-        else:
-            pid.log("DELETE", "Successfully deleted in DataCite")
+            if self.pid.is_new():
+                self.pid.delete()
+            else:
+                self.pid.delete()
+                self.api.metadata_delete(self.pid.pid_value)
+        except (DataCiteError, HttpError):
+            logger.exception("Failed to delete in DataCite",
+                             extra=dict(pid=self.pid))
+            raise
+        logger.info("Successfully deleted in DataCite",
+                    extra=dict(pid=self.pid))
         return True
 
-    def sync_status(self, pid, *args, **kwargs):
+    def sync_status(self):
         """Synchronize DOI status DataCite MDS."""
         status = None
 
         try:
-            self.api.doi_get(pid.pid_value)
-            status = PIDStatus.REGISTERED
-        except DataCiteGoneError:
-            status = PIDStatus.DELETED
-        except DataCiteNoContentError:
-            status = PIDStatus.REGISTERED
-        except DataCiteNotFoundError:
-            pass
-        except DataCiteError as e:
-            pid.log("SYNC", "Failed with {0}".format(e.__class__.__name__))
-            return False
-        except HttpError as e:
-            pid.log("SYNC", "Failed with HttpError - {0}".format(
-                six.text_type(e)))
-            return False
-
-        if status is None:
             try:
-                self.api.metadata_get(pid.pid_value)
-                status = PIDStatus.RESERVED
+                self.api.doi_get(self.pid.pid_value)
+                status = PIDStatus.REGISTERED
             except DataCiteGoneError:
                 status = PIDStatus.DELETED
             except DataCiteNoContentError:
                 status = PIDStatus.REGISTERED
             except DataCiteNotFoundError:
                 pass
-            except DataCiteError as e:
-                pid.log("SYNC", "Failed with {0}".format(e.__class__.__name__))
-                return False
-            except HttpError as e:
-                pid.log("SYNC", "Failed with HttpError - {0}".format(
-                    six.text_type(e)))
-                return False
+
+            if status is None:
+                try:
+                    self.api.metadata_get(self.pid.pid_value)
+                    status = PIDStatus.RESERVED
+                except DataCiteGoneError:
+                    status = PIDStatus.DELETED
+                except DataCiteNoContentError:
+                    status = PIDStatus.REGISTERED
+                except DataCiteNotFoundError:
+                    pass
+        except (DataCiteError, HttpError):
+            logger.exception("Failed to sync status from DataCite",
+                             extra=dict(pid=self.pid))
+            raise
 
         if status is None:
             status = PIDStatus.NEW
 
-        if pid.status != status:
-            pid.log("SYNC", "Fixed status from {0} to {1}.".format(
-                pid.status, status))
-            pid.status = status
+        self.pid.sync_status(status)
 
+        logger.info("Successfully synced status from DataCite",
+                    extra=dict(pid=self.pid))
         return True
-
-    @classmethod
-    def is_provider_for_pid(cls, pid_str):
-        """Check if DataCite is the provider for this DOI.
-
-        Note: If you e.g. changed DataCite account and received a new prefix,
-        then this provider can only update and register DOIs for the new
-        prefix.
-        """
-        return pid_str.startswith("{0}/".format(
-            current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']))

@@ -22,20 +22,30 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
-"""Define provider for locally unmanaged DOIs."""
+"""Minter tests."""
 
-from flask import current_app
+from __future__ import absolute_import, print_function
 
-from ..provider import LocalPidProvider
+import uuid
+
+from invenio_pidstore import current_pidstore
+from invenio_pidstore.minters import recid_minter
 
 
-class LocalDOI(LocalPidProvider):
-    """Provider for locally unmanaged DOIs."""
+def test_recid_minter(app):
+    """Test base provider."""
+    with app.app_context():
 
-    pid_type = 'doi'
+        rec_uuid = uuid.uuid4()
+        data = {}
+        pid = recid_minter(rec_uuid, data)
+        assert pid
+        assert data['control_number'] == int(pid.pid_value)
+        assert pid.object_type == 'rec'
+        assert pid.object_uuid == rec_uuid
 
-    @classmethod
-    def is_provider_for_pid(cls, pid_str):
-        """Check if DOI is not the local datacite managed one."""
-        return not pid_str.startswith("{0}/".format(
-            current_app.config['PIDSTORE_DATACITE_DOI_PREFIX']))
+
+def test_register_minter(app):
+    """Test base provider."""
+    with app.app_context():
+        current_pidstore.register_minter('anothername', recid_minter)

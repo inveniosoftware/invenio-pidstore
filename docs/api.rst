@@ -33,14 +33,39 @@ API Docs
    :members:
    :undoc-members:
 
-.. automodule:: invenio_pidstore.provider
+Resolver
+--------
+
+.. automodule:: invenio_pidstore.resolver
    :members:
    :undoc-members:
 
-.. automodule:: invenio_pidstore.providers.datacite
+
+Providers
+---------
+
+.. automodule:: invenio_pidstore.providers
    :members:
    :undoc-members:
 
-.. automodule:: invenio_pidstore.providers.local_doi
+.. automodule:: invenio_pidstore.providers.base
+   :members:
+   :undoc-members:
+
+.. automodule:: invenio_pidstore.providers.recordid
+   :members:
+   :undoc-members:
+
+Minters
+-------
+
+.. automodule:: invenio_pidstore.minters
+   :members:
+   :undoc-members:
+
+Exceptions
+----------
+
+.. automodule:: invenio_pidstore.errors
    :members:
    :undoc-members:
