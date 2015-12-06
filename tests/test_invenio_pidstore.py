@@ -85,6 +85,13 @@ def test_upgrades():
     from invenio_pidstore import upgrades  # pragma: noqa
 
 
+def test_pidstatus_as():
+    """Test PID status."""
+    assert PIDStatus.as_title(PIDStatus.NEW) == 'New'
+    assert PIDStatus.as_title(PIDStatus.RESERVED) == 'Reserved'
+    assert PIDStatus.as_mapping()[0] == (PIDStatus.NEW, 'New')
+
+
 def test_pid_get(app):
     """Test pid retrieval."""
     with app.app_context():

@@ -40,3 +40,6 @@ recursive-include docs *.rst
 recursive-include docs Makefile
 recursive-include examples *.py
 recursive-include invenio_pidstore *.py
+
+# added by check_manifest.py
+recursive-include invenio_pidstore *.po

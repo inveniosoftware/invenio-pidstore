@@ -17,12 +17,16 @@
 # along with Invenio; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-"""Admin model views for PersistentIdentifier and PidLog."""
+"""Admin model views for PersistentIdentifier."""
 
 from flask_admin.contrib.sqla import ModelView
-from flask_babelex import gettext as _
 
-from .models import PersistentIdentifier, PIDStatus, Redirect
+from .models import PersistentIdentifier, PIDStatus
+
+
+def _(x):
+    """Identity function for string extraction."""
+    return x
 
 
 class PersistentIdentifierModelView(ModelView):
@@ -34,39 +38,25 @@ class PersistentIdentifierModelView(ModelView):
     can_view_details = True
     column_display_all_relations = True
     column_list = (
-        'id', 'pid_type', 'pid_value', 'pid_provider', 'status', 'object_type',
-        'object_uuid', 'last_modified',
+        'pid_type', 'pid_value', 'status', 'object_type',
+        'object_uuid', 'created', 'updated',
     )
+    column_labels = dict(
+        pid_type=_('PID Type'),
+        pid_value=_('PID'),
+        pid_provider=_('Provider'),
+        status=_('Status'),
+        object_type=_('Object Type'),
+        object_uuid=_('Object UUID'),
+    )
+    column_choices = dict(status=PIDStatus.as_mapping())
+    column_filters = ('pid_type', 'pid_value', 'object_type', 'status', )
     column_searchable_list = ('pid_value', )
-    form_choices = {
-        'status': ((PIDStatus.NEW, _('New')),
-                   (PIDStatus.RESERVED, _('Reserved')),
-                   (PIDStatus.REGISTERED, _('Registered')),
-                   (PIDStatus.DELETED, _('Inactive')))
-    }
-    """
-    PIDStatus form choices in the typical lifetime order.
-    """
+    column_default_sort = ('updated', True)
+    page_size = 25
 
 
-class RedirectModelView(ModelView):
-    """ModelView for the Redirect."""
-
-    can_create = False
-    can_edit = True
-    can_delete = True
-    can_view_details = True
-    column_list = ('id', 'pid_id', 'pid',)
-
-
-pid_adminview = dict(modelview=PersistentIdentifierModelView,
-                     model=PersistentIdentifier,
-                     category='PIDStore')
-redirect_adminview = dict(modelview=RedirectModelView,
-                          model=Redirect,
-                          category='PIDStore')
-
-__all__ = (
-    'pid_adminview',
-    'redirect_adminview',
-)
+pid_adminview = dict(
+    modelview=PersistentIdentifierModelView,
+    model=PersistentIdentifier,
+    category=_('Records'))

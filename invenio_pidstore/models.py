@@ -30,7 +30,9 @@ import logging
 import uuid
 
 import six
+from flask_babelex import gettext
 from invenio_db import db
+from speaklater import make_lazy_gettext
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
@@ -39,6 +41,8 @@ from sqlalchemy_utils.types import UUIDType
 
 from .errors import PIDAlreadyExists, PIDDoesNotExistError, PIDInvalidAction, \
     PIDObjectAlreadyAssigned
+
+_ = make_lazy_gettext(lambda: gettext)
 
 logger = logging.getLogger('invenio-pidstore')
 
@@ -64,6 +68,24 @@ class PIDStatus(object):
     This should happen very rarely, and must be kept track of, as the PID
     should not be reused for something else.
     """
+
+    titles = [
+        (NEW, _('New')),
+        (RESERVED, _('Reserved')),
+        (REGISTERED, _('Registered')),
+        (REDIRECTED, _('Redirected')),
+        (DELETED, _('Deleted')),
+    ]
+
+    @classmethod
+    def as_title(cls, value):
+        """Get title for status."""
+        return dict(cls.titles)[value]
+
+    @classmethod
+    def as_mapping(cls):
+        """Get sorted mapping."""
+        return cls.titles
 
 
 class PersistentIdentifier(db.Model, Timestamp):

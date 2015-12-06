@@ -48,6 +48,9 @@ tests_require = [
 ]
 
 extras_require = {
+    'admin': [
+        'Flask-Admin>=1.3.0',
+    ],
     'datacite': [
         'datacite>=0.1.0'
     ],
@@ -77,7 +80,6 @@ setup_requires = [
 ]
 
 install_requires = [
-    'Flask-Admin>=1.3.0',
     'Flask-BabelEx>=0.9.2',
 ]
 
@@ -149,8 +151,6 @@ setup(
         ],
         'invenio_admin.views': [
             'invenio_pidstore_pid = invenio_pidstore.admin:pid_adminview',
-            'invenio_pidstore_redirect = '
-            'invenio_pidstore.admin:redirect_adminview',
         ]
     },
     extras_require=extras_require,
