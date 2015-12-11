@@ -149,6 +149,9 @@ setup(
         'invenio_pidstore.minters': [
             'recid_minter = invenio_pidstore.minters:recid_minter',
         ],
+        'invenio_pidstore.fetchers': [
+            'recid_fetcher = invenio_pidstore.fetchers:recid_fetcher',
+        ],
         'invenio_admin.views': [
             'invenio_pidstore_pid = invenio_pidstore.admin:pid_adminview',
         ]

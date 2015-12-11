@@ -49,34 +49,53 @@ def pid_exists(value, pidtype=None):
 class _PIDStoreState(object):
     """Persistent identifier store state."""
 
-    def __init__(self, app, entry_point_group=None):
+    def __init__(self, app, minters_entry_point_group=None,
+                 fetchers_entry_point_group=None):
         """Initialize state."""
         self.app = app
         self.minters = {}
-        if entry_point_group:
-            self.load_entry_point_group(entry_point_group)
+        self.fetchers = {}
+        if minters_entry_point_group:
+            self.load_minters_entry_point_group(minters_entry_point_group)
+        if fetchers_entry_point_group:
+            self.load_fetchers_entry_point_group(fetchers_entry_point_group)
 
     def register_minter(self, name, minter):
         """Register a minter."""
         assert name not in self.minters
         self.minters[name] = minter
 
-    def load_entry_point_group(self, entry_point_group):
+    def register_fetcher(self, name, fetcher):
+        """Register a fetcher."""
+        assert name not in self.fetchers
+        self.fetchers[name] = fetcher
+
+    def load_minters_entry_point_group(self, entry_point_group):
         """Load minters from an entry point group."""
         for ep in pkg_resources.iter_entry_points(group=entry_point_group):
             self.register_minter(ep.name, ep.load())
+
+    def load_fetchers_entry_point_group(self, entry_point_group):
+        """Load fetchers from an entry point group."""
+        for ep in pkg_resources.iter_entry_points(group=entry_point_group):
+            self.register_fetcher(ep.name, ep.load())
 
 
 class InvenioPIDStore(object):
     """Invenio-PIDStore extension."""
 
-    def __init__(self, app=None, entry_point_group='invenio_pidstore.minters'):
+    def __init__(self, app=None,
+                 minters_entry_point_group='invenio_pidstore.minters',
+                 fetchers_entry_point_group='invenio_pidstore.fetchers'):
         """Extension initialization."""
         if app:
             self._state = self.init_app(
-                app, entry_point_group=entry_point_group)
+                app, minters_entry_point_group=minters_entry_point_group,
+                fetchers_entry_point_group=fetchers_entry_point_group
+            )
 
-    def init_app(self, app, entry_point_group=None):
+    def init_app(self, app, minters_entry_point_group=None,
+                 fetchers_entry_point_group=None):
         """Flask application initialization."""
         # Initialize logger
         app.config.setdefault('PIDSTORE_APP_LOGGER_HANDLERS', app.debug)
@@ -88,7 +107,11 @@ class InvenioPIDStore(object):
         app.jinja_env.filters['pid_exists'] = pid_exists
 
         # Initialize extension state.
-        state = _PIDStoreState(app=app, entry_point_group=entry_point_group)
+        state = _PIDStoreState(
+            app=app,
+            minters_entry_point_group=minters_entry_point_group,
+            fetchers_entry_point_group=fetchers_entry_point_group,
+        )
         app.extensions['invenio-pidstore'] = state
         return state
 

@@ -40,6 +40,8 @@ PIDStore consists of:
 - `Minters` - small functions that are responsible for minting a specific
   persistent identifier type for a specific internal object type in as
   automatic way as possible.
+- `Fetchers` - small functions that are responsible for returning a minted
+  persistent identifier.
 
 Initialization
 --------------
@@ -302,10 +304,50 @@ You can retrieve registered minters from the extension as well:
 >>> current_pidstore.minters['my_uuid_minter']
 <function my_uuid_minter at ...>
 
+
+Fetchers
+--------
+Fetchers are small functions that are responsible for returning a minted
+persistent identifier.
+
+A fetcher takes two arguments:
+
+- an `object uuid` of the internal object which the persistent identifier
+  should be assigned to.
+- a `dictionary object`, which the fetcher may extract information from. For
+  instance, if a record object is passed, it might contain a previously minted
+  DOI.
+
+Below is an example fetcher which extracts external UUIDs previously minted in
+the dictionary object (which could be e.g. a record):
+
+>>> import uuid
+>>> def my_uuid_fetcher(object_uuid, data):
+...     return data['uuid']
+
+Registering fetchers
+~~~~~~~~~~~~~~~~~~~~
+Fetchers are usually used by other modules and thus registered on the
+Flask application.
+
+First import the proxy to the current application's PIDStore:
+
+>>> from invenio_pidstore import current_pidstore
+
+Next, register a fetcher:
+
+>>> current_pidstore.register_fetcher('my_uuid_fetcher', my_uuid_fetcher)
+
+You can retrieve registered fetchers from the extension as well:
+
+>>> current_pidstore.fetchers['my_uuid_fetcher']
+<function my_uuid_fetcher at ...>
+
+
 Entry points loading
 ~~~~~~~~~~~~~~~~~~~~
-PIDStore will automatically register minters defined by the entry point group
-``invenio_pidstore.minters``.
+PIDStore will automatically register minters and fetchers defined by the entry
+point groups ``invenio_pidstore.minters`` and . ``invenio_pidstore.fetchers``.
 
 Example:
 
@@ -317,6 +359,9 @@ Example:
        entry_points={
            'invenio_pidstore.minters': [
                'recid_minter = invenio_pidstore.minters:recid_minter',
+           ],
+           'invenio_pidstore.fetchers': [
+               'recid_fetcher = invenio_pidstore.fetchers:recid_fetcher',
            ]})
 
 Above is equivalent to:
@@ -324,7 +369,9 @@ Above is equivalent to:
 .. code-block:: python
 
    from invenio_pidstore.minters import recid_minter
+   from invenio_pidstore.fetchers import recid_fetcher
    current_pidstore.register_minter('recid_minter', recid_minter)
+   current_pidstore.register_fetcher('recid_fetcher', recid_fetcher)
 
 """
 

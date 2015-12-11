@@ -45,7 +45,10 @@ def test_init():
     app = Flask('testapp')
     ext = InvenioPIDStore(app)
     assert 'invenio-pidstore' in app.extensions
-    ext.register_minter('testminter', lambda a, b: None)
+    ext.register_minter('testminter',
+                        lambda a, b: 'deadbeef-c0de-c0de-c0de-b100dc0ffee5')
+    ext.register_fetcher('testfetcher',
+                         lambda a, b: 'deadbeef-c0de-c0de-c0de-b100dc0ffee5')
 
     app = Flask('testapp')
     ext = InvenioPIDStore()

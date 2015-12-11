@@ -63,6 +63,13 @@ Minters
    :members:
    :undoc-members:
 
+Fetchers
+--------
+
+.. automodule:: invenio_pidstore.fetchers
+   :members:
+   :undoc-members:
+
 Exceptions
 ----------
 
