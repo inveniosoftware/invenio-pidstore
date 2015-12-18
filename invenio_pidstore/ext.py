@@ -30,6 +30,7 @@ import pkg_resources
 from flask import current_app
 from werkzeug.local import LocalProxy
 
+from .cli import pid as cmd
 from .errors import PIDDoesNotExistError
 from .models import PersistentIdentifier, logger
 
@@ -97,6 +98,9 @@ class InvenioPIDStore(object):
     def init_app(self, app, minters_entry_point_group=None,
                  fetchers_entry_point_group=None):
         """Flask application initialization."""
+        # Initialize CLI
+        app.cli.add_command(cmd)
+
         # Initialize logger
         app.config.setdefault('PIDSTORE_APP_LOGGER_HANDLERS', app.debug)
         if app.config['PIDSTORE_APP_LOGGER_HANDLERS']:

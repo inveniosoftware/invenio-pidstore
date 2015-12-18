@@ -320,8 +320,8 @@ def test_redirect_cleanup(app):
     """Test proper clean up from redirects."""
     with app.app_context():
         pid1 = PersistentIdentifier.create(
-                'recid', '1', status=PIDStatus.REGISTERED, object_type='rec',
-                object_uuid=uuid.uuid4())
+            'recid', '1', status=PIDStatus.REGISTERED, object_type='rec',
+            object_uuid=uuid.uuid4())
         pid2 = PersistentIdentifier.create(
             'recid', '2', status=PIDStatus.REGISTERED, object_type='rec',
             object_uuid=uuid.uuid4())

@@ -76,3 +76,13 @@ Exceptions
 .. automodule:: invenio_pidstore.errors
    :members:
    :undoc-members:
+
+CLI
+---
+
+Detailed usage documentation is available by running
+``inveniomanage pid --help``.
+
+.. automodule:: invenio_pidstore.cli
+   :members:
+   :undoc-members:

@@ -69,6 +69,14 @@ class PIDStatus(object):
     should not be reused for something else.
     """
 
+    attributes = [
+        'NEW',
+        'RESERVED',
+        'REGISTERED',
+        'REDIRECTED',
+        'DELETED',
+    ]
+
     titles = [
         (NEW, _('New')),
         (RESERVED, _('Reserved')),

@@ -37,9 +37,9 @@ from invenio_pidstore.admin import pid_adminview
 def test_admin():
     """Test flask-admin interace."""
     app = Flask('testapp')
-    InvenioPIDStore(app)
     FlaskCLI(app)
     InvenioDB(app)
+    InvenioPIDStore(app)
     admin = Admin(app, name="AdminExt")
 
     pid_kwargs = dict(pid_adminview)

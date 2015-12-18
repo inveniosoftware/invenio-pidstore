@@ -28,6 +28,7 @@
 from __future__ import absolute_import, print_function
 
 from flask import Flask
+from flask_cli import FlaskCLI
 from invenio_db import db
 
 from invenio_pidstore import InvenioPIDStore
@@ -43,6 +44,7 @@ def test_version():
 def test_init():
     """Test extension initialization."""
     app = Flask('testapp')
+    FlaskCLI(app)
     ext = InvenioPIDStore(app)
     assert 'invenio-pidstore' in app.extensions
     ext.register_minter('testminter',
@@ -51,6 +53,7 @@ def test_init():
                          lambda a, b: 'deadbeef-c0de-c0de-c0de-b100dc0ffee5')
 
     app = Flask('testapp')
+    FlaskCLI(app)
     ext = InvenioPIDStore()
     assert 'invenio-pidstore' not in app.extensions
     ext.init_app(app)
@@ -60,6 +63,7 @@ def test_init():
 def test_logger():
     """Test extension initialization."""
     app = Flask('testapp')
+    FlaskCLI(app)
     app.config['PIDSTORE_APP_LOGGER_HANDLERS'] = True
     InvenioPIDStore(app)
 
