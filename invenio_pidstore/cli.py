@@ -39,9 +39,9 @@ def process_status(ctx, param, value):
     if value is None:
         return None
 
-    if value not in PIDStatus.attributes:
+    if not hasattr(PIDStatus, value):
         raise click.BadParameter('Status needs to be one of {0}.'.format(
-            ', '.join(PIDStatus.attributes)
+            ', '.join([s.name for s in PIDStatus])
         ))
     return getattr(PIDStatus, value)
 
@@ -141,7 +141,7 @@ def dereference_object(object_type, object_uuid, status):
         object_type=object_type, object_uuid=object_uuid
     )
     if status:
-        pids = pids.filter_by(status=status)
+        pids = pids.filter_by(status=str(status))
 
     for found_pid in pids.all():
         click.echo(

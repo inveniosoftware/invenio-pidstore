@@ -28,6 +28,7 @@ from __future__ import absolute_import, print_function
 
 import logging
 import uuid
+from enum import Enum
 
 import six
 from flask_babelex import gettext
@@ -35,6 +36,7 @@ from invenio_db import db
 from speaklater import make_lazy_gettext
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import validates
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.models import Timestamp
 from sqlalchemy_utils.types import UUIDType
@@ -47,8 +49,19 @@ _ = make_lazy_gettext(lambda: gettext)
 logger = logging.getLogger('invenio-pidstore')
 
 
-class PIDStatus(object):
+PID_STATUS_TITLES = {
+    'NEW': _('New'),
+    'RESERVED': _('Reserved'),
+    'REGISTERED': _('Registered'),
+    'REDIRECTED': _('Redirected'),
+    'DELETED': _('Deleted'),
+}
+
+
+class PIDStatus(Enum):
     """Constants for possible status of any given PID."""
+
+    __order__ = 'NEW RESERVED REGISTERED REDIRECTED DELETED'
 
     NEW = 'N'
     """PID has *not* yet been registered with the service provider."""
@@ -69,31 +82,21 @@ class PIDStatus(object):
     should not be reused for something else.
     """
 
-    attributes = [
-        'NEW',
-        'RESERVED',
-        'REGISTERED',
-        'REDIRECTED',
-        'DELETED',
-    ]
+    def __init__(self, value):
+        """Hack."""
 
-    titles = [
-        (NEW, _('New')),
-        (RESERVED, _('Reserved')),
-        (REGISTERED, _('Registered')),
-        (REDIRECTED, _('Redirected')),
-        (DELETED, _('Deleted')),
-    ]
+    def __eq__(self, other):
+        """Equality test."""
+        return self.value == other
 
-    @classmethod
-    def as_title(cls, value):
-        """Get title for status."""
-        return dict(cls.titles)[value]
+    def __str__(self):
+        """Return its value."""
+        return self.value
 
-    @classmethod
-    def as_mapping(cls):
-        """Get sorted mapping."""
-        return cls.titles
+    @property
+    def title(self):
+        """Return human readable title."""
+        return PID_STATUS_TITLES[self.name]
 
 
 class PersistentIdentifier(db.Model, Timestamp):
@@ -132,6 +135,13 @@ class PersistentIdentifier(db.Model, Timestamp):
 
     object_uuid = db.Column(UUIDType, nullable=True)
     """Object ID - e.g. a record id."""
+
+    @validates('status')
+    def validate_status(self, key, status):
+        """Allow only instances of PIDStatus."""
+        status = status if type(status) is PIDStatus else PIDStatus(status)
+        assert status in PIDStatus
+        return status.value
 
     #
     # Class methods

@@ -49,7 +49,7 @@ class PersistentIdentifierModelView(ModelView):
         object_type=_('Object Type'),
         object_uuid=_('Object UUID'),
     )
-    column_choices = dict(status=PIDStatus.as_mapping())
+    column_choices = dict(status=[(s.value, s.title) for s in PIDStatus])
     column_filters = ('pid_type', 'pid_value', 'object_type', 'status', )
     column_searchable_list = ('pid_value', )
     column_default_sort = ('updated', True)

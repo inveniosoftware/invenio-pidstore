@@ -87,9 +87,9 @@ def test_upgrades():
 
 def test_pidstatus_as():
     """Test PID status."""
-    assert PIDStatus.as_title(PIDStatus.NEW) == 'New'
-    assert PIDStatus.as_title(PIDStatus.RESERVED) == 'Reserved'
-    assert PIDStatus.as_mapping()[0] == (PIDStatus.NEW, 'New')
+    assert PIDStatus.NEW.title == 'New'
+    assert PIDStatus.RESERVED.title == 'Reserved'
+    assert next(iter(PIDStatus)) == 'N'
 
 
 def test_pid_get(app):

@@ -48,6 +48,7 @@ tests_require = [
 ]
 
 extras_require = {
+    ':python_version<"3.4"': ['enum34>=1.0.4'],
     'admin': [
         'Flask-Admin>=1.3.0',
     ],
