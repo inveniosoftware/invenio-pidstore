@@ -141,7 +141,7 @@ def dereference_object(object_type, object_uuid, status):
         object_type=object_type, object_uuid=object_uuid
     )
     if status:
-        pids = pids.filter_by(status=str(status))
+        pids = pids.filter_by(status=status)
 
     for found_pid in pids.all():
         click.echo(

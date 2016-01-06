@@ -36,10 +36,9 @@ from invenio_db import db
 from speaklater import make_lazy_gettext
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import validates
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.models import Timestamp
-from sqlalchemy_utils.types import UUIDType
+from sqlalchemy_utils.types import ChoiceType, UUIDType
 
 from .errors import PIDAlreadyExists, PIDDoesNotExistError, PIDInvalidAction, \
     PIDObjectAlreadyAssigned
@@ -127,7 +126,7 @@ class PersistentIdentifier(db.Model, Timestamp):
     pid_provider = db.Column(db.String(8), nullable=True)
     """Persistent Identifier Provider"""
 
-    status = db.Column(db.CHAR(1), nullable=False)
+    status = db.Column(ChoiceType(PIDStatus, impl=db.CHAR(1)), nullable=False)
     """Status of persistent identifier, e.g. registered, reserved, deleted."""
 
     object_type = db.Column(db.String(3), nullable=True)
@@ -135,13 +134,6 @@ class PersistentIdentifier(db.Model, Timestamp):
 
     object_uuid = db.Column(UUIDType, nullable=True)
     """Object ID - e.g. a record id."""
-
-    @validates('status')
-    def validate_status(self, key, status):
-        """Allow only instances of PIDStatus."""
-        status = status if type(status) is PIDStatus else PIDStatus(status)
-        assert status in PIDStatus
-        return status.value
 
     #
     # Class methods
