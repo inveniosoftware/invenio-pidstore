@@ -1,8 +1,8 @@
-=========================
- Invenio-PIDStore v1.0.0
-=========================
+===========================
+ Invenio-PIDStore v1.0.0a3
+===========================
 
-Invenio-PIDStore v1.0.0 was released on November 19, 2015.
+Invenio-PIDStore v1.0.0a3 was released on January 7, 2016.
 
 About
 -----
@@ -11,15 +11,25 @@ Invenio module that stores and registers persistent identifiers.
 
 *This is an experimental development preview release.*
 
-Improved features
------------------
+Incompatible changes
+--------------------
 
-- Makes Datacite provider optional.
+- Major rewrite of PIDStore in order to fix performance issues and
+  clean up programmatic API. (#21) (#20) (#19) (#9) (#4) (#1)
+- Refactoring and column name change for pidSTORE table.
+
+New features
+------------
+
+- Adds basic CLI API.  (#42)
+- Adds pid fetchers which enable to retrieve a PID from a previously
+  minted data.
+- Adds recid_fetcher which can retrieve pids minted by recid_minter.
 
 Installation
 ------------
 
-   $ pip install invenio-pidstore==1.0.0
+   $ pip install invenio-pidstore==1.0.0a3
 
 Documentation
 -------------

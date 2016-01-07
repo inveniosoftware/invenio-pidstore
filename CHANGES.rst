@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2015 CERN.
+    Copyright (C) 2015, 2016 CERN.
 
     Invenio is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -24,8 +24,23 @@
 Changes
 =======
 
-Version 1.0.0 (released 2015-11-19)
------------------------------------
+Version 1.0.0a3 (released 2016-01-07)
+-------------------------------------
+
+Incompatible changes
+~~~~~~~~~~~~~~~~~~~~
+
+- Major rewrite of PIDStore in order to fix performance issues and
+  clean up programmatic API. (#21) (#20) (#19) (#9) (#4) (#1)
+- Refactoring and column name change for pidSTORE table.
+
+New features
+~~~~~~~~~~~~
+
+- Adds basic CLI API.  (#42)
+- Adds pid fetchers which enable to retrieve a PID from a previously
+  minted data.
+- Adds recid_fetcher which can retrieve pids minted by recid_minter.
 
 Version 0.1.3 (released 2015-10-11)
 -----------------------------------
