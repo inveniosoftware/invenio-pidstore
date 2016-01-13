@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -106,6 +106,15 @@ class InvenioPIDStore(object):
         if app.config['PIDSTORE_APP_LOGGER_HANDLERS']:
             for handler in app.logger.handlers:
                 logger.addHandler(handler)
+
+        # Initialize admin object link endpoints.
+        try:
+            pkg_resources.get_distribution('invenio-records')
+            app.config.setdefault('PIDSTORE_OBJECT_ENDPOINTS', dict(
+                rec='recordmetadata.details_view',
+            ))
+        except pkg_resources.DistributionNotFound:
+            app.config.setdefault('PIDSTORE_OBJECT_ENDPOINTS', {})
 
         # Register template filter
         app.jinja_env.filters['pid_exists'] = pid_exists

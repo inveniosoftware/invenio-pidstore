@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -193,6 +193,18 @@ class PersistentIdentifier(db.Model, Timestamp):
             return cls.query.filter_by(**args).one()
         except NoResultFound:
             raise PIDDoesNotExistError(pid_type, pid_value)
+
+    @classmethod
+    def get_by_object(cls, pid_type, object_type, object_uuid):
+        """Get a persistent identifier for a given object."""
+        try:
+            return cls.query.filter_by(
+                pid_type=pid_type,
+                object_type=object_type,
+                object_uuid=object_uuid
+            ).one()
+        except NoResultFound:
+            raise PIDDoesNotExistError(pid_type, None)
 
     #
     # Assigned object methods

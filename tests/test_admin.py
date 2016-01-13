@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -25,13 +25,16 @@
 
 from __future__ import absolute_import, print_function
 
+import uuid
+
 from flask import Flask
 from flask_admin import Admin, menu
 from flask_cli import FlaskCLI
 from invenio_db import InvenioDB, db
 
 from invenio_pidstore import InvenioPIDStore
-from invenio_pidstore.admin import pid_adminview
+from invenio_pidstore.admin import FilterUUID, object_formatter, pid_adminview
+from invenio_pidstore.models import PersistentIdentifier
 
 
 def test_admin():
@@ -65,3 +68,32 @@ def test_admin():
                      menu_items['Records'].get_children()}
     assert 'Persistent Identifier' in submenu_items
     assert isinstance(submenu_items['Persistent Identifier'], menu.MenuView)
+
+
+def test_filter_uuid(app):
+    """Test FilterUUID."""
+    with app.app_context():
+        myuuid = uuid.uuid4()
+        PersistentIdentifier.create(
+            'doi', '10.1234/a', object_type='tst', object_uuid=myuuid)
+
+        query = FilterUUID(PersistentIdentifier.object_uuid, 'Test').apply(
+            PersistentIdentifier.query, str(myuuid), None)
+        assert query.count() == 1
+
+
+def test_object_formatter(app):
+    """Test FilterUUID."""
+    @app.route('/<id>')
+    def test_detail(id=None):
+        return str(id)
+
+    with app.test_request_context():
+        app.config['PIDSTORE_OBJECT_ENDPOINTS']['tst'] = 'test_detail'
+        pid = PersistentIdentifier.create(
+            'doi', '10.1234/a', object_type='tst', object_uuid=uuid.uuid4())
+        assert 'View' in object_formatter(None, None, pid, None)
+
+        pid = PersistentIdentifier.create(
+            'doi', '10.1234/b', )
+        assert object_formatter(None, None, pid, None) == ''

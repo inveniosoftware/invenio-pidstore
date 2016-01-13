@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -27,9 +27,11 @@
 
 from __future__ import absolute_import, print_function
 
+import pkg_resources
 from flask import Flask
 from flask_cli import FlaskCLI
 from invenio_db import db
+from mock import patch
 
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.models import PersistentIdentifier
@@ -66,6 +68,17 @@ def test_logger():
     FlaskCLI(app)
     app.config['PIDSTORE_APP_LOGGER_HANDLERS'] = True
     InvenioPIDStore(app)
+
+
+def test_no_invenio_records():
+    """Test extension initialization."""
+    app = Flask('testapp')
+    FlaskCLI(app)
+    with patch('invenio_pidstore.ext.pkg_resources') as obj:
+        obj.DistributionNotFound = pkg_resources.DistributionNotFound
+        obj.get_distribution.side_effect = pkg_resources.DistributionNotFound
+        InvenioPIDStore(app)
+    assert app.config['PIDSTORE_OBJECT_ENDPOINTS'] == {}
 
 
 def test_template_filters(app):

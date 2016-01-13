@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -113,6 +113,20 @@ def test_pid_get(app):
             PIDDoesNotExistError,
             PersistentIdentifier.get,
             'doi', doi, pid_provider='cref'
+        )
+
+        # Retrieve by object
+        myuuid = uuid.uuid4()
+        doi = '10.1234/b'
+        PersistentIdentifier.create(
+            'doi', doi, object_type='rec', object_uuid=myuuid)
+        pid = PersistentIdentifier.get_by_object('doi', 'rec', myuuid)
+        assert pid.pid_value == doi
+
+        pytest.raises(
+            PIDDoesNotExistError,
+            PersistentIdentifier.get_by_object,
+            'doi', 'rec', uuid.uuid4()
         )
 
 
