@@ -147,6 +147,9 @@ setup(
         'invenio_base.apps': [
             'invenio_pidstore = invenio_pidstore:InvenioPIDStore',
         ],
+        'invenio_base.api_apps': [
+            'invenio_pidstore = invenio_pidstore:InvenioPIDStore',
+        ],
         'invenio_pidstore.minters': [
             'recid_minter = invenio_pidstore.minters:recid_minter',
         ],
