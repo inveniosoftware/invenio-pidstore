@@ -52,7 +52,7 @@ def process_status(ctx, param, value):
 
 @click.group()
 def pid():
-    """PIDStore management commands."""
+    """PID-Store management commands."""
 
 
 @pid.command()
