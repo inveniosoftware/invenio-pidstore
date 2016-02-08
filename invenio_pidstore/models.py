@@ -460,7 +460,8 @@ class RecordIdentifier(db.Model):
 
     __tablename__ = 'pidstore_recid'
 
-    recid = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    recid = db.Column(db.BigInteger().with_variant(db.Integer, "sqlite"),
+                      primary_key=True, autoincrement=True)
 
     @classmethod
     def next(cls):
