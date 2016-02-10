@@ -26,6 +26,8 @@
 
 from __future__ import absolute_import, print_function
 
+from flask import current_app
+
 from .errors import PIDDeletedError, PIDMissingObjectError, \
     PIDRedirectedError, PIDUnregistered
 from .models import PersistentIdentifier
@@ -62,9 +64,13 @@ class Resolver(object):
 
         if pid.is_deleted():
             obj_id = pid.get_assigned_object(object_type=self.object_type)
-            raise PIDDeletedError(
-                pid,
-                self.object_getter(obj_id) if obj_id else None)
+            try:
+                obj = self.object_getter(obj_id) if obj_id else None
+            except Exception:
+                current_app.logger.exception("Failed to get object {0}".format(
+                    obj_id))
+                obj = None
+            raise PIDDeletedError(pid, obj)
 
         if pid.is_redirected():
             raise PIDRedirectedError(pid, pid.get_redirect())
