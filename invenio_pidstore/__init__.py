@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -358,10 +358,10 @@ Example:
        # ...
        entry_points={
            'invenio_pidstore.minters': [
-               'recid_minter = invenio_pidstore.minters:recid_minter',
+               'recid = invenio_pidstore.minters:recid_minter',
            ],
            'invenio_pidstore.fetchers': [
-               'recid_fetcher = invenio_pidstore.fetchers:recid_fetcher',
+               'recid = invenio_pidstore.fetchers:recid_fetcher',
            ]})
 
 Above is equivalent to:
@@ -370,8 +370,8 @@ Above is equivalent to:
 
    from invenio_pidstore.minters import recid_minter
    from invenio_pidstore.fetchers import recid_fetcher
-   current_pidstore.register_minter('recid_minter', recid_minter)
-   current_pidstore.register_fetcher('recid_fetcher', recid_fetcher)
+   current_pidstore.register_minter('recid', recid_minter)
+   current_pidstore.register_fetcher('recid', recid_fetcher)
 
 """
 
