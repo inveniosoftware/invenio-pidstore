@@ -27,15 +27,10 @@
 from __future__ import absolute_import, print_function
 
 import pkg_resources
-from flask import current_app
-from werkzeug.local import LocalProxy
 
 from .cli import pid as cmd
 from .errors import PIDDoesNotExistError
 from .models import PersistentIdentifier, logger
-
-current_pidstore = LocalProxy(
-    lambda: current_app.extensions['invenio-pidstore'])
 
 
 def pid_exists(value, pidtype=None):
