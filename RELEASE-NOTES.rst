@@ -1,8 +1,8 @@
 ===========================
- Invenio-PIDStore v1.0.0a5
+ Invenio-PIDStore v1.0.0a6
 ===========================
 
-Invenio-PIDStore v1.0.0a5 was released on February 28, 2016.
+Invenio-PIDStore v1.0.0a6 was released on March 9, 2016.
 
 About
 -----
@@ -29,7 +29,7 @@ New features
 Installation
 ------------
 
-   $ pip install invenio-pidstore==1.0.0a5
+   $ pip install invenio-pidstore==1.0.0a6
 
 Documentation
 -------------
