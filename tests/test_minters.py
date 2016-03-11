@@ -40,7 +40,7 @@ def test_recid_minter(app):
         data = {}
         pid = recid_minter(rec_uuid, data)
         assert pid
-        assert data['control_number'] == int(pid.pid_value)
+        assert data['control_number'] == pid.pid_value
         assert pid.object_type == 'rec'
         assert pid.object_uuid == rec_uuid
 
