@@ -27,6 +27,7 @@
 from __future__ import absolute_import, print_function
 
 from flask import current_app
+from sqlalchemy.orm.exc import NoResultFound
 
 from .errors import PIDDeletedError, PIDMissingObjectError, \
     PIDRedirectedError, PIDUnregistered
@@ -66,9 +67,7 @@ class Resolver(object):
             obj_id = pid.get_assigned_object(object_type=self.object_type)
             try:
                 obj = self.object_getter(obj_id) if obj_id else None
-            except Exception:
-                current_app.logger.exception("Failed to get object {0}".format(
-                    obj_id))
+            except NoResultFound:
                 obj = None
             raise PIDDeletedError(pid, obj)
 
