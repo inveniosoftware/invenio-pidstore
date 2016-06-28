@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: invenio-pidstore 1.0.0a3.dev20151125\n"
-"Report-Msgid-Bugs-To: info@invenio-software.org\n"
+"Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
 "POT-Creation-Date: 2015-12-07 13:36+0100\n"
 "PO-Revision-Date: 2015-12-07 12:35+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
