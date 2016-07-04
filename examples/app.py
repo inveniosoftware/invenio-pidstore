@@ -38,7 +38,6 @@ import os
 
 from flask import Flask
 from flask_babelex import Babel
-from flask_cli import FlaskCLI
 from invenio_db import InvenioDB
 
 from invenio_pidstore import InvenioPIDStore
@@ -48,6 +47,8 @@ app = Flask(__name__)
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ.get('SQLALCHEMY_DATABASE_URI'))
 Babel(app)
-FlaskCLI(app)
+if not hasattr(app, 'cli'):
+    from flask_cli import FlaskCLI
+    FlaskCLI(app)
 InvenioDB(app)
 InvenioPIDStore(app)

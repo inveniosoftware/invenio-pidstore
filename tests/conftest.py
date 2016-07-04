@@ -32,7 +32,6 @@ import tempfile
 
 import pytest
 from flask import Flask
-from flask_cli import FlaskCLI
 from invenio_db import InvenioDB, db
 from sqlalchemy_utils.functions import create_database, database_exists, \
     drop_database
@@ -46,8 +45,9 @@ def app(request):
     # Set temporary instance path for sqlite
     instance_path = tempfile.mkdtemp()
     app = Flask('testapp', instance_path=instance_path)
-
-    FlaskCLI(app)
+    if not hasattr(app, 'cli'):
+        from flask_cli import FlaskCLI
+        FlaskCLI(app)
     InvenioDB(app)
     InvenioPIDStore(app)
 

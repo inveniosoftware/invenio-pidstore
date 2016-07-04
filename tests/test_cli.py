@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -31,7 +31,6 @@ import uuid
 
 import pytest
 from click.testing import CliRunner
-from flask_cli import ScriptInfo
 from invenio_db import db
 from mock import patch
 from sqlalchemy.exc import SQLAlchemyError
@@ -40,6 +39,11 @@ from invenio_pidstore.cli import pid as cmd
 from invenio_pidstore.errors import PIDAlreadyExists, PIDDoesNotExistError, \
     PIDInvalidAction, PIDObjectAlreadyAssigned
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus, Redirect
+
+try:
+    from flask.cli import ScriptInfo
+except ImportError:
+    from flask_cli import ScriptInfo
 
 
 def test_pid_creation(app):

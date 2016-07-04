@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2014, 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -46,13 +46,14 @@ PIDStore consists of:
 Initialization
 --------------
 First create a Flask application (Flask-CLI is not needed for Flask
-version 1.0+):
+version 0.11+):
 
 >>> from flask import Flask
->>> from flask_cli import FlaskCLI
 >>> app = Flask('myapp')
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
->>> ext_cli = FlaskCLI(app)
+>>> if not hasattr(app, 'cli'):
+...     from flask_cli import FlaskCLI
+...     FlaskCLI(app)
 
 You initialize PIDStore like a normal Flask extension, however Invenio-PIDStore
 is dependent on Invenio-DB so you need to initialize both extensions:

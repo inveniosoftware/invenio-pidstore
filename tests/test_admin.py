@@ -27,22 +27,15 @@ from __future__ import absolute_import, print_function
 
 import uuid
 
-from flask import Flask
 from flask_admin import Admin, menu
-from flask_cli import FlaskCLI
-from invenio_db import InvenioDB, db
+from invenio_db import db
 
-from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.admin import FilterUUID, object_formatter, pid_adminview
 from invenio_pidstore.models import PersistentIdentifier
 
 
-def test_admin():
+def test_admin(app):
     """Test flask-admin interace."""
-    app = Flask('testapp')
-    FlaskCLI(app)
-    InvenioDB(app)
-    InvenioPIDStore(app)
     admin = Admin(app, name="AdminExt")
 
     pid_kwargs = dict(pid_adminview)
