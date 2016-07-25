@@ -41,8 +41,8 @@ def object_formatter(v, c, m, p):
 
     if endpoint and m.object_uuid:
         return Markup('<a href="{0}">{1}</a>'.format(
-                url_for(endpoint, id=m.object_uuid),
-                _('View')))
+            url_for(endpoint, id=m.object_uuid),
+            _('View')))
     return ''
 
 

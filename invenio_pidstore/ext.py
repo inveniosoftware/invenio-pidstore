@@ -34,7 +34,12 @@ from .models import PersistentIdentifier, logger
 
 
 def pid_exists(value, pidtype=None):
-    """Check if a persistent identifier exists."""
+    """Check if a persistent identifier exists.
+
+    :param value: The PID value.
+    :param pidtype: The pid value (Default: None).
+    :returns: `True` if the PID exists.
+    """
     try:
         PersistentIdentifier.get(pidtype, value)
         return True
@@ -57,22 +62,36 @@ class _PIDStoreState(object):
             self.load_fetchers_entry_point_group(fetchers_entry_point_group)
 
     def register_minter(self, name, minter):
-        """Register a minter."""
+        """Register a minter.
+
+        :param name: Minter name.
+        :param minter: The new minter.
+        """
         assert name not in self.minters
         self.minters[name] = minter
 
     def register_fetcher(self, name, fetcher):
-        """Register a fetcher."""
+        """Register a fetcher.
+
+        :param name: Fetcher name.
+        :param fetcher: The new fetcher.
+        """
         assert name not in self.fetchers
         self.fetchers[name] = fetcher
 
     def load_minters_entry_point_group(self, entry_point_group):
-        """Load minters from an entry point group."""
+        """Load minters from an entry point group.
+
+        :param entry_point_group: The entrypoint group.
+        """
         for ep in pkg_resources.iter_entry_points(group=entry_point_group):
             self.register_minter(ep.name, ep.load())
 
     def load_fetchers_entry_point_group(self, entry_point_group):
-        """Load fetchers from an entry point group."""
+        """Load fetchers from an entry point group.
+
+        :param entry_point_group: The entrypoint group.
+        """
         for ep in pkg_resources.iter_entry_points(group=entry_point_group):
             self.register_fetcher(ep.name, ep.load())
 
@@ -83,7 +102,13 @@ class InvenioPIDStore(object):
     def __init__(self, app=None,
                  minters_entry_point_group='invenio_pidstore.minters',
                  fetchers_entry_point_group='invenio_pidstore.fetchers'):
-        """Extension initialization."""
+        """Extension initialization.
+
+        :param minters_entry_point_group: The entrypoint for minters.
+            (Default: `invenio_pidstore.minters`).
+        :param fetchers_entry_point_group: The entrypoint for fetchers.
+            (Default: `invenio_pidstore.fetchers`).
+        """
         if app:
             self._state = self.init_app(
                 app, minters_entry_point_group=minters_entry_point_group,
@@ -92,7 +117,29 @@ class InvenioPIDStore(object):
 
     def init_app(self, app, minters_entry_point_group=None,
                  fetchers_entry_point_group=None):
-        """Flask application initialization."""
+        """Flask application initialization.
+
+        Initialize:
+
+        * The CLI commands.
+
+        * Initialize the logger (Default: `app.debug`).
+
+        * Initialize the default admin object link endpoint.
+            (Default: `{"rec": "recordmetadata.details_view"}` if
+            `invenio-records` is installed, otherwise `{}`).
+
+        * Register the `pid_exists` template filter.
+
+        * Initialize extension state.
+
+        :param app: The Flask application
+        :param minters_entry_point_group: The minters entrtypoint group
+            (Default: None).
+        :param fetchers_entry_point_group: The fetchers entrtypoint group
+            (Default: None).
+            :returns: PIDStore state application.
+        """
         # Initialize CLI
         app.cli.add_command(cmd)
 

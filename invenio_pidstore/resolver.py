@@ -26,7 +26,6 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import current_app
 from sqlalchemy.orm.exc import NoResultFound
 
 from .errors import PIDDeletedError, PIDMissingObjectError, \
@@ -57,6 +56,7 @@ class Resolver(object):
         """Resolve a persistent identifier to an internal object.
 
         :param pid_value: Persistent identifier.
+        :returns: A tuple containing (pid, object).
         """
         pid = PersistentIdentifier.get(self.pid_type, pid_value)
 

@@ -44,11 +44,23 @@ class RecordIdProvider(BaseProvider):
     """
 
     default_status = PIDStatus.RESERVED
-    """Record IDs are by default registered immediately."""
+    """Record IDs are by default registered immediately.
+
+    Default: :attr:`invenio_pidstore.models.PIDStatus.RESERVED`
+    """
 
     @classmethod
     def create(cls, object_type=None, object_uuid=None, **kwargs):
-        """Create a new record identifier."""
+        """Create a new record identifier.
+
+        Note: if the object_type and object_uuid values are passed, then the
+        PID status will be automatically setted to
+        :attr:`invenio_pidstore.models.PIDStatus.REGISTERED`.
+
+        :param object_type: The object type. (Default: None.)
+        :param object_uuid: The object identifier. (Default: None).
+        :param kwargs: You specify the pid_value.
+        """
         # Request next integer in recid sequence.
         assert 'pid_value' not in kwargs
         kwargs['pid_value'] = str(RecordIdentifier.next())

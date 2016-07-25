@@ -145,6 +145,14 @@ class PersistentIdentifier(db.Model, Timestamp):
 
         :param pid_type: Persistent identifier type.
         :param pid_value: Persistent identifier value.
+        :param pid_provider: Persistent identifier provider. (default: None).
+        :param status: Current PID status.
+            (Default: :attr:`invenio_pidstore.models.PIDStatus.NEW`)
+        :param object_type: The object type is a string that identify its type.
+            (default: None).
+        :param object_uuid: The object UUID. (default: None).
+        :returns: A :class:`invenio_pidstore.models.PersistentIdentifier`
+            instance.
         """
         try:
             with db.session.begin_nested():
@@ -185,7 +193,16 @@ class PersistentIdentifier(db.Model, Timestamp):
 
     @classmethod
     def get(cls, pid_type, pid_value, pid_provider=None):
-        """Get persistent identifier."""
+        """Get persistent identifier.
+
+        :param pid_type: Persistent identifier type.
+        :param pid_value: Persistent identifier value.
+        :param pid_provider: Persistent identifier provider. (default: None).
+        :raises: :exc:`invenio_pidstore.errors.PIDDoesNotExistError` if no
+            PID is found.
+        :returns: A :class:`invenio_pidstore.models.PersistentIdentifier`
+            instance.
+        """
         try:
             args = dict(pid_type=pid_type, pid_value=six.text_type(pid_value))
             if pid_provider:
@@ -196,7 +213,16 @@ class PersistentIdentifier(db.Model, Timestamp):
 
     @classmethod
     def get_by_object(cls, pid_type, object_type, object_uuid):
-        """Get a persistent identifier for a given object."""
+        """Get a persistent identifier for a given object.
+
+        :param pid_type: Persistent identifier type.
+        :param object_type: The object type is a string that identify its type.
+        :param object_uuid: The object UUID.
+        :raises invenio_pidstore.errors.PIDDoesNotExistError: If no PID is
+            found.
+        :returns: A :class:`invenio_pidstore.models.PersistentIdentifier`
+            instance.
+        """
         try:
             return cls.query.filter_by(
                 pid_type=pid_type,
@@ -210,11 +236,19 @@ class PersistentIdentifier(db.Model, Timestamp):
     # Assigned object methods
     #
     def has_object(self):
-        """Determine if this PID has an assigned object."""
+        """Determine if this PID has an assigned object.
+
+        :returns: `True` if the PID has a object assigned.
+        """
         return bool(self.object_type and self.object_uuid)
 
     def get_assigned_object(self, object_type=None):
-        """Return an assigned object."""
+        """Return the current assigned object UUID.
+
+        :param object_type: If it's specified, returns only if the PID
+            object_type is the same, otherwise returns None. (default: None).
+        :returns: The object UUID.
+        """
         if object_type is not None:
             if self.object_type == object_type:
                 return self.object_uuid
@@ -228,6 +262,15 @@ class PersistentIdentifier(db.Model, Timestamp):
         Note, the persistent identifier must first have been reserved. Also,
         if an existing object is already assigned to the pid, it will raise an
         exception unless overwrite=True.
+
+        :param object_type: The object type is a string that identify its type.
+        :param object_uuid: The object UUID.
+        :param overwrite: Force PID overwrites in case was previously assigned.
+        :raises invenio_pidstore.errors.PIDInvalidAction: If the PID was
+            previously deleted.
+        :raises invenio_pidstore.errors.PIDObjectAlreadyAssigned: If the PID
+            was previously assigned with a different type/uuid.
+        :returns: `True` if the PID is successfully assigned.
         """
         if self.is_deleted():
             raise PIDInvalidAction(
@@ -262,7 +305,13 @@ class PersistentIdentifier(db.Model, Timestamp):
         return True
 
     def unassign(self):
-        """Unassign the registered object."""
+        """Unassign the registered object.
+
+        Note:
+        Only registered PIDs can be redirected so we set it back to registered.
+
+        :returns: `True` if the PID is successfully unassigned.
+        """
         if self.object_uuid is None and self.object_type is None:
             return True
 
@@ -285,14 +334,27 @@ class PersistentIdentifier(db.Model, Timestamp):
         return True
 
     def get_redirect(self):
-        """Get redirected persistent identifier."""
+        """Get redirected persistent identifier.
+
+        :returns: The :class:`invenio_pidstore.models.PersistentIdentifier`
+            instance.
+        """
         return Redirect.query.get(self.object_uuid).pid
 
     #
     # Status methods.
     #
     def redirect(self, pid):
-        """Redirect persistent identifier to another persistent identifier."""
+        """Redirect persistent identifier to another persistent identifier.
+
+        :param pid: The :class:`invenio_pidstore.models.PersistentIdentifier`
+            where redirect the PID.
+        :raises invenio_pidstore.errors.PIDInvalidAction: If the PID is not
+            registered or is not already redirecting to another PID.
+        :raises invenio_pidstore.errors.PIDDoesNotExistError: If PID is not
+            found.
+        :returns: `True` if the PID is successfully redirect.
+        """
         if not (self.is_registered() or self.is_redirected()):
             raise PIDInvalidAction("Persistent identifier is not registered.")
 
@@ -324,6 +386,10 @@ class PersistentIdentifier(db.Model, Timestamp):
 
         Note, the reserve method may be called multiple times, even if it was
         already reserved.
+
+        :raises: :exc:`invenio_pidstore.errors.PIDInvalidAction` if the PID is
+            not new or is not already reserved a PID.
+        :returns: `True` if the PID is successfully reserved.
         """
         if not (self.is_new() or self.is_reserved()):
             raise PIDInvalidAction(
@@ -340,7 +406,13 @@ class PersistentIdentifier(db.Model, Timestamp):
         return True
 
     def register(self):
-        """Register the persistent identifier with the provider."""
+        """Register the persistent identifier with the provider.
+
+        :raises invenio_pidstore.errors.PIDInvalidAction: If the PID is not
+            already registered or is deleted or is a redirection to another
+            PID.
+        :returns: `True` if the PID is successfully register.
+        """
         if self.is_registered() or self.is_deleted() or self.is_redirected():
             raise PIDInvalidAction(
                 "Persistent identifier has already been registered"
@@ -357,7 +429,14 @@ class PersistentIdentifier(db.Model, Timestamp):
         return True
 
     def delete(self):
-        """Delete the persistent identifier."""
+        """Delete the persistent identifier.
+
+        If the persistent identifier haven't been registered yet, it is
+        removed from the database.
+        Otherwise, it's marked as
+        :data:`invenio_pidstore.models.PIDStatus.DELETED`.
+        :returns: `True` if the PID is successfully removed.
+        """
         removed = False
         try:
             with db.session.begin_nested():
@@ -384,6 +463,9 @@ class PersistentIdentifier(db.Model, Timestamp):
 
         Used when the provider uses an external service, which might have been
         modified outside of our system.
+
+        :param status: The new status to set.
+        :returns: `True` if the PID is successfully sync.
         """
         if self.status == status:
             return True
@@ -405,19 +487,31 @@ class PersistentIdentifier(db.Model, Timestamp):
         return self.status == PIDStatus.REDIRECTED
 
     def is_registered(self):
-        """Return true if the persistent identifier has been registered."""
+        """Return true if the persistent identifier has been registered.
+
+        :returns: A :class:`invenio_pidstore.models.PIDStatus` status.
+        """
         return self.status == PIDStatus.REGISTERED
 
     def is_deleted(self):
-        """Return true if the persistent identifier has been deleted."""
+        """Return true if the persistent identifier has been deleted.
+
+        :returns: A boolean value.
+        """
         return self.status == PIDStatus.DELETED
 
     def is_new(self):
-        """Return true if the PIDhas not yet been registered or reserved."""
+        """Return true if the PIDhas not yet been registered or reserved.
+
+        :returns: A boolean value.
+        """
         return self.status == PIDStatus.NEW
 
     def is_reserved(self):
-        """Return true if the PID has not yet been reserved."""
+        """Return true if the PID has not yet been reserved.
+
+        :returns: A boolean value.
+        """
         return self.status == PIDStatus.RESERVED
 
     def __repr__(self):
@@ -430,7 +524,19 @@ class PersistentIdentifier(db.Model, Timestamp):
 
 
 class Redirect(db.Model, Timestamp):
-    """Redirect for a persistent identifier."""
+    """Redirect for a persistent identifier.
+
+    You can redirect a PID to another one.
+
+    E.g.
+
+    .. code-block:: python
+
+        pid1 = PersistentIdentifier.get(pid_type="recid", pid_value="1")
+        pid2 = PersistentIdentifier.get(pid_type="recid", pid_value="2")
+        pid1.redirect(pid=pid2)
+        assert pid2.pid_value == pid.get_redirect().pid_value
+    """
 
     __tablename__ = 'pidstore_redirect'
     id = db.Column(UUIDType, default=uuid.uuid4, primary_key=True)
@@ -488,7 +594,12 @@ class RecordIdentifier(db.Model):
 
     @classmethod
     def _set_sequence(cls, val):
-        """Internal function to reset sequence to specific value."""
+        """Internal function to reset sequence to specific value.
+
+        Note: this function is for PostgreSQL compatibility.
+
+        :param val: The value to be set.
+        """
         if db.engine.dialect.name == 'postgresql':  # pragma: no cover
             db.session.execute(
                 "SELECT setval(pg_get_serial_sequence("
@@ -497,7 +608,10 @@ class RecordIdentifier(db.Model):
 
     @classmethod
     def insert(cls, val):
-        """Insert a record identifier."""
+        """Insert a record identifier.
+
+        :param val: The `recid` column value to insert.
+        """
         with db.session.begin_nested():
             obj = cls(recid=val)
             db.session.add(obj)
