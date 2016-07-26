@@ -29,7 +29,22 @@ Run example development server:
 
 .. code-block:: console
 
-   $ flask --app app run
+    $ pip install -e .[all]
+    $ python setup.py extract_messages
+    $ python setup.py compile_catalog
+    $ cd examples
+    $ ./app-recreate.sh
+
+Open the admin page:
+
+.. code-block:: console
+
+    $ open http://0.0.0.0:5000/admin/recordmetadata/
+
+Make a login with:
+
+    username: admin@inveniosoftware.org
+    password: 123456
 """
 
 from __future__ import absolute_import, print_function
@@ -38,17 +53,40 @@ import os
 
 from flask import Flask
 from flask_babelex import Babel
+from flask_menu import Menu
+from invenio_access import InvenioAccess
+from invenio_accounts import InvenioAccounts
+from invenio_accounts.views import blueprint as accounts_blueprint
+from invenio_admin import InvenioAdmin
 from invenio_db import InvenioDB
+from invenio_records import InvenioRecords
+from invenio_i18n import InvenioI18N
 
 from invenio_pidstore import InvenioPIDStore
 
 # Create Flask application
 app = Flask(__name__)
 app.config.update(
-    SQLALCHEMY_DATABASE_URI=os.environ.get('SQLALCHEMY_DATABASE_URI'))
+    I18N_LANGUAGES=[("da", "Danish"), ("en", "English")],
+    SECRET_KEY='test_key',
+    SECURITY_PASSWORD_HASH='pbkdf2_sha512',
+    SECURITY_PASSWORD_SALT="CHANGE_ME_ALSO",
+    SECURITY_PASSWORD_SCHEMES=[
+        'pbkdf2_sha512', 'sha512_crypt', 'invenio_aes_encrypted_email'
+    ],
+    SQLALCHEMY_DATABASE_URI=os.environ.get('SQLALCHEMY_DATABASE_URI',
+                                           'sqlite:///app.db')
+)
+
 Babel(app)
-if not hasattr(app, 'cli'):
-    from flask_cli import FlaskCLI
-    FlaskCLI(app)
+InvenioI18N(app)
+Menu(app)
 InvenioDB(app)
+admin = InvenioAdmin(app)
 InvenioPIDStore(app)
+accounts = InvenioAccounts(app)
+InvenioAccess(app)
+InvenioRecords(app)
+
+# register blueprints
+app.register_blueprint(accounts_blueprint)
