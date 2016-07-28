@@ -97,7 +97,7 @@ class BaseProvider(object):
         assert pid.pid_provider == self.pid_provider
 
     def reserve(self):
-        """Reserve a the persistent identifier.
+        """Reserve a persistent identifier.
 
         This might or might not be useful depending on the service of the
         provider.
@@ -107,7 +107,7 @@ class BaseProvider(object):
         return self.pid.reserve()
 
     def register(self):
-        """Register a the persistent identifier.
+        """Register a persistent identifier.
 
         See: :meth:`invenio_pidstore.models.PersistentIdentifier.register`.
         """
