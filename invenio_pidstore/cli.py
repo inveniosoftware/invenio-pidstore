@@ -28,6 +28,9 @@ from __future__ import absolute_import, print_function
 
 import click
 from invenio_db import db
+from sqlalchemy.exc import StatementError
+from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.utils import import_string, cached_property
 
 from .proxies import current_pidstore
 
@@ -35,6 +38,40 @@ try:
     from flask.cli import with_appcontext
 except ImportError:
     from flask_cli import with_appcontext
+
+
+def loader_import(ctx, param, value):
+    """Import the loader."""
+    try:
+        return import_string(value)
+    except ImportError:
+        raise click.BadParameter('Loader {0} not found.'.format(value))
+
+
+class LazyMinter(object):
+
+    """Lazy minter."""
+
+    def __init__(self, ctx, param, value):
+        """Init."""
+        self.value = value
+
+    @cached_property
+    def minter(self):
+        """Get minter."""
+        try:
+            return current_pidstore.minters[self.value]
+        except KeyError:
+            raise click.BadParameter(
+                param_hint='minter',
+                message='Unknown minter {0}. Please use one of: {1}.'.format(
+                    self.value, ', '.join(current_pidstore.minters.keys())
+                )
+            )
+
+    def __call__(self, *args, **kwargs):
+        """Call."""
+        return self.minter(*args, **kwargs)
 
 
 def process_status(ctx, param, value):
@@ -153,3 +190,24 @@ def dereference_object(object_type, object_uuid, status):
         click.echo(
             '{0.pid_type} {0.pid_value} {0.pid_provider}'.format(found_pid)
         )
+
+
+@pid.command()
+@click.argument('minter', callback=LazyMinter)
+@click.argument('ids', nargs=-1, required=True)
+@click.option('-l', '--loader',
+              default='invenio_records.api:Record.get_record',
+              callback=loader_import)
+@with_appcontext
+def mint(minter, ids, loader):
+    """Mint objects."""
+    created_ids = []
+    for id_ in ids:
+        try:
+            created_ids.append(minter(id_, loader(id_)).id)
+        except (StatementError, NoResultFound) as e:
+            click.echo(
+                'Error for the object id {0}: {1}'.format(id_, e), err=True
+            )
+    db.session.commit()
+    click.echo('\n'.join('{0}'.format(idx) for idx in created_ids))

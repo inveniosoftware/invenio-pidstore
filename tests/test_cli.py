@@ -27,23 +27,104 @@
 
 from __future__ import absolute_import, print_function
 
+import re
 import uuid
 
-import pytest
 from click.testing import CliRunner
 from invenio_db import db
-from mock import patch
-from sqlalchemy.exc import SQLAlchemyError
+from invenio_records.api import Record
 
 from invenio_pidstore.cli import pid as cmd
-from invenio_pidstore.errors import PIDAlreadyExists, PIDDoesNotExistError, \
-    PIDInvalidAction, PIDObjectAlreadyAssigned
-from invenio_pidstore.models import PersistentIdentifier, PIDStatus, Redirect
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
 try:
     from flask.cli import ScriptInfo
 except ImportError:
     from flask_cli import ScriptInfo
+
+
+def test_mint_single_input_good(app):
+    """Test minter with single input."""
+    runner = CliRunner()
+    script_info = ScriptInfo(create_app=lambda info: app)
+
+    with app.app_context():
+        assert PersistentIdentifier.query.count() == 0
+
+        id_1 = str(Record.create({'title': 'test'}).id)
+
+        db.session.commit()
+
+        result = runner.invoke(cmd, ['mint', 'recid', id_1],
+                               obj=script_info)
+
+        assert 0 == result.exit_code
+        assert result.output == '1\n'
+
+        assert PersistentIdentifier.query.count() == 1
+
+
+def test_mint_with_wrong_loader(app):
+    """Test minter with a wrong loader."""
+    runner = CliRunner()
+    script_info = ScriptInfo(create_app=lambda info: app)
+
+    with app.app_context():
+        assert PersistentIdentifier.query.count() == 0
+
+        result = runner.invoke(
+            cmd,
+            ['mint', 'recid', 'id', '-l', 'fake_loader'],
+            obj=script_info)
+
+        assert 2 == result.exit_code
+
+
+def test_mint_with_wrong_minter(app):
+    """Test minter with a wrong minter."""
+    runner = CliRunner()
+    script_info = ScriptInfo(create_app=lambda info: app)
+
+    with app.app_context():
+        assert PersistentIdentifier.query.count() == 0
+
+        result = runner.invoke(cmd, ['mint', 'wrong-minter', 'id'],
+                               obj=script_info)
+
+        assert 2 == result.exit_code
+
+
+def test_mint_mixed_input(app):
+    """Test minter with a multiple mix input."""
+    runner = CliRunner()
+    script_info = ScriptInfo(create_app=lambda info: app)
+
+    with app.app_context():
+        assert PersistentIdentifier.query.count() == 0
+
+        id_1 = str(Record.create({'title': 'test'}).id)
+        id_2 = 'fake-id'
+        id_3 = 'ee7393d0-e13a-466b-88ca-ef7a3243ffab'
+        id_4 = str(Record.create({'title': 'test2'}).id)
+
+        db.session.commit()
+
+        result = runner.invoke(cmd, [
+            'mint', 'recid'
+        ] + [id_1, id_2, id_3, id_4],
+            obj=script_info)
+
+        assert 0 == result.exit_code
+        output = result.output.split("\n")
+        error = re.compile('Error for the object id *')
+        assert error.match(output[0])
+        assert error.match(output[1])
+        assert output[2] == '1'
+        assert output[3] == '2'
+
+        assert PersistentIdentifier.query.count() == 2
+        assert PersistentIdentifier.get(pid_type='recid', pid_value='1')
+        assert PersistentIdentifier.get(pid_type='recid', pid_value='2')
 
 
 def test_pid_creation(app):
@@ -141,7 +222,6 @@ def test_pid_assign(app):
             '-t', 'rec', '-i', str(rec_uuid)
         ], obj=script_info)
         assert 0 == result.exit_code
-        pid_status = result.output
         with app.app_context():
             pid = PersistentIdentifier.get('doi', '10.1234/foo')
             assert pid.has_object()
