@@ -29,6 +29,7 @@ from __future__ import absolute_import, print_function
 import click
 import json
 import sys
+import uuid
 
 from invenio_db import db
 from sqlalchemy.exc import StatementError
@@ -201,7 +202,7 @@ def dereference_object(object_type, object_uuid, status):
 
 @pid.command()
 @click.argument('minter', callback=LazyMinter)
-@click.argument('ids', nargs=-1, required=True)
+@click.argument('ids', nargs=-1)
 @click.option('-l', '--loader',
               default=None,
               callback=loader_import)
@@ -216,5 +217,7 @@ def mint(minter, ids, loader):
             click.echo(
                 'Error for the object id {0}: {1}'.format(id_, e), err=True
             )
+    if not ids:
+        created_ids.append(minter(uuid.uuid4(), loader()))
     db.session.commit()
     click.echo('\n'.join('{0}'.format(idx) for idx in created_ids))
