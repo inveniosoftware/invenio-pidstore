@@ -27,6 +27,9 @@
 from __future__ import absolute_import, print_function
 
 import click
+import json
+import sys
+
 from invenio_db import db
 from sqlalchemy.exc import StatementError
 from sqlalchemy.orm.exc import NoResultFound
@@ -42,6 +45,10 @@ except ImportError:
 
 def loader_import(ctx, param, value):
     """Import the loader."""
+    if not value:
+        def default_loader():
+            return json.load(sys.stdin)
+        return default_loader
     try:
         return import_string(value)
     except ImportError:
@@ -196,7 +203,7 @@ def dereference_object(object_type, object_uuid, status):
 @click.argument('minter', callback=LazyMinter)
 @click.argument('ids', nargs=-1, required=True)
 @click.option('-l', '--loader',
-              default='invenio_records.api:Record.get_record',
+              default=None,
               callback=loader_import)
 @with_appcontext
 def mint(minter, ids, loader):
