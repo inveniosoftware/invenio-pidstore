@@ -26,8 +26,14 @@
 
 from __future__ import absolute_import, print_function
 
+import json
+import sys
+
 import click
 from invenio_db import db
+from sqlalchemy.exc import StatementError
+from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.utils import cached_property, import_string
 
 from .proxies import current_pidstore
 
@@ -35,6 +41,40 @@ try:
     from flask.cli import with_appcontext
 except ImportError:
     from flask_cli import with_appcontext
+
+
+def loader_import(ctx, param, value):
+    """Import the loader."""
+    if value:
+        try:
+            return import_string(value)
+        except ImportError:
+            raise click.BadParameter('Loader {0} not found.'.format(value))
+
+
+class LazyMinter(object):
+    """Lazy minter."""
+
+    def __init__(self, ctx, param, value):
+        """Init."""
+        self.value = value
+
+    @cached_property
+    def minter(self):
+        """Get minter."""
+        try:
+            return current_pidstore.minters[self.value]
+        except KeyError:
+            raise click.BadParameter(
+                param_hint='minter',
+                message='Unknown minter {0}. Please use one of: {1}.'.format(
+                    self.value, ', '.join(current_pidstore.minters.keys())
+                )
+            )
+
+    def __call__(self, *args, **kwargs):
+        """Call."""
+        return self.minter(*args, **kwargs)
 
 
 def process_status(ctx, param, value):
@@ -153,3 +193,35 @@ def dereference_object(object_type, object_uuid, status):
         click.echo(
             '{0.pid_type} {0.pid_value} {0.pid_provider}'.format(found_pid)
         )
+
+
+@pid.command()
+@click.argument('minter', callback=LazyMinter)
+@click.argument('ids', nargs=-1)
+@click.option('-l', '--loader',
+              default=None,
+              callback=loader_import)
+@with_appcontext
+def mint(minter, ids, loader):
+    """Mint objects."""
+    objects = []
+    if loader:
+        for id_ in ids:
+            try:
+                data = loader(id_)
+                minter(id_, data)
+                objects.append(data)
+            except (StatementError, NoResultFound) as e:
+                click.echo(
+                    'Error for the object id {0}: {1}'.format(id_, e), err=True
+                )
+    else:
+        data = json.load(sys.stdin)
+        if isinstance(data, dict):
+            data = [data]
+        for obj in data:
+            minter(None, obj)
+            objects.append(obj)
+
+    db.session.commit()
+    click.echo(json.dumps(objects, sort_keys=True, indent=4))
