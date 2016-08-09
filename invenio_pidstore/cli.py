@@ -28,7 +28,6 @@ from __future__ import absolute_import, print_function
 
 import json
 import sys
-import uuid
 
 import click
 from invenio_db import db
@@ -218,8 +217,11 @@ def mint(minter, ids, loader):
                 )
     else:
         data = json.load(sys.stdin)
-        minter(uuid.uuid4(), data)
-        objects.append(data)
+        if isinstance(data, dict):
+            data = [data]
+        for obj in data:
+            minter(None, obj)
+            objects.append(obj)
 
     db.session.commit()
     click.echo(json.dumps(objects, sort_keys=True, indent=4))

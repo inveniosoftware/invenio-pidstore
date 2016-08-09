@@ -143,8 +143,8 @@ def test_mint_mixed_input(app):
         assert PersistentIdentifier.get(pid_type='recid', pid_value='2')
 
 
-def test_mint_stdin(app):
-    """Test minter with stdin input."""
+def test_mint_stdin_single(app):
+    """Test minter with stdin input a single object."""
     runner = CliRunner()
     script_info = ScriptInfo(create_app=lambda info: app)
 
@@ -161,6 +161,31 @@ def test_mint_stdin(app):
 
         assert PersistentIdentifier.query.count() == 1
         assert PersistentIdentifier.get(pid_type='recid', pid_value='1')
+        assert RecordMetadata.query.count() == 0
+
+
+def test_mint_stdin_multiple(app):
+    """Test minter with stdin input an array of objects."""
+    runner = CliRunner()
+    script_info = ScriptInfo(create_app=lambda info: app)
+
+    with app.app_context():
+        assert RecordMetadata.query.count() == 0
+        assert PersistentIdentifier.query.count() == 0
+
+        data_1 = {'title': 'test1'}
+        data_2 = {'title': 'test2'}
+        data = [data_1, data_2]
+
+        result = runner.invoke(cmd, ['mint', 'recid'], input=json.dumps(data),
+                               obj=script_info)
+        output = json.loads(result.output)
+        assert output[0]['control_number'] == '1'
+        assert output[1]['control_number'] == '2'
+
+        assert PersistentIdentifier.query.count() == 2
+        assert PersistentIdentifier.get(pid_type='recid', pid_value='1')
+        assert PersistentIdentifier.get(pid_type='recid', pid_value='2')
         assert RecordMetadata.query.count() == 0
 
 
