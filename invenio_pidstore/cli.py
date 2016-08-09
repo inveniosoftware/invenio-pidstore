@@ -26,15 +26,15 @@
 
 from __future__ import absolute_import, print_function
 
-import click
 import json
 import sys
 import uuid
 
+import click
 from invenio_db import db
 from sqlalchemy.exc import StatementError
 from sqlalchemy.orm.exc import NoResultFound
-from werkzeug.utils import import_string, cached_property
+from werkzeug.utils import cached_property, import_string
 
 from .proxies import current_pidstore
 
@@ -46,18 +46,14 @@ except ImportError:
 
 def loader_import(ctx, param, value):
     """Import the loader."""
-    if not value:
-        def default_loader():
-            return json.load(sys.stdin)
-        return default_loader
-    try:
-        return import_string(value)
-    except ImportError:
-        raise click.BadParameter('Loader {0} not found.'.format(value))
+    if value:
+        try:
+            return import_string(value)
+        except ImportError:
+            raise click.BadParameter('Loader {0} not found.'.format(value))
 
 
 class LazyMinter(object):
-
     """Lazy minter."""
 
     def __init__(self, ctx, param, value):
@@ -209,15 +205,21 @@ def dereference_object(object_type, object_uuid, status):
 @with_appcontext
 def mint(minter, ids, loader):
     """Mint objects."""
-    created_ids = []
-    for id_ in ids:
-        try:
-            created_ids.append(minter(id_, loader(id_)).id)
-        except (StatementError, NoResultFound) as e:
-            click.echo(
-                'Error for the object id {0}: {1}'.format(id_, e), err=True
-            )
-    if not ids:
-        created_ids.append(minter(uuid.uuid4(), loader()))
+    objects = []
+    if loader:
+        for id_ in ids:
+            try:
+                data = loader(id_)
+                minter(id_, data)
+                objects.append(data)
+            except (StatementError, NoResultFound) as e:
+                click.echo(
+                    'Error for the object id {0}: {1}'.format(id_, e), err=True
+                )
+    else:
+        data = json.load(sys.stdin)
+        minter(uuid.uuid4(), data)
+        objects.append(data)
+
     db.session.commit()
-    click.echo('\n'.join('{0}'.format(idx) for idx in created_ids))
+    click.echo(json.dumps(objects, sort_keys=True, indent=4))

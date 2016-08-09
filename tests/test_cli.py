@@ -27,12 +27,14 @@
 
 from __future__ import absolute_import, print_function
 
+import json
 import re
 import uuid
 
 from click.testing import CliRunner
 from invenio_db import db
 from invenio_records.api import Record
+from invenio_records.models import RecordMetadata
 
 from invenio_pidstore.cli import pid as cmd
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus
@@ -51,15 +53,20 @@ def test_mint_single_input_good(app):
     with app.app_context():
         assert PersistentIdentifier.query.count() == 0
 
-        id_1 = str(Record.create({'title': 'test'}).id)
+        data = {'title': 'test'}
+        id_1 = str(Record.create(data).id)
 
         db.session.commit()
 
-        result = runner.invoke(cmd, ['mint', 'recid', id_1],
-                               obj=script_info)
+        result = runner.invoke(
+            cmd,
+            ['mint', 'recid', id_1, '-l',
+             'invenio_records.api:Record.get_record'],
+            obj=script_info)
 
         assert 0 == result.exit_code
-        assert result.output == '1\n'
+        record = json.loads(result.output)
+        assert record[0]['control_number'] == '1'
 
         assert PersistentIdentifier.query.count() == 1
 
@@ -88,8 +95,16 @@ def test_mint_with_wrong_minter(app):
     with app.app_context():
         assert PersistentIdentifier.query.count() == 0
 
-        result = runner.invoke(cmd, ['mint', 'wrong-minter', 'id'],
-                               obj=script_info)
+        data = {'title': 'test'}
+        id_1 = str(Record.create(data).id)
+
+        db.session.commit()
+
+        result = runner.invoke(
+            cmd,
+            ['mint', 'wrong-minter', id_1, '-l',
+             'invenio_records.api:Record.get_record'],
+            obj=script_info)
 
         assert 2 == result.exit_code
 
@@ -110,7 +125,7 @@ def test_mint_mixed_input(app):
         db.session.commit()
 
         result = runner.invoke(cmd, [
-            'mint', 'recid'
+            'mint', 'recid', '-l', 'invenio_records.api:Record.get_record'
         ] + [id_1, id_2, id_3, id_4],
             obj=script_info)
 
@@ -119,12 +134,34 @@ def test_mint_mixed_input(app):
         error = re.compile('Error for the object id *')
         assert error.match(output[0])
         assert error.match(output[1])
-        assert output[2] == '1'
-        assert output[3] == '2'
+        ret = json.loads(reduce(lambda a, b: a + b, output[2:], ''))
+        assert ret[0]['control_number'] == '1'
+        assert ret[1]['control_number'] == '2'
 
         assert PersistentIdentifier.query.count() == 2
         assert PersistentIdentifier.get(pid_type='recid', pid_value='1')
         assert PersistentIdentifier.get(pid_type='recid', pid_value='2')
+
+
+def test_mint_stdin(app):
+    """Test minter with stdin input."""
+    runner = CliRunner()
+    script_info = ScriptInfo(create_app=lambda info: app)
+
+    with app.app_context():
+        assert RecordMetadata.query.count() == 0
+        assert PersistentIdentifier.query.count() == 0
+
+        data = {'title': 'test'}
+
+        result = runner.invoke(cmd, ['mint', 'recid'], input=json.dumps(data),
+                               obj=script_info)
+        output = json.loads(result.output)
+        assert output[0]['control_number'] == '1'
+
+        assert PersistentIdentifier.query.count() == 1
+        assert PersistentIdentifier.get(pid_type='recid', pid_value='1')
+        assert RecordMetadata.query.count() == 0
 
 
 def test_pid_creation(app):
