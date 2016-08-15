@@ -56,13 +56,13 @@ extras_require = {
         'datacite>=0.1.0'
     ],
     'mysql': [
-        'invenio-db[mysql]>=1.0.0a6',
+        'invenio-db[mysql]>=1.0.0b1',
     ],
     'postgresql': [
-        'invenio-db[postgresql]>=1.0.0a6',
+        'invenio-db[postgresql]>=1.0.0b1',
     ],
     'sqlite': [
-        'invenio-db>=1.0.0a6',
+        'invenio-db>=1.0.0b1',
     ],
     'docs': [
         'Sphinx>=1.4.2',
@@ -82,6 +82,7 @@ setup_requires = [
 
 install_requires = [
     'Flask-BabelEx>=0.9.2',
+    'Flask>=0.11.1',
 ]
 
 packages = find_packages()

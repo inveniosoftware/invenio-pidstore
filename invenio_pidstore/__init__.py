@@ -45,15 +45,11 @@ PIDStore consists of:
 
 Initialization
 --------------
-First create a Flask application (Flask-CLI is not needed for Flask
-version 0.11+):
+First create a Flask application with a Click support (Flask version 0.11+):
 
 >>> from flask import Flask
 >>> app = Flask('myapp')
 >>> app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
->>> if not hasattr(app, 'cli'):
-...     from flask_cli import FlaskCLI
-...     FlaskCLI(app)
 
 You initialize PIDStore like a normal Flask extension, however Invenio-PIDStore
 is dependent on Invenio-DB so you need to initialize both extensions:
@@ -103,7 +99,7 @@ specific **provider** (see below).
 
 Creating PIDs
 ~~~~~~~~~~~~~
-You create a persistent identifier like this:
+You can create a persistent identifier like this:
 
 >>> from invenio_pidstore.models import PersistentIdentifier
 >>> pid = PersistentIdentifier.create('doi', '10.1234/foo')

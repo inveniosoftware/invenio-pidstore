@@ -45,9 +45,6 @@ def app(request):
     # Set temporary instance path for sqlite
     instance_path = tempfile.mkdtemp()
     app = Flask('testapp', instance_path=instance_path)
-    if not hasattr(app, 'cli'):
-        from flask_cli import FlaskCLI
-        FlaskCLI(app)
     InvenioDB(app)
     InvenioPIDStore(app)
 

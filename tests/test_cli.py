@@ -31,6 +31,7 @@ import uuid
 
 import pytest
 from click.testing import CliRunner
+from flask.cli import ScriptInfo
 from invenio_db import db
 from mock import patch
 from sqlalchemy.exc import SQLAlchemyError
@@ -39,11 +40,6 @@ from invenio_pidstore.cli import pid as cmd
 from invenio_pidstore.errors import PIDAlreadyExists, PIDDoesNotExistError, \
     PIDInvalidAction, PIDObjectAlreadyAssigned
 from invenio_pidstore.models import PersistentIdentifier, PIDStatus, Redirect
-
-try:
-    from flask.cli import ScriptInfo
-except ImportError:
-    from flask_cli import ScriptInfo
 
 
 def test_pid_creation(app):

@@ -27,14 +27,10 @@
 from __future__ import absolute_import, print_function
 
 import click
+from flask.cli import with_appcontext
 from invenio_db import db
 
 from .proxies import current_pidstore
-
-try:
-    from flask.cli import with_appcontext
-except ImportError:
-    from flask_cli import with_appcontext
 
 
 def process_status(ctx, param, value):
