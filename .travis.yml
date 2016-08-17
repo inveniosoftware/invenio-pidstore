@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN
+# Copyright (C) 2015, 2016 CERN
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -51,9 +51,14 @@ env:
 
 python:
   - "2.7"
-  - "3.3"
-  - "3.4"
   - "3.5"
+
+matrix:
+  allow_failures:
+    - python: pypy
+  include:
+    - python: pypy
+      env: REQUIREMENTS=release EXTRAS=all,sqlite SQLALCHEMY_DATABASE_URI="sqlite:///test.db"
 
 before_install:
   - "travis_retry pip install --upgrade pip setuptools py"
