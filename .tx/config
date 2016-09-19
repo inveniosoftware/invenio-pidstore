@@ -41,7 +41,7 @@
 [main]
 host = https://www.transifex.com
 
-[invenio-1.invenio-pidstore-messages]
+[invenio.invenio-pidstore-messages]
 file_filter = invenio_pidstore/translations/<lang>/LC_MESSAGES/messages.po
 source_file = invenio_pidstore/translations/messages.pot
 source_lang = en
