@@ -25,7 +25,9 @@
 
 """Minimal Flask application example for development.
 
-Run example development server:
+Start the Redis server.
+
+Install the requirements:
 
 .. code-block:: console
 
@@ -34,6 +36,12 @@ Run example development server:
     $ python setup.py compile_catalog
     $ cd examples
     $ ./app-recreate.sh
+
+Run example development server:
+
+.. code-block:: console
+
+    $ FLASK_APP=app.py flask run --debugger -p 5000
 
 Open the admin page:
 
@@ -74,8 +82,7 @@ app.config.update(
     SECURITY_PASSWORD_SCHEMES=[
         'pbkdf2_sha512', 'sha512_crypt', 'invenio_aes_encrypted_email'
     ],
-    SQLALCHEMY_DATABASE_URI=os.environ.get('SQLALCHEMY_DATABASE_URI',
-                                           'sqlite:///app.db')
+    WTF_CSRF_ENABLED=False,
 )
 
 Babel(app)
