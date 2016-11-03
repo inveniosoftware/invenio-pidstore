@@ -82,6 +82,9 @@ app.config.update(
     SECURITY_PASSWORD_SCHEMES=[
         'pbkdf2_sha512', 'sha512_crypt', 'invenio_aes_encrypted_email'
     ],
+    SQLALCHEMY_DATABASE_URI=os.environ.get(
+        'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'
+    ),
     WTF_CSRF_ENABLED=False,
 )
 
