@@ -34,16 +34,17 @@ readme = open('README.rst').read()
 history = open('CHANGES.rst').read()
 
 tests_require = [
+    'SQLAlchemy-Continuum>=1.2.1',
     'check-manifest>=0.25',
     'coverage>=4.0',
     'invenio-records>=1.0.0a2',
     'isort>=4.2.2',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
-    'pytest>=2.8.0',
     'pytest-cache>=1.0',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
+    'pytest>=2.8.0',
 ]
 
 extras_require = {
@@ -55,13 +56,13 @@ extras_require = {
         'datacite>=0.1.0'
     ],
     'mysql': [
-        'invenio-db[mysql]>=1.0.0b1',
+        'invenio-db[mysql]>=1.0.0b3',
     ],
     'postgresql': [
-        'invenio-db[postgresql]>=1.0.0b1',
+        'invenio-db[postgresql]>=1.0.0b3',
     ],
     'sqlite': [
-        'invenio-db>=1.0.0b1',
+        'invenio-db>=1.0.0b3',
     ],
     'docs': [
         'Sphinx>=1.4.2',
@@ -108,6 +109,9 @@ setup(
     include_package_data=True,
     platforms='any',
     entry_points={
+        'invenio_db.alembic': [
+            'invenio_pidstore = invenio_pidstore:alembic',
+        ],
         'invenio_db.models': [
             'invenio_pidstore = invenio_pidstore.models',
         ],

@@ -80,9 +80,24 @@ def test_pid_creation(logger, app):
                 "Failed to create")
 
 
-def test_upgrades():
-    """Test import of upgrades."""
-    from invenio_pidstore import upgrades  # pragma: noqa
+def test_alembic(app):
+    """Test alembic recipes."""
+    ext = app.extensions['invenio-db']
+
+    with app.app_context():
+        if db.engine.name == 'sqlite':
+            raise pytest.skip('Upgrades are not supported on SQLite.')
+
+        assert not ext.alembic.compare_metadata()
+        db.drop_all()
+        ext.alembic.upgrade()
+
+        assert not ext.alembic.compare_metadata()
+        ext.alembic.stamp()
+        ext.alembic.downgrade(target='96e796392533')
+        ext.alembic.upgrade()
+
+        assert not ext.alembic.compare_metadata()
 
 
 def test_pidstatus_as():
