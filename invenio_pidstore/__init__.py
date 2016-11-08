@@ -183,13 +183,12 @@ Resolver
 The resolver is responsible for retrieving an internal object for a given
 persistent identifier.
 
-Following is an example for creating a record resolver (note, you must have
-Invenio-Records installed in order for this example to work):
+Following is an example for creating a record resolver.
 
 >>> from invenio_pidstore.resolver import Resolver
->>> from invenio_records.api import Record
+>>> records = {}
 >>> resolver = Resolver(pid_type='recid', object_type='rec',
-...    getter=Record.get_record)
+...    getter=records.get)
 
 Above creates a resolver that will translate ``recid`` persistent identifiers
 to internal records. The getter argument must be a callable that takes one
@@ -199,8 +198,7 @@ Before we use the resolver, let's first create record and a persistent
 identifier that we can use to test the resolver with:
 
 >>> my_object_uuid = uuid.uuid4()
->>> record = Record.create(
-...     {'title': 'PIDStore test'}, id_=my_object_uuid)
+>>> records[my_object_uuid] = {'title': 'PIDStore test'}
 >>> pid = PersistentIdentifier.create(
 ...     'recid', '12', object_type='rec', object_uuid=my_object_uuid,
 ...     status=PIDStatus.REGISTERED)

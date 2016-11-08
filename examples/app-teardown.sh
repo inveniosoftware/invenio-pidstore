@@ -5,6 +5,10 @@ DIR=`dirname "$0"`
 cd $DIR
 export FLASK_APP=app.py
 
+flask db drop --yes-i-know
+
 # clean environment
-[ -e "$DIR/instance" ] && rm $DIR/instance -Rf
-[ -e "$DIR/cookiefile" ] && rm $DIR/cookiefile -Rf
+[ -d instance ] && rm -Rf instance
+[ -e cookiefile ] && rm -Rf cookiefile
+
+pip uninstall -y -r requirements.txt

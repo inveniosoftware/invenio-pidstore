@@ -66,14 +66,12 @@ def test_logger():
     InvenioPIDStore(app)
 
 
-def test_no_invenio_records():
+def test_invenio_records():
     """Test extension initialization."""
     app = Flask('testapp')
     with patch('invenio_pidstore.ext.pkg_resources') as obj:
-        obj.DistributionNotFound = pkg_resources.DistributionNotFound
-        obj.get_distribution.side_effect = pkg_resources.DistributionNotFound
         InvenioPIDStore(app)
-    assert app.config['PIDSTORE_OBJECT_ENDPOINTS'] == {}
+    assert app.config['PIDSTORE_OBJECT_ENDPOINTS']
 
 
 def test_template_filters(app):

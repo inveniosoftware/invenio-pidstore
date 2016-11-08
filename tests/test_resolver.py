@@ -30,7 +30,6 @@ import uuid
 
 import pytest
 from invenio_db import db
-from invenio_records.api import Record
 
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError, \
     PIDMissingObjectError, PIDRedirectedError, PIDUnregistered
@@ -129,18 +128,18 @@ def test_resolver_deleted_object(app):
     """Test the class methods of PersistentIdentifier class."""
     with app.app_context():
         rec_uuid = uuid.uuid4()
+        records = {
+            rec_uuid: {'title': 'test'},
+        }
         with db.session.begin_nested():
-            record = Record.create({'title': 'test'})
-
             pid = PersistentIdentifier.create(
                 'recid', '1', status=PIDStatus.REGISTERED,
                 object_type='rec', object_uuid=rec_uuid)
 
         with db.session.begin_nested():
             pid.delete()
-            record.delete()
 
         resolver = Resolver(
-            pid_type='recid', object_type='rec', getter=Record.get_record)
+            pid_type='recid', object_type='rec', getter=records.get)
 
         assert pytest.raises(PIDDeletedError, resolver.resolve, '1')
