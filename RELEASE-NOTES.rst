@@ -1,15 +1,13 @@
 ===========================
- Invenio-PIDStore v1.0.0a9
+ Invenio-PIDStore v1.0.0b1
 ===========================
 
-Invenio-PIDStore v1.0.0a9 was released on July 4, 2016.
+Invenio-PIDStore v1.0.0b1 was released on November 8, 2016.
 
 About
 -----
 
 Invenio module that stores and registers persistent identifiers.
-
-*This is an experimental development preview release.*
 
 Incompatible changes
 --------------------
@@ -29,7 +27,7 @@ New features
 Installation
 ------------
 
-   $ pip install invenio-pidstore==1.0.0a9
+   $ pip install invenio-pidstore==1.0.0b1
 
 Documentation
 -------------
