@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+# Idea software family
+.idea/
+
 # C extensions
 *.so
 
@@ -55,3 +58,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Vim swapfiles
+.*.sw?
