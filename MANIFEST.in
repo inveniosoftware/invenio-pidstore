@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -34,6 +34,7 @@ include MAINTAINERS
 include babel.ini
 include docs/requirements.txt
 include pytest.ini
+prune docs/_build
 recursive-include docs *.bat
 recursive-include docs *.py
 recursive-include docs *.rst
@@ -41,5 +42,7 @@ recursive-include docs Makefile
 recursive-include examples *.py
 recursive-include examples *.sh
 recursive-include examples *.txt
+recursive-include invenio_pidstore *.mo
 recursive-include invenio_pidstore *.po
+recursive-include invenio_pidstore *.pot
 recursive-include invenio_pidstore *.py
