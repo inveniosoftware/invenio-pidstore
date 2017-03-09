@@ -432,9 +432,9 @@ class PersistentIdentifier(db.Model, Timestamp):
         """Delete the persistent identifier.
 
         If the persistent identifier haven't been registered yet, it is
-        removed from the database.
-        Otherwise, it's marked as
-        :data:`invenio_pidstore.models.PIDStatus.DELETED`.
+        removed from the database. Otherwise, it's marked as
+        :attr:`invenio_pidstore.models.PIDStatus.DELETED`.
+
         :returns: `True` if the PID is successfully removed.
         """
         removed = False

@@ -32,10 +32,9 @@ Install the requirements:
 .. code-block:: console
 
     $ pip install -e .[all]
-    $ python setup.py extract_messages
-    $ python setup.py compile_catalog
     $ cd examples
-    $ ./app-recreate.sh
+    $ ./app-setup.sh
+    $ ./app-fixtures.sh
 
 Run example development server:
 
@@ -52,7 +51,15 @@ Open the admin page:
 Make a login with:
 
     username: admin@inveniosoftware.org
+
     password: 123456
+
+At the end, don't forget to clean-up your folder:
+
+.. code-block:: console
+
+    $ ./app-teardown.sh
+
 """
 
 from __future__ import absolute_import, print_function

@@ -138,7 +138,7 @@ class InvenioPIDStore(object):
             (Default: None).
         :param fetchers_entry_point_group: The fetchers entrtypoint group
             (Default: None).
-            :returns: PIDStore state application.
+        :returns: PIDStore state application.
         """
         # Initialize CLI
         app.cli.add_command(cmd)
