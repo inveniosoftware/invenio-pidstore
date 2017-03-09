@@ -35,7 +35,7 @@ Invenio-PIDStore.
 
    installation
    usage
-
+   examplesapp
 
 API Reference
 -------------
