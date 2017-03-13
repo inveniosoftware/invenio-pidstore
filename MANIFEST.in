@@ -22,17 +22,17 @@
 # waive the privileges and immunities granted to it by virtue of its status
 # as an Intergovernmental Organization or submit itself to any jurisdiction.
 
+include .dockerignore
+include .editorconfig
+include .lgtm
+include .tx/config
 include *.rst
 include *.sh
 include *.txt
-include .dockerignore
-include .editorconfig
-include .tx/config
-include .lgtm
-include LICENSE
-include MAINTAINERS
 include babel.ini
 include docs/requirements.txt
+include LICENSE
+include MAINTAINERS
 include pytest.ini
 prune docs/_build
 recursive-include docs *.bat
@@ -45,3 +45,4 @@ recursive-include invenio_pidstore *.mo
 recursive-include invenio_pidstore *.po
 recursive-include invenio_pidstore *.pot
 recursive-include invenio_pidstore *.py
+recursive-include tests *.py
