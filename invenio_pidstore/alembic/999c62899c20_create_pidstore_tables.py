@@ -81,6 +81,7 @@ def upgrade():
         sa.ForeignKeyConstraint(
             ['pid_id'],
             [u'pidstore_pid.id'],
+            name='fk_pidstore_redirect_persistent_identifier',
             onupdate='CASCADE',
             ondelete='RESTRICT'
         ),

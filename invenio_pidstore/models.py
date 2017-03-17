@@ -544,8 +544,9 @@ class Redirect(db.Model, Timestamp):
 
     pid_id = db.Column(
         db.Integer,
-        db.ForeignKey(PersistentIdentifier.id, onupdate="CASCADE",
-                      ondelete="RESTRICT"),
+        db.ForeignKey(PersistentIdentifier.id,
+                      name='fk_pidstore_redirect_persistent_identifier',
+                      onupdate="CASCADE", ondelete="RESTRICT"),
         nullable=False)
     """Persistent identifier."""
 
