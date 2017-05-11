@@ -21,6 +21,6 @@ flask roles create admins
 flask roles add admin@inveniosoftware.org admins
 
 # Give access to admin pages to the "admins" users
-flask access allow -r admins admin-access
+flask access allow admin-access role admins
 echo '{"title": "Test title"}' | flask records create \
   -i deadbeef-9fe4-43d3-a08f-38c2b309afba --pid-minter recid
