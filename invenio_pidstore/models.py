@@ -432,9 +432,9 @@ class PersistentIdentifier(db.Model, Timestamp):
         """Delete the persistent identifier.
 
         If the persistent identifier haven't been registered yet, it is
-        removed from the database.
-        Otherwise, it's marked as
-        :data:`invenio_pidstore.models.PIDStatus.DELETED`.
+        removed from the database. Otherwise, it's marked as
+        :attr:`invenio_pidstore.models.PIDStatus.DELETED`.
+
         :returns: `True` if the PID is successfully removed.
         """
         removed = False
@@ -544,8 +544,9 @@ class Redirect(db.Model, Timestamp):
 
     pid_id = db.Column(
         db.Integer,
-        db.ForeignKey(PersistentIdentifier.id, onupdate="CASCADE",
-                      ondelete="RESTRICT"),
+        db.ForeignKey(PersistentIdentifier.id,
+                      name='fk_pidstore_redirect_persistent_identifier',
+                      onupdate="CASCADE", ondelete="RESTRICT"),
         nullable=False)
     """Persistent identifier."""
 

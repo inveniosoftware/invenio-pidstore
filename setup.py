@@ -25,10 +25,8 @@
 """Invenio module that stores and registers persistent identifiers."""
 
 import os
-import sys
 
 from setuptools import find_packages, setup
-from setuptools.command.test import test as TestCommand
 
 readme = open('README.rst').read()
 history = open('CHANGES.rst').read()
@@ -38,6 +36,12 @@ tests_require = [
     'check-manifest>=0.25',
     'coverage>=4.0',
     'isort>=4.2.2',
+    'Flask-Menu>=0.5.1',
+    'invenio-access>=1.0.0a9',
+    'invenio-accounts>=1.0.0a9',
+    'invenio-admin>=1.0.0a3',
+    'invenio-records>=1.0.0a9',
+    'invenio-i18n>=1.0.0a4',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
     'pytest-cache>=1.0',
@@ -64,14 +68,15 @@ extras_require = {
         'invenio-db>=1.0.0b3',
     ],
     'docs': [
-        'Sphinx>=1.4.2',
+        'Sphinx>=1.5.1',
     ],
     'tests': tests_require,
 }
 
 extras_require['all'] = []
 for name, reqs in extras_require.items():
-    if name in ('mysql', 'postgresql', 'sqlite'):
+    if name in ('mysql', 'postgresql', 'sqlite') \
+       or name.startswith(':'):
         continue
     extras_require['all'].extend(reqs)
 
