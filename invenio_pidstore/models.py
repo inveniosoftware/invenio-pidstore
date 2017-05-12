@@ -117,19 +117,19 @@ class PersistentIdentifier(db.Model, Timestamp):
     id = db.Column(db.Integer, primary_key=True)
     """Id of persistent identifier entry."""
 
-    pid_type = db.Column(db.String(6), nullable=False)
+    pid_type = db.Column(db.String(255), nullable=False)
     """Persistent Identifier Schema."""
 
     pid_value = db.Column(db.String(255), nullable=False)
     """Persistent Identifier."""
 
-    pid_provider = db.Column(db.String(8), nullable=True)
+    pid_provider = db.Column(db.String(255), nullable=True)
     """Persistent Identifier Provider"""
 
     status = db.Column(ChoiceType(PIDStatus, impl=db.CHAR(1)), nullable=False)
     """Status of persistent identifier, e.g. registered, reserved, deleted."""
 
-    object_type = db.Column(db.String(3), nullable=True)
+    object_type = db.Column(db.String(255), nullable=True)
     """Object Type - e.g. rec for record."""
 
     object_uuid = db.Column(UUIDType, nullable=True)
