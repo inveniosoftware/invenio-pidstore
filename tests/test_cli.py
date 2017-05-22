@@ -29,20 +29,14 @@ from __future__ import absolute_import, print_function
 
 import uuid
 
-import pytest
 from click.testing import CliRunner
 from flask.cli import ScriptInfo
-from invenio_db import db
-from mock import patch
-from sqlalchemy.exc import SQLAlchemyError
 
 from invenio_pidstore.cli import pid as cmd
-from invenio_pidstore.errors import PIDAlreadyExists, PIDDoesNotExistError, \
-    PIDInvalidAction, PIDObjectAlreadyAssigned
-from invenio_pidstore.models import PersistentIdentifier, PIDStatus, Redirect
+from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 
 
-def test_pid_creation(app):
+def test_pid_creation(app, db):
     """Test pid creation."""
     runner = CliRunner()
     script_info = ScriptInfo(create_app=lambda info: app)
@@ -112,7 +106,7 @@ def test_pid_creation(app):
         assert -1 == result.exit_code
 
 
-def test_pid_assign(app):
+def test_pid_assign(app, db):
     """Test pid object assignment."""
     runner = CliRunner()
     script_info = ScriptInfo(create_app=lambda info: app)
@@ -137,7 +131,6 @@ def test_pid_assign(app):
             '-t', 'rec', '-i', str(rec_uuid)
         ], obj=script_info)
         assert 0 == result.exit_code
-        pid_status = result.output
         with app.app_context():
             pid = PersistentIdentifier.get('doi', '10.1234/foo')
             assert pid.has_object()
@@ -196,7 +189,7 @@ def test_pid_assign(app):
             assert pid.get_assigned_object('oth') is None
 
 
-def test_pid_unassign(app):
+def test_pid_unassign(app, db):
     """Test pid object unassignment."""
     runner = CliRunner()
     script_info = ScriptInfo(create_app=lambda info: app)

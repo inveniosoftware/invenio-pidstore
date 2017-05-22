@@ -26,12 +26,10 @@
 
 from __future__ import absolute_import, print_function
 
-from invenio_db import db
-
 from invenio_pidstore.models import RecordIdentifier
 
 
-def test_record_identifier(app):
+def test_record_identifier(app, db):
     """Test base provider."""
     with app.app_context():
         assert RecordIdentifier.next() == 1

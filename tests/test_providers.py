@@ -39,7 +39,7 @@ from invenio_pidstore.providers.datacite import DataCiteProvider
 from invenio_pidstore.providers.recordid import RecordIdProvider
 
 
-def test_base_provider(app):
+def test_base_provider(app, db):
     """Test base provider."""
     with app.app_context():
         provider = BaseProvider.create(pid_type='test', pid_value='test')
@@ -79,7 +79,7 @@ def test_base_provider(app):
         assert TestProvider.get('test')
 
 
-def test_recordid_provider(app):
+def test_recordid_provider(app, db):
     """Test record id provider."""
     with app.app_context():
         provider = RecordIdProvider.create()
@@ -106,7 +106,7 @@ def test_recordid_provider(app):
         pytest.raises(AssertionError, RecordIdProvider.create, pid_value='3')
 
 
-def test_datacite_create_get(app):
+def test_datacite_create_get(app, db):
     """Test datacite provider create/get."""
     with app.app_context():
         provider = DataCiteProvider.create('10.1234/a')
@@ -127,7 +127,7 @@ def test_datacite_create_get(app):
         assert isinstance(provider.api, MagicMock)
 
 
-def test_datacite_reserve_register_update_delete(app):
+def test_datacite_reserve_register_update_delete(app, db):
     """Test datacite provider reserve."""
     with app.app_context():
         api = MagicMock()
@@ -157,7 +157,7 @@ def test_datacite_reserve_register_update_delete(app):
 
 
 @patch('invenio_pidstore.providers.datacite.logger')
-def test_datacite_error_reserve(logger, app):
+def test_datacite_error_reserve(logger, app, db):
     """Test reserve errors."""
     with app.app_context():
         api = MagicMock()
@@ -170,7 +170,7 @@ def test_datacite_error_reserve(logger, app):
 
 
 @patch('invenio_pidstore.providers.datacite.logger')
-def test_datacite_error_register_update(logger, app):
+def test_datacite_error_register_update(logger, app, db):
     """Test register errors."""
     with app.app_context():
         api = MagicMock()
@@ -187,7 +187,7 @@ def test_datacite_error_register_update(logger, app):
 
 
 @patch('invenio_pidstore.providers.datacite.logger')
-def test_datacite_error_delete(logger, app):
+def test_datacite_error_delete(logger, app, db):
     """Test reserve errors."""
     with app.app_context():
         api = MagicMock()
@@ -208,7 +208,7 @@ def test_datacite_error_delete(logger, app):
 
 
 @patch('invenio_pidstore.providers.datacite.logger')
-def test_datacite_sync(logger, app):
+def test_datacite_sync(logger, app, db):
     """Test sync."""
     with app.app_context():
         api = MagicMock()

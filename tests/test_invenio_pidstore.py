@@ -30,7 +30,6 @@ from __future__ import absolute_import, print_function
 import uuid
 
 import pytest
-from invenio_db import db
 from mock import patch
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -40,7 +39,7 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus, Redirect
 
 
 @patch('invenio_pidstore.models.logger')
-def test_pid_creation(logger, app):
+def test_pid_creation(logger, app, db):
     """Test pid creation."""
     with app.app_context():
         assert PersistentIdentifier.query.count() == 0
@@ -80,24 +79,23 @@ def test_pid_creation(logger, app):
                 "Failed to create")
 
 
-def test_alembic(app):
+def test_alembic(app, db):
     """Test alembic recipes."""
     ext = app.extensions['invenio-db']
 
-    with app.app_context():
-        if db.engine.name == 'sqlite':
-            raise pytest.skip('Upgrades are not supported on SQLite.')
+    if db.engine.name == 'sqlite':
+        raise pytest.skip('Upgrades are not supported on SQLite.')
 
-        assert not ext.alembic.compare_metadata()
-        db.drop_all()
-        ext.alembic.upgrade()
+    assert not ext.alembic.compare_metadata()
+    db.drop_all()
+    ext.alembic.upgrade()
 
-        assert not ext.alembic.compare_metadata()
-        ext.alembic.stamp()
-        ext.alembic.downgrade(target='96e796392533')
-        ext.alembic.upgrade()
+    assert not ext.alembic.compare_metadata()
+    ext.alembic.stamp()
+    ext.alembic.downgrade(target='96e796392533')
+    ext.alembic.upgrade()
 
-        assert not ext.alembic.compare_metadata()
+    assert not ext.alembic.compare_metadata()
 
 
 def test_pidstatus_as():
@@ -107,7 +105,7 @@ def test_pidstatus_as():
     assert next(iter(PIDStatus)) == 'N'
 
 
-def test_pid_get(app):
+def test_pid_get(app, db):
     """Test pid retrieval."""
     with app.app_context():
         PersistentIdentifier.create('doi', '10.1234/foo')
@@ -146,7 +144,7 @@ def test_pid_get(app):
 
 
 @patch('invenio_pidstore.models.logger')
-def test_pid_assign(logger, app):
+def test_pid_assign(logger, app, db):
     """Test pid object assignment."""
     with app.app_context():
         # No assigned object
@@ -188,7 +186,7 @@ def test_pid_assign(logger, app):
 
 
 @patch('invenio_pidstore.models.logger')
-def test_pid_unassign_noobject(logger, app):
+def test_pid_unassign_noobject(logger, app, db):
     """Test unassign."""
     with app.app_context():
         pid = PersistentIdentifier.create('recid', '101')
@@ -202,7 +200,7 @@ def test_pid_unassign_noobject(logger, app):
             assert 'pid' in logger.exception.call_args[1]['extra']
 
 
-def test_pid_assign_deleted(app):
+def test_pid_assign_deleted(app, db):
     """Test pid object assignment."""
     with app.app_context():
         pid = PersistentIdentifier.create(
@@ -211,7 +209,7 @@ def test_pid_assign_deleted(app):
 
 
 @patch('invenio_pidstore.models.logger')
-def test_reserve(logger, app):
+def test_reserve(logger, app, db):
     """Test pid reserve."""
     with app.app_context():
         i = 1
@@ -238,7 +236,7 @@ def test_reserve(logger, app):
 
 
 @patch('invenio_pidstore.models.logger')
-def test_register(logger, app):
+def test_register(logger, app, db):
     """Test pid register."""
     with app.app_context():
         i = 1
@@ -266,7 +264,7 @@ def test_register(logger, app):
 
 
 @patch('invenio_pidstore.models.logger')
-def test_delete(logger, app):
+def test_delete(logger, app, db):
     """Test pid delete."""
     with app.app_context():
         i = 1
@@ -296,7 +294,7 @@ def test_delete(logger, app):
 
 
 @patch('invenio_pidstore.models.logger')
-def test_redirect(logger, app):
+def test_redirect(logger, app, db):
     """Test redirection."""
     with app.app_context():
         pid1 = PersistentIdentifier.create(
@@ -345,7 +343,7 @@ def test_redirect(logger, app):
             assert 'pid' in logger.exception.call_args[1]['extra']
 
 
-def test_redirect_cleanup(app):
+def test_redirect_cleanup(app, db):
     """Test proper clean up from redirects."""
     with app.app_context():
         pid1 = PersistentIdentifier.create(
@@ -370,7 +368,7 @@ def test_redirect_cleanup(app):
 
 
 @patch('invenio_pidstore.models.logger')
-def test_sync_status(logger, app):
+def test_sync_status(logger, app, db):
     """Test sync status."""
     with app.app_context():
         pid = PersistentIdentifier.create(
@@ -393,7 +391,7 @@ def test_sync_status(logger, app):
             assert 'pid' in logger.exception.call_args[1]['extra']
 
 
-def test_repr(app):
+def test_repr(app, db):
     """Test representation."""
     with app.app_context():
         pid = PersistentIdentifier.create(

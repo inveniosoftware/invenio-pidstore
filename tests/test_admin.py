@@ -63,7 +63,7 @@ def test_admin(app):
     assert isinstance(submenu_items['Persistent Identifier'], menu.MenuView)
 
 
-def test_filter_uuid(app):
+def test_filter_uuid(app, db):
     """Test FilterUUID."""
     with app.app_context():
         myuuid = uuid.uuid4()
@@ -75,7 +75,7 @@ def test_filter_uuid(app):
         assert query.count() == 1
 
 
-def test_object_formatter(app):
+def test_object_formatter(app, db):
     """Test FilterUUID."""
     @app.route('/<id>')
     def test_detail(id=None):

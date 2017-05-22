@@ -74,7 +74,6 @@ from invenio_accounts import InvenioAccounts
 from invenio_accounts.views import blueprint as accounts_blueprint
 from invenio_admin import InvenioAdmin
 from invenio_db import InvenioDB
-from invenio_i18n import InvenioI18N
 from invenio_records import InvenioRecords
 
 from invenio_pidstore import InvenioPIDStore
@@ -82,7 +81,6 @@ from invenio_pidstore import InvenioPIDStore
 # Create Flask application
 app = Flask(__name__)
 app.config.update(
-    I18N_LANGUAGES=[("da", "Danish"), ("en", "English")],
     SECRET_KEY='test_key',
     SECURITY_PASSWORD_HASH='pbkdf2_sha512',
     SECURITY_PASSWORD_SALT="CHANGE_ME_ALSO",
@@ -96,7 +94,6 @@ app.config.update(
 )
 
 Babel(app)
-InvenioI18N(app)
 Menu(app)
 InvenioDB(app)
 admin = InvenioAdmin(app)

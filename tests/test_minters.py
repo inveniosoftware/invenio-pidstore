@@ -32,7 +32,7 @@ from invenio_pidstore import current_pidstore
 from invenio_pidstore.minters import recid_minter
 
 
-def test_recid_minter(app):
+def test_recid_minter(app, db):
     """Test base provider."""
     with app.app_context():
 

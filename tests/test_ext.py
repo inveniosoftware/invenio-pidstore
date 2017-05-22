@@ -27,9 +27,7 @@
 
 from __future__ import absolute_import, print_function
 
-import pkg_resources
 from flask import Flask
-from invenio_db import db
 from mock import patch
 
 from invenio_pidstore import InvenioPIDStore
@@ -69,12 +67,12 @@ def test_logger():
 def test_invenio_records():
     """Test extension initialization."""
     app = Flask('testapp')
-    with patch('invenio_pidstore.ext.pkg_resources') as obj:
+    with patch('invenio_pidstore.ext.pkg_resources'):
         InvenioPIDStore(app)
     assert app.config['PIDSTORE_OBJECT_ENDPOINTS']
 
 
-def test_template_filters(app):
+def test_template_filters(app, db):
     """Test the template filters."""
     with app.app_context():
         # Test the 'pid_exists' template filter

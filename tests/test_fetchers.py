@@ -33,7 +33,7 @@ from invenio_pidstore.fetchers import recid_fetcher
 from invenio_pidstore.minters import recid_minter
 
 
-def test_recid_fetcher(app):
+def test_recid_fetcher(app, db):
     """Test base provider."""
     with app.app_context():
         rec_uuid = uuid.uuid4()

@@ -29,7 +29,6 @@ from __future__ import absolute_import, print_function
 import uuid
 
 import pytest
-from invenio_db import db
 
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError, \
     PIDMissingObjectError, PIDRedirectedError, PIDUnregistered
@@ -37,7 +36,7 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 from invenio_pidstore.resolver import Resolver
 
 
-def test_resolver(app):
+def test_resolver(app, db):
     """Test the class methods of PersistentIdentifier class."""
     status = [
         PIDStatus.NEW,
@@ -124,7 +123,7 @@ def test_resolver(app):
         assert pid and obj == rec_a
 
 
-def test_resolver_deleted_object(app):
+def test_resolver_deleted_object(app, db):
     """Test the class methods of PersistentIdentifier class."""
     with app.app_context():
         rec_uuid = uuid.uuid4()

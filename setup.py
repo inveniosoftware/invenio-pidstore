@@ -37,11 +37,10 @@ tests_require = [
     'coverage>=4.0',
     'isort>=4.2.2',
     'Flask-Menu>=0.5.1',
-    'invenio-access>=1.0.0a9',
-    'invenio-accounts>=1.0.0a9',
-    'invenio-admin>=1.0.0a3',
-    'invenio-records>=1.0.0a9',
-    'invenio-i18n>=1.0.0a4',
+    'invenio-access>=1.0.0a12',
+    'invenio-accounts>=1.0.0b3',
+    'invenio-admin>=1.0.0b1',
+    'invenio-records>=1.0.0b1',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
     'pytest-cache>=1.0',
@@ -59,13 +58,13 @@ extras_require = {
         'datacite>=0.1.0'
     ],
     'mysql': [
-        'invenio-db[mysql]>=1.0.0b3',
+        'invenio-db[mysql]>=1.0.0b6',
     ],
     'postgresql': [
-        'invenio-db[postgresql]>=1.0.0b3',
+        'invenio-db[postgresql]>=1.0.0b6',
     ],
     'sqlite': [
-        'invenio-db>=1.0.0b3',
+        'invenio-db>=1.0.0b6',
     ],
     'docs': [
         'Sphinx>=1.5.1',
@@ -152,7 +151,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 4 - Beta',
     ],
 )
