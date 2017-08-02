@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015, 2016 CERN.
+# Copyright (C) 2015, 2016, 2017 CERN.
 #
 # Invenio is free software; you can redistribute it
 # and/or modify it under the terms of the GNU General Public License as
@@ -24,6 +24,8 @@
 
 
 """Minimal Flask application example for development.
+
+SPHINX-START
 
 Start the Redis server.
 
@@ -59,6 +61,8 @@ At the end, don't forget to clean-up your folder:
 .. code-block:: console
 
     $ ./app-teardown.sh
+
+SPHINX-END
 
 """
 
