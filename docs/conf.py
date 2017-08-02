@@ -69,7 +69,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Invenio-PIDStore'
-copyright = u'2015, CERN'
+copyright = u'2017, CERN'
 author = u'CERN'
 
 # The version info for the project you're documenting, acts as replacement for
