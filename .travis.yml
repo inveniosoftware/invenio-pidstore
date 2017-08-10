@@ -28,6 +28,8 @@ sudo: false
 
 language: python
 
+dist: precise
+
 cache:
   - pip
 

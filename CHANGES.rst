@@ -1,6 +1,6 @@
 ..
     This file is part of Invenio.
-    Copyright (C) 2015, 2016 CERN.
+    Copyright (C) 2015, 2016, 2017 CERN.
 
     Invenio is free software; you can redistribute it
     and/or modify it under the terms of the GNU General Public License as
@@ -23,6 +23,17 @@
 
 Changes
 =======
+
+Version 1.0.0b2 (released 2016-08-10)
+-------------------------------------
+
+- Updates documentation.
+
+- Updates example app.
+
+- Fixes issue with tests directory being detected as a package and hence
+  being installed due to the __init__.py in the tests package.
+
 
 Version 1.0.0b1 (released 2016-11-08)
 -------------------------------------
