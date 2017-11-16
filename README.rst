@@ -44,5 +44,4 @@
 Invenio module that mints, stores, registers and resolves persistent
 identifiers.
 
-* Free software: GPLv2 license
-* Documentation: https://invenio-pidstore.readthedocs.io/
+Further documentation is available on https://invenio-pidstore.readthedocs.io/

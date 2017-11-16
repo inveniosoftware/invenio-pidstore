@@ -134,9 +134,9 @@ class InvenioPIDStore(object):
         * Initialize extension state.
 
         :param app: The Flask application
-        :param minters_entry_point_group: The minters entrtypoint group
+        :param minters_entry_point_group: The minters entry point group
             (Default: None).
-        :param fetchers_entry_point_group: The fetchers entrtypoint group
+        :param fetchers_entry_point_group: The fetchers entry point group
             (Default: None).
         :returns: PIDStore state application.
         """

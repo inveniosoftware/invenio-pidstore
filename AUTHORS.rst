@@ -24,7 +24,8 @@
 Authors
 =======
 
-Invenio module that stores and registers persistent identifiers.
+Invenio module that mints, stores, registers and resolves persistent
+identifiers.
 
 - Eamonn Maguire <eamonnmag@gmail.com>
 - Esteban J. G. Gabancho <esteban.gabancho@gmail.com>

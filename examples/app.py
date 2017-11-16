@@ -27,36 +27,36 @@
 
 SPHINX-START
 
-Start the Redis server.
-
-Install the requirements:
-
-.. code-block:: console
-
-    $ pip install -e .[all]
-    $ cd examples
-    $ ./app-setup.sh
-    $ ./app-fixtures.sh
-
-Run example development server:
+First install Invenio-PIDStore, setup the application and load
+fixture data by running:
 
 .. code-block:: console
 
-    $ FLASK_APP=app.py flask run --debugger -p 5000
+   $ pip install -e .[all]
+   $ cd examples
+   $ ./app-setup.sh
+   $ ./app-fixtures.sh
+
+Next, start the development server:
+
+.. code-block:: console
+
+   $ export FLASK_APP=app.py FLASK_DEBUG=1
+   $ flask run
 
 Open the admin page:
 
 .. code-block:: console
 
-    $ open http://0.0.0.0:5000/admin/recordmetadata/
+    $ open http://127.0.0.1:5000/admin/recordmetadata/
 
-Make a login with:
+Login with:
 
     username: admin@inveniosoftware.org
 
     password: 123456
 
-At the end, don't forget to clean-up your folder:
+To reset the example application run:
 
 .. code-block:: console
 
