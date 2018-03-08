@@ -35,22 +35,22 @@ tests_require = [
     'SQLAlchemy-Continuum>=1.2.1',
     'check-manifest>=0.25',
     'coverage>=4.0',
-    'isort>=4.2.2',
+    'isort>=4.3.0',
     'Flask-Menu>=0.5.1',
-    'invenio-access>=1.0.0a12',
-    'invenio-accounts>=1.0.0b3',
-    'invenio-admin>=1.0.0b1',
-    'invenio-records>=1.0.0b1',
+    'invenio-access>=1.0.0b1',
+    'invenio-accounts>=1.0.0b12',
+    'invenio-admin>=1.0.0b4',
+    'invenio-records>=1.0.0b4',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
     'pytest-cache>=1.0',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
-    'pytest>=2.8.0',
+    'pytest>=2.8.0,!=3.3.0',
 ]
 
 extras_require = {
-    ':python_version<"3.4"': ['enum34>=1.0.4'],
+    ':python_version<"3.4"': ['enum34>=1.1.6'],
     'admin': [
         'Flask-Admin>=1.3.0',
     ],
@@ -58,13 +58,13 @@ extras_require = {
         'datacite>=0.1.0'
     ],
     'mysql': [
-        'invenio-db[mysql]>=1.0.0b6',
+        'invenio-db[mysql]>=1.0.0b9',
     ],
     'postgresql': [
-        'invenio-db[postgresql]>=1.0.0b6',
+        'invenio-db[postgresql]>=1.0.0b9',
     ],
     'sqlite': [
-        'invenio-db>=1.0.0b6',
+        'invenio-db>=1.0.0b9',
     ],
     'docs': [
         'Sphinx>=1.5.1',
