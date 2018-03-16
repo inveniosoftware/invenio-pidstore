@@ -27,7 +27,6 @@ tests_require = [
     'invenio-records>=1.0.0b4',
     'mock>=1.3.0',
     'pydocstyle>=1.0.0',
-    'pytest-cache>=1.0',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
     'pytest>=2.8.0,!=3.3.0',
