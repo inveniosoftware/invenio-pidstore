@@ -10,6 +10,7 @@ Invenio-PIDStore.
    :maxdepth: 2
 
    installation
+   configuration
    usage
    examplesapp
 
