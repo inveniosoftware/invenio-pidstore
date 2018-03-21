@@ -29,6 +29,8 @@ from __future__ import absolute_import, print_function
 
 from collections import namedtuple
 
+from flask import current_app
+
 from .providers.recordid import RecordIdProvider
 
 FetchedPID = namedtuple('FetchedPID', ['provider', 'pid_type', 'pid_value'])
@@ -42,8 +44,9 @@ def recid_fetcher(record_uuid, data):
     :param data: The record metadata.
     :returns: A :data:`invenio_pidstore.fetchers.FetchedPID` instance.
     """
+    pid_field = current_app.config['PIDSTORE_RECID_FIELD']
     return FetchedPID(
         provider=RecordIdProvider,
         pid_type=RecordIdProvider.pid_type,
-        pid_value=str(data['control_number']),
+        pid_value=str(data[pid_field]),
     )

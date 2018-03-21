@@ -12,6 +12,7 @@ from __future__ import absolute_import, print_function
 
 import pkg_resources
 
+from . import config
 from .cli import pid as cmd
 from .errors import PIDDoesNotExistError
 from .models import PersistentIdentifier, logger
@@ -124,6 +125,7 @@ class InvenioPIDStore(object):
             (Default: None).
         :returns: PIDStore state application.
         """
+        self.init_config(app)
         # Initialize CLI
         app.cli.add_command(cmd)
 
@@ -153,6 +155,14 @@ class InvenioPIDStore(object):
         )
         app.extensions['invenio-pidstore'] = state
         return state
+
+    def init_config(self, app):
+        """Initialize configuration."""
+        for k in dir(config):
+            if k.startswith('PIDSTORE_') and k not in (
+                    'PIDSTORE_OBJECT_ENDPOINTS',
+                    'PIDSTORE_APP_LOGGER_HANDLERS'):
+                app.config.setdefault(k, getattr(config, k))
 
     def __getattr__(self, name):
         """Proxy to state object."""

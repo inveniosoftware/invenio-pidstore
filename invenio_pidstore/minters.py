@@ -10,6 +10,8 @@
 
 from __future__ import absolute_import, print_function
 
+from flask import current_app
+
 from .providers.recordid import RecordIdProvider
 
 
@@ -21,7 +23,8 @@ def recid_minter(record_uuid, data):
     :class:`invenio_pidstore.providers.recordid.RecordIdProvider`, it creates
     the PID instance with `rec` as predefined `object_type`.
 
-    Procedure followed:
+    Procedure followed: (we will use `control_number` as value of
+    `PIDSTORE_RECID_FIELD` for the simplicity of the documentation.)
 
     #. If a `control_number` field is already there, a `AssertionError`
     exception is raised.
@@ -37,8 +40,9 @@ def recid_minter(record_uuid, data):
     :param data: The record metadata.
     :returns: A fresh `invenio_pidstore.models.PersistentIdentifier` instance.
     """
-    assert 'control_number' not in data
+    pid_field = current_app.config['PIDSTORE_RECID_FIELD']
+    assert pid_field not in data
     provider = RecordIdProvider.create(
         object_type='rec', object_uuid=record_uuid)
-    data['control_number'] = provider.pid.pid_value
+    data[pid_field] = provider.pid.pid_value
     return provider.pid
