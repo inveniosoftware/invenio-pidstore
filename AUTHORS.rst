@@ -5,21 +5,20 @@
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
-Authors
-=======
+Contributors
+============
 
-Invenio module that mints, stores, registers and resolves persistent
-identifiers.
-
-- Eamonn Maguire <eamonnmag@gmail.com>
-- Esteban J. G. Gabancho <esteban.gabancho@gmail.com>
-- Jan Aage Lavik <jan.age.lavik@cern.ch>
-- Jiri Kuncar <jiri.kuncar@cern.ch>
-- Jochen Klein <klein.jochen@gmail.com>
-- Krzysztof Nowak <k.nowak@cern.ch>
-- Lars Holm Nielsen <lars.holm.nielsen@cern.ch>
-- Leonardo Rossi <leonardo.r@cern.ch>
-- Nicolas Harraudeau <nicolas.harraudeau@cern.ch>
-- Orestis Melkonian <melkon.or@gmail.com>
-- Sami Hiltunen <sami.mikael.hiltunen@cern.ch>
-- Tibor Simko <tibor.simko@cern.ch>
+- Alexander Ioannidis
+- Alizee Pace
+- Diego Rodriguez
+- Esteban J. G. Gabancho
+- Harri Hirvonsalo
+- Jiri Kuncar
+- Krzysztof Nowak
+- Lars Holm Nielsen
+- Leonardo Rossi
+- Nicolas Harraudeau
+- Orestis Melkonian
+- Paulina Lach
+- Sami Hiltunen
+- Tibor Simko
