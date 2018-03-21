@@ -25,6 +25,7 @@ recursive-include docs *.rst
 recursive-include docs Makefile
 recursive-include examples *.py
 recursive-include examples *.sh
+recursive-include examples *.txt
 recursive-include invenio_pidstore *.mo
 recursive-include invenio_pidstore *.po
 recursive-include invenio_pidstore *.pot

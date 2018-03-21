@@ -69,6 +69,7 @@ from invenio_pidstore import InvenioPIDStore
 # Create Flask application
 app = Flask(__name__)
 app.config.update(
+    DB_VERSIONING_USER_MODEL=None,
     SECRET_KEY='test_key',
     SECURITY_PASSWORD_HASH='pbkdf2_sha512',
     SECURITY_PASSWORD_SALT="CHANGE_ME_ALSO",
