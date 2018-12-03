@@ -87,7 +87,7 @@ def test_pid_creation(app, db):
         result = runner.invoke(cmd, [
             'create', 'recid', '2',
         ], obj=script_info)
-        assert -1 == result.exit_code
+        assert 1 == result.exit_code
 
 
 def test_pid_assign(app, db):
@@ -153,7 +153,8 @@ def test_pid_assign(app, db):
             'assign', 'doi', '10.1234/foo',
             '-t', 'rec', '-i', str(new_uuid)
         ], obj=script_info)
-        assert -1 == result.exit_code
+
+        assert 1 == result.exit_code
 
         # Assign with overwrite
         result = runner.invoke(cmd, [
