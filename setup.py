@@ -16,6 +16,7 @@ readme = open('README.rst').read()
 history = open('CHANGES.rst').read()
 
 tests_require = [
+    'attrs>=17.4.0',  # once pytest is upgraded this can be removed
     'SQLAlchemy-Continuum>=1.2.1',
     'check-manifest>=0.25',
     'coverage>=4.0',
@@ -28,7 +29,7 @@ tests_require = [
     'pydocstyle>=1.0.0',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
-    'pytest>=2.8.0,!=3.3.0',
+    'pytest>=2.8.0',
 ]
 
 extras_require = {
