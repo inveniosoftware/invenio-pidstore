@@ -295,6 +295,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         Only registered PIDs can be redirected so we set it back to registered.
 
         :returns: `True` if the PID is successfully unassigned.
+
         """
         if self.object_uuid is None and self.object_type is None:
             return True

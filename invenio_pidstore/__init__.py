@@ -328,7 +328,7 @@ Entry points loading
 PIDStore will automatically register minters and fetchers defined by the entry
 point groups ``invenio_pidstore.minters`` and . ``invenio_pidstore.fetchers``.
 
-Example:
+Example code:
 
 .. code-block:: python
 
