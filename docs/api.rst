@@ -39,6 +39,9 @@ Providers
 .. automodule:: invenio_pidstore.providers.recordid
    :members:
 
+.. automodule:: invenio_pidstore.providers.datacite
+  :members:
+
 Minters
 -------
 

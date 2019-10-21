@@ -210,13 +210,15 @@ invenio_pidstore.errors.PIDUnregistered: ...
 
 Providers
 ---------
-Providers adds extra functionality persistent identifiers. Use cases for this
-includes automatically creating the persistent identifier or retrieving the
-persistent identifier from an external service.
+Providers wrap the creation of persistent identifiers with extra functionality.
+Use cases for this include automatically creating the persistent identifier or
+retrieving the persistent identifier from an external service.
 
-PIDStore comes by default with a
-:py:class:`invenio_pidstore.providers.recordid.RecordIdProvider` which will
-create Invenio legacy integer record identifiers:
+PIDStore comes by default with two providers:
+:py:class:`invenio_pidstore.providers.recordid.RecordIdProvider` which
+creates Invenio legacy integer record identifiers and
+:py:class:`invenio_pidstore.providers.datacite.DataCiteProvider` which
+creates a DOI with a checksummed random alphanumeric 10-character suffix:
 
 >>> from invenio_pidstore.providers.recordid import RecordIdProvider
 >>> provider = RecordIdProvider.create()
@@ -224,6 +226,15 @@ create Invenio legacy integer record identifiers:
 'recid'
 >>> provider.pid.pid_value
 '1'
+>>> from invenio_pidstore.providers.datacite import DataCiteProvider
+>>> provider = DataCiteProvider.create(doi_options={'prefix': '10.5555'})
+>>> provider.pid.pid_type
+'doi'
+>>> provider.pid.pid_value  # doctest: +SKIP
+'10.5555/3sbk2-5j060'
+
+Configure, ``PIDSTORE_DATACITE_DOI_PREFIX`` in ``config.py``, to be able to
+simply call ``DataCiteProvider.create()`` in order to get a full random DOI.
 
 Creating your own provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

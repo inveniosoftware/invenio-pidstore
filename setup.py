@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2015-2019 CERN.
+# Copyright (C) 2019 Northwestern University.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -25,7 +26,7 @@ tests_require = [
     'Flask-Menu>=0.5.1',
     'invenio-access>=1.0.0',
     'invenio-accounts>=1.0.0',
-    'mock>=1.3.0',
+    'mock>=3.0.0',
     'pydocstyle>=1.0.0',
     'pytest-cov>=1.8.0',
     'pytest-pep8>=1.0.6',
@@ -70,6 +71,8 @@ setup_requires = [
 install_requires = [
     'Flask-BabelEx>=0.9.3',
     'Flask>=0.11.1',
+    'six>=1.12.0',
+    'base32-lib>=1.0.0a1'
 ]
 
 packages = find_packages()

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2015-2019 CERN.
+# Copyright (C) 2019 Northwestern University.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -241,3 +242,71 @@ def test_datacite_sync(logger, app, db):
         assert provider.pid.status == PIDStatus.NEW
         assert logger.exception.call_args[0][0] == \
             "Failed to sync status from DataCite"
+
+
+def test_datacite_valid_doi_prefix():
+    assert DataCiteProvider.valid_doi_prefix('10.1234')
+    assert DataCiteProvider.valid_doi_prefix('10.12.34')
+    assert not DataCiteProvider.valid_doi_prefix('101234')
+    assert not DataCiteProvider.valid_doi_prefix('101234.')
+    assert not DataCiteProvider.valid_doi_prefix('10.1234/')
+    assert not DataCiteProvider.valid_doi_prefix('100.1234')
+    assert not DataCiteProvider.valid_doi_prefix('10.12E45')
+
+
+@patch('invenio_pidstore.providers.datacite.base32')
+def test_datacite_generate_doi_calls_base32_generate(patched_base32, app):
+    original_prefix = app.config.get('PIDSTORE_DATACITE_DOI_PREFIX')
+    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = '10.4321'
+    original_doi_options = app.config.get('PIDSTORE_DATACITE_DOI_OPTIONS')
+    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = {
+        'suffix_length': 8,
+        'split_every': 4,
+        'checksum': False
+    }
+
+    DataCiteProvider.generate_doi()
+
+    patched_base32.generate.assert_called_with(
+        length=8,
+        split_every=4,
+        checksum=False
+    )
+
+    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = original_prefix
+    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = original_doi_options
+
+
+def test_datacite_generate_doi_prefix(app):
+    original_doi_options = app.config.get('PIDSTORE_DATACITE_DOI_OPTIONS')
+    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = {
+        'suffix_length': 8,
+        'split_every': 4,
+        'checksum': False
+    }
+    # explicit prefix
+    doi = DataCiteProvider.generate_doi(options={'prefix': '10.1234'})
+
+    assert doi.startswith('10.1234/')
+
+    # configuration prefix
+    original_prefix = app.config.get('PIDSTORE_DATACITE_DOI_PREFIX')
+    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = '10.4321'
+
+    doi = DataCiteProvider.generate_doi()
+
+    assert doi.startswith('10.4321/')
+
+    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = original_doi_options
+    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = original_prefix
+
+
+def test_datacite_provider_create_calls_generate(app, db):
+    with app.app_context():
+        provider = DataCiteProvider.create(doi_options={'prefix': '10.1234'})
+        assert provider.pid.status == PIDStatus.NEW
+        assert provider.pid.pid_provider == 'datacite'
+        assert provider.pid.pid_value.startswith('10.1234')
+
+        with pytest.raises(ValueError):
+            DataCiteProvider.create(doi_options={'prefix': '10.123fd4'})
