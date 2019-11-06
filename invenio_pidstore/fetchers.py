@@ -32,13 +32,29 @@ from collections import namedtuple
 from flask import current_app
 
 from .providers.recordid import RecordIdProvider
+from .providers.recordid_v2 import RecordIdProviderV2
 
 FetchedPID = namedtuple('FetchedPID', ['provider', 'pid_type', 'pid_value'])
 """A pid fetcher."""
 
 
-def recid_fetcher(record_uuid, data):
+def recid_fetcher_v2(record_uuid, data):
     """Fetch a record's identifiers.
+
+    :param record_uuid: The record UUID.
+    :param data: The record metadata.
+    :returns: A :data:`invenio_pidstore.fetchers.FetchedPID` instance.
+    """
+    pid_field = current_app.config['PIDSTORE_RECID_FIELD']
+    return FetchedPID(
+        provider=RecordIdProviderV2,
+        pid_type=RecordIdProviderV2.pid_type,
+        pid_value=str(data[pid_field])
+    )
+
+
+def recid_fetcher(record_uuid, data):
+    """Legacy way to fetch a record's identifiers.
 
     :param record_uuid: The record UUID.
     :param data: The record metadata.

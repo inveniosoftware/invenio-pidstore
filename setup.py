@@ -72,7 +72,7 @@ install_requires = [
     'Flask-BabelEx>=0.9.3',
     'Flask>=0.11.1',
     'six>=1.12.0',
-    'base32-lib>=1.0.0a1'
+    'base32-lib>=1.0.0'
 ]
 
 packages = find_packages()
@@ -112,9 +112,11 @@ setup(
         ],
         'invenio_pidstore.minters': [
             'recid = invenio_pidstore.minters:recid_minter',
+            'recid_v2 = invenio_pidstore.minters:recid_minter_v2',
         ],
         'invenio_pidstore.fetchers': [
             'recid = invenio_pidstore.fetchers:recid_fetcher',
+            'recid_v2 = invenio_pidstore.fetchers:recid_fetcher_v2',
         ],
         'invenio_admin.views': [
             'invenio_pidstore_pid = invenio_pidstore.admin:pid_adminview',

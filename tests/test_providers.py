@@ -99,8 +99,9 @@ def test_recordid_provider_v2(app, db):
         assert provider.pid
         assert provider.pid.pid_type == 'recid'
         pid_value = provider.pid.pid_value
-        assert len(pid_value) == 10 + 1
-        assert pid_value.count('-') == 1
+        part1, part2 = pid_value.split('-')
+        assert len(part1) == 5
+        assert len(part2) == 5
         assert provider.pid.pid_provider is None
         assert provider.pid.status == PIDStatus.RESERVED
         assert provider.pid.object_type is None
@@ -113,8 +114,9 @@ def test_recordid_provider_v2(app, db):
         assert provider.pid
         assert provider.pid.pid_type == 'recid'
         pid_value = provider.pid.pid_value
-        assert len(pid_value) == 10 + 1
-        assert pid_value.count('-') == 1
+        part1, part2 = pid_value.split('-')
+        assert len(part1) == 5
+        assert len(part2) == 5
         assert provider.pid.pid_provider is None
         assert provider.pid.status == PIDStatus.REGISTERED
         assert provider.pid.object_type == 'rec'
@@ -127,8 +129,10 @@ def test_recordid_provider_v2(app, db):
             options={'length': 3, 'checksum': True, 'split_every': 1}
         )
         pid_value = provider.pid.pid_value
-        assert len(pid_value) == 3 + 2
-        assert pid_value.count('-') == 2
+        part1, part2, part3 = pid_value.split('-')
+        assert len(part1) == 1
+        assert len(part2) == 1
+        assert len(part3) == 1
 
 
 def test_datacite_create_get(app, db):

@@ -222,7 +222,7 @@ PIDStore comes by default with three providers:
 - :py:class:`invenio_pidstore.providers.datacite.DataCiteProvider` which
   creates and manages a PersistentIdentifier given a valid DOI.
 - :py:class:`invenio_pidstore.providers.recordid.RecordIdProvider` which
-  creates Invenio legacy integer record identifiers. (Deprecated)
+  creates Invenio legacy integer record identifiers. (Not Recommended)
 
 >>> from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
 >>> provider = RecordIdProviderV2.create()
@@ -232,7 +232,7 @@ PIDStore comes by default with three providers:
 '3sbk2-5j060'
 
 Configure ``PIDSTORE_RECORDID_OPTIONS`` in ``config.py``, to construct a
-`pid_value` as you wish.
+custom `pid_value`.
 
 Creating your own provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
