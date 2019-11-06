@@ -22,6 +22,7 @@ from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.base import BaseProvider
 from invenio_pidstore.providers.datacite import DataCiteProvider
 from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
 
 
 def test_base_provider(app, db):
@@ -89,6 +90,45 @@ def test_recordid_provider(app, db):
         assert provider.pid.object_uuid == rec_uuid
 
         pytest.raises(AssertionError, RecordIdProvider.create, pid_value='3')
+
+
+def test_recordid_provider_v2(app, db):
+    """Test RecordIdProviderV2."""
+    with app.app_context():
+        provider = RecordIdProviderV2.create()
+        assert provider.pid
+        assert provider.pid.pid_type == 'recid'
+        pid_value = provider.pid.pid_value
+        assert len(pid_value) == 10 + 1
+        assert pid_value.count('-') == 1
+        assert provider.pid.pid_provider is None
+        assert provider.pid.status == PIDStatus.RESERVED
+        assert provider.pid.object_type is None
+        assert provider.pid.object_uuid is None
+
+        # Assign to object immediately
+        rec_uuid = uuid.uuid4()
+        provider = RecordIdProviderV2.create(
+            object_type='rec', object_uuid=rec_uuid)
+        assert provider.pid
+        assert provider.pid.pid_type == 'recid'
+        pid_value = provider.pid.pid_value
+        assert len(pid_value) == 10 + 1
+        assert pid_value.count('-') == 1
+        assert provider.pid.pid_provider is None
+        assert provider.pid.status == PIDStatus.REGISTERED
+        assert provider.pid.object_type == 'rec'
+        assert provider.pid.object_uuid == rec_uuid
+
+        pytest.raises(AssertionError, RecordIdProviderV2.create, pid_value='3')
+
+        # Options
+        provider = RecordIdProviderV2.create(
+            options={'length': 3, 'checksum': True, 'split_every': 1}
+        )
+        pid_value = provider.pid.pid_value
+        assert len(pid_value) == 3 + 2
+        assert pid_value.count('-') == 2
 
 
 def test_datacite_create_get(app, db):
@@ -244,28 +284,16 @@ def test_datacite_sync(logger, app, db):
             "Failed to sync status from DataCite"
 
 
-def test_datacite_valid_doi_prefix():
-    assert DataCiteProvider.valid_doi_prefix('10.1234')
-    assert DataCiteProvider.valid_doi_prefix('10.12.34')
-    assert not DataCiteProvider.valid_doi_prefix('101234')
-    assert not DataCiteProvider.valid_doi_prefix('101234.')
-    assert not DataCiteProvider.valid_doi_prefix('10.1234/')
-    assert not DataCiteProvider.valid_doi_prefix('100.1234')
-    assert not DataCiteProvider.valid_doi_prefix('10.12E45')
-
-
-@patch('invenio_pidstore.providers.datacite.base32')
-def test_datacite_generate_doi_calls_base32_generate(patched_base32, app):
-    original_prefix = app.config.get('PIDSTORE_DATACITE_DOI_PREFIX')
-    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = '10.4321'
-    original_doi_options = app.config.get('PIDSTORE_DATACITE_DOI_OPTIONS')
-    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = {
-        'suffix_length': 8,
+@patch('invenio_pidstore.providers.recordid_v2.base32')
+def test_recordidv2_generate_id_calls_base32_generate(patched_base32, app):
+    original_options = app.config.get('PIDSTORE_RECORDID_OPTIONS')
+    app.config['PIDSTORE_RECORDID_OPTIONS'] = {
+        'length': 8,
         'split_every': 4,
         'checksum': False
     }
 
-    DataCiteProvider.generate_doi()
+    RecordIdProviderV2.generate_id()
 
     patched_base32.generate.assert_called_with(
         length=8,
@@ -273,40 +301,4 @@ def test_datacite_generate_doi_calls_base32_generate(patched_base32, app):
         checksum=False
     )
 
-    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = original_prefix
-    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = original_doi_options
-
-
-def test_datacite_generate_doi_prefix(app):
-    original_doi_options = app.config.get('PIDSTORE_DATACITE_DOI_OPTIONS')
-    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = {
-        'suffix_length': 8,
-        'split_every': 4,
-        'checksum': False
-    }
-    # explicit prefix
-    doi = DataCiteProvider.generate_doi(options={'prefix': '10.1234'})
-
-    assert doi.startswith('10.1234/')
-
-    # configuration prefix
-    original_prefix = app.config.get('PIDSTORE_DATACITE_DOI_PREFIX')
-    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = '10.4321'
-
-    doi = DataCiteProvider.generate_doi()
-
-    assert doi.startswith('10.4321/')
-
-    app.config['PIDSTORE_DATACITE_DOI_OPTIONS'] = original_doi_options
-    app.config['PIDSTORE_DATACITE_DOI_PREFIX'] = original_prefix
-
-
-def test_datacite_provider_create_calls_generate(app, db):
-    with app.app_context():
-        provider = DataCiteProvider.create(doi_options={'prefix': '10.1234'})
-        assert provider.pid.status == PIDStatus.NEW
-        assert provider.pid.pid_provider == 'datacite'
-        assert provider.pid.pid_value.startswith('10.1234')
-
-        with pytest.raises(ValueError):
-            DataCiteProvider.create(doi_options={'prefix': '10.123fd4'})
+    app.config['PIDSTORE_RECORDID_OPTIONS'] = original_options

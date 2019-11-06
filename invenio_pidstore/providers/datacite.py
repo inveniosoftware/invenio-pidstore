@@ -11,9 +11,6 @@
 
 from __future__ import absolute_import
 
-import re
-
-from base32_lib import base32
 from datacite import DataCiteMDSClient
 from datacite.errors import DataCiteError, DataCiteGoneError, \
     DataCiteNoContentError, DataCiteNotFoundError, HttpError
@@ -35,56 +32,14 @@ class DataCiteProvider(BaseProvider):
     default_status = PIDStatus.NEW
     """Default status for newly created PIDs by this provider."""
 
-    doi_prefix_regexp = re.compile(
-        r"10\.\d+(\.\d+)*$"
-    )
-
     @classmethod
-    def valid_doi_prefix(cls, prefix):
-        """Matches if prefix is a DOI prefix.
-
-        NOTE: This was done here to prevent relying on idutils.
-        """
-        return cls.doi_prefix_regexp.match(prefix)
-
-    @classmethod
-    def generate_doi(cls, options=None):
-        """Generate DOI with random suffix."""
-        passed_options = options or {}
-        # WHY: A new dict needs to be created to prevent side-effects
-        options = dict(current_app.config.get(
-            'PIDSTORE_DATACITE_DOI_OPTIONS', {}
-        ))
-        options.update(passed_options)
-        prefix = options.get(
-            'prefix',
-            current_app.config.get('PIDSTORE_DATACITE_DOI_PREFIX')
-        )
-        suffix_length = options.get('suffix_length')
-        split_every = options.get('split_every')
-        checksum = options.get('checksum')
-
-        if not cls.valid_doi_prefix(prefix):
-            raise ValueError("Invalid DOI prefix: {}".format(prefix))
-
-        suffix = base32.generate(
-            length=suffix_length,
-            split_every=split_every,
-            checksum=checksum
-        )
-
-        return prefix + "/" + suffix
-
-    @classmethod
-    def create(cls, pid_value=None, doi_options=None, **kwargs):
+    def create(cls, pid_value, **kwargs):
         """Create a new record identifier.
 
         For more information about parameters,
         see :meth:`invenio_pidstore.providers.base.BaseProvider.create`.
 
         :param pid_value: Persistent identifier value.
-        :param doi_options: ``dict`` with optional keys:
-            ``"prefix", "suffix_length", "checksum", "checksum"``
         :params ``**kwargs``: See
             :meth:`invenio_pidstore.providers.base.BaseProvider.create` extra
             parameters.
@@ -92,9 +47,6 @@ class DataCiteProvider(BaseProvider):
             :class:`invenio_pidstore.providers.datacite.DataCiteProvider`
             instance.
         """
-        if pid_value is None:
-            pid_value = cls.generate_doi(doi_options)
-
         return super(DataCiteProvider, cls).create(
             pid_value=pid_value, **kwargs)
 

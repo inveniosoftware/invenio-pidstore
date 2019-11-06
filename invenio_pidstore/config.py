@@ -19,7 +19,7 @@ JSON, and by the minter, to store it inside the JSON.
 PIDSTORE_DATACITE_DOI_PREFIX = ''
 """Provide a DOI prefix here."""
 
-PIDSTORE_DATACITE_DOI_OPTIONS = {
+PIDSTORE_RECORDID_OPTIONS = {
     'suffix_length': 10,
     'split_every': 5,
     'checksum': True

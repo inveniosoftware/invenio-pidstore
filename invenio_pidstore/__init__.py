@@ -214,27 +214,25 @@ Providers wrap the creation of persistent identifiers with extra functionality.
 Use cases for this include automatically creating the persistent identifier or
 retrieving the persistent identifier from an external service.
 
-PIDStore comes by default with two providers:
-:py:class:`invenio_pidstore.providers.recordid.RecordIdProvider` which
-creates Invenio legacy integer record identifiers and
-:py:class:`invenio_pidstore.providers.datacite.DataCiteProvider` which
-creates a DOI with a checksummed random alphanumeric 10-character suffix:
+PIDStore comes by default with three providers:
 
->>> from invenio_pidstore.providers.recordid import RecordIdProvider
->>> provider = RecordIdProvider.create()
+- :py:class:`invenio_pidstore.providers.recordid_v2.RecordIdProviderV2` which
+  creates random, checksummed, alphanumeric, PersistentIdentifier.
+  (Recommended)
+- :py:class:`invenio_pidstore.providers.datacite.DataCiteProvider` which
+  creates and manages a PersistentIdentifier given a valid DOI.
+- :py:class:`invenio_pidstore.providers.recordid.RecordIdProvider` which
+  creates Invenio legacy integer record identifiers. (Deprecated)
+
+>>> from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
+>>> provider = RecordIdProviderV2.create()
 >>> provider.pid.pid_type
 'recid'
->>> provider.pid.pid_value
-'1'
->>> from invenio_pidstore.providers.datacite import DataCiteProvider
->>> provider = DataCiteProvider.create(doi_options={'prefix': '10.5555'})
->>> provider.pid.pid_type
-'doi'
 >>> provider.pid.pid_value  # doctest: +SKIP
-'10.5555/3sbk2-5j060'
+'3sbk2-5j060'
 
-Configure, ``PIDSTORE_DATACITE_DOI_PREFIX`` in ``config.py``, to be able to
-simply call ``DataCiteProvider.create()`` in order to get a full random DOI.
+Configure ``PIDSTORE_RECORDID_OPTIONS`` in ``config.py``, to construct a
+`pid_value` as you wish.
 
 Creating your own provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
