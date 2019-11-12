@@ -72,7 +72,7 @@ install_requires = [
     'Flask-BabelEx>=0.9.3',
     'Flask>=0.11.1',
     'six>=1.12.0',
-    'base32-lib>=1.0.0'
+    'base32-lib>=1.0.1'
 ]
 
 packages = find_packages()
