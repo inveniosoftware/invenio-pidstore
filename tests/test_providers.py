@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2015-2019 CERN.
+# Copyright (C) 2019 Northwestern University.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -21,6 +22,7 @@ from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.base import BaseProvider
 from invenio_pidstore.providers.datacite import DataCiteProvider
 from invenio_pidstore.providers.recordid import RecordIdProvider
+from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
 
 
 def test_base_provider(app, db):
@@ -88,6 +90,49 @@ def test_recordid_provider(app, db):
         assert provider.pid.object_uuid == rec_uuid
 
         pytest.raises(AssertionError, RecordIdProvider.create, pid_value='3')
+
+
+def test_recordid_provider_v2(app, db):
+    """Test RecordIdProviderV2."""
+    with app.app_context():
+        provider = RecordIdProviderV2.create()
+        assert provider.pid
+        assert provider.pid.pid_type == 'recid'
+        pid_value = provider.pid.pid_value
+        part1, part2 = pid_value.split('-')
+        assert len(part1) == 5
+        assert len(part2) == 5
+        assert provider.pid.pid_provider is None
+        assert provider.pid.status == PIDStatus.RESERVED
+        assert provider.pid.object_type is None
+        assert provider.pid.object_uuid is None
+
+        # Assign to object immediately
+        rec_uuid = uuid.uuid4()
+        provider = RecordIdProviderV2.create(
+            object_type='rec', object_uuid=rec_uuid)
+        assert provider.pid
+        assert provider.pid.pid_type == 'recid'
+        pid_value = provider.pid.pid_value
+        part1, part2 = pid_value.split('-')
+        assert len(part1) == 5
+        assert len(part2) == 5
+        assert provider.pid.pid_provider is None
+        assert provider.pid.status == PIDStatus.REGISTERED
+        assert provider.pid.object_type == 'rec'
+        assert provider.pid.object_uuid == rec_uuid
+
+        pytest.raises(AssertionError, RecordIdProviderV2.create, pid_value='3')
+
+        # Options
+        provider = RecordIdProviderV2.create(
+            options={'length': 3, 'checksum': True, 'split_every': 1}
+        )
+        pid_value = provider.pid.pid_value
+        part1, part2, part3 = pid_value.split('-')
+        assert len(part1) == 1
+        assert len(part2) == 1
+        assert len(part3) == 1
 
 
 def test_datacite_create_get(app, db):
@@ -241,3 +286,23 @@ def test_datacite_sync(logger, app, db):
         assert provider.pid.status == PIDStatus.NEW
         assert logger.exception.call_args[0][0] == \
             "Failed to sync status from DataCite"
+
+
+@patch('invenio_pidstore.providers.recordid_v2.base32')
+def test_recordidv2_generate_id_calls_base32_generate(patched_base32, app):
+    original_options = app.config.get('PIDSTORE_RECORDID_OPTIONS')
+    app.config['PIDSTORE_RECORDID_OPTIONS'] = {
+        'length': 8,
+        'split_every': 4,
+        'checksum': False
+    }
+
+    RecordIdProviderV2.generate_id()
+
+    patched_base32.generate.assert_called_with(
+        length=8,
+        split_every=4,
+        checksum=False
+    )
+
+    app.config['PIDSTORE_RECORDID_OPTIONS'] = original_options

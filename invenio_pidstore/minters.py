@@ -13,6 +13,29 @@ from __future__ import absolute_import, print_function
 from flask import current_app
 
 from .providers.recordid import RecordIdProvider
+from .providers.recordid_v2 import RecordIdProviderV2
+
+
+def recid_minter_v2(record_uuid, data):
+    """Mint record identifiers with RecordIDProviderV2.
+
+    This minter is recommended to be used when creating records to get
+    PersistentIdentifier with ``object_type='rec'`` and the new random
+    alphanumeric `pid_value`.
+
+    Raises ``AssertionError`` if a ``PIDSTORE_RECID_FIELD`` entry is already in
+    ``data``. The minted ``pid_value`` will be stored in that field.
+
+    :param record_uuid: The object UUID of the record.
+    :param data: The record metadata.
+    :returns: A fresh `invenio_pidstore.models.PersistentIdentifier` instance.
+    """
+    pid_field = current_app.config['PIDSTORE_RECID_FIELD']
+    assert pid_field not in data
+    provider = RecordIdProviderV2.create(
+        object_type='rec', object_uuid=record_uuid)
+    data[pid_field] = provider.pid.pid_value
+    return provider.pid
 
 
 def recid_minter(record_uuid, data):

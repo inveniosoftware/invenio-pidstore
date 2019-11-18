@@ -210,20 +210,29 @@ invenio_pidstore.errors.PIDUnregistered: ...
 
 Providers
 ---------
-Providers adds extra functionality persistent identifiers. Use cases for this
-includes automatically creating the persistent identifier or retrieving the
-persistent identifier from an external service.
+Providers wrap the creation of persistent identifiers with extra functionality.
+Use cases for this include automatically creating the persistent identifier or
+retrieving the persistent identifier from an external service.
 
-PIDStore comes by default with a
-:py:class:`invenio_pidstore.providers.recordid.RecordIdProvider` which will
-create Invenio legacy integer record identifiers:
+PIDStore comes by default with three providers:
 
->>> from invenio_pidstore.providers.recordid import RecordIdProvider
->>> provider = RecordIdProvider.create()
+- :py:class:`invenio_pidstore.providers.recordid_v2.RecordIdProviderV2` which
+  creates random, checksummed, alphanumeric, PersistentIdentifier.
+  (Recommended)
+- :py:class:`invenio_pidstore.providers.datacite.DataCiteProvider` which
+  creates and manages a PersistentIdentifier given a valid DOI.
+- :py:class:`invenio_pidstore.providers.recordid.RecordIdProvider` which
+  creates Invenio legacy integer record identifiers. (Not Recommended)
+
+>>> from invenio_pidstore.providers.recordid_v2 import RecordIdProviderV2
+>>> provider = RecordIdProviderV2.create()
 >>> provider.pid.pid_type
 'recid'
->>> provider.pid.pid_value
-'1'
+>>> provider.pid.pid_value  # doctest: +SKIP
+'3sbk2-5j060'
+
+Configure ``PIDSTORE_RECORDID_OPTIONS`` in ``config.py``, to construct a
+custom `pid_value`.
 
 Creating your own provider
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

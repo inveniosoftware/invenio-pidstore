@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2015-2019 CERN.
+# Copyright (C) 2019 Northwestern University.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -36,13 +37,14 @@ class DataCiteProvider(BaseProvider):
         """Create a new record identifier.
 
         For more information about parameters,
-        see :meth:`invenio_pidstore.providers.BaseProvider.create`.
+        see :meth:`invenio_pidstore.providers.base.BaseProvider.create`.
 
         :param pid_value: Persistent identifier value.
-        :params **kwargs: See
+        :params ``**kwargs``: See
             :meth:`invenio_pidstore.providers.base.BaseProvider.create` extra
             parameters.
-        :returns: A :class:`invenio_pidstore.providers.DataCiteProvider`
+        :returns: A
+            :class:`invenio_pidstore.providers.datacite.DataCiteProvider`
             instance.
         """
         return super(DataCiteProvider, cls).create(
