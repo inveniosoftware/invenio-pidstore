@@ -22,7 +22,7 @@ tests_require = [
     'check-manifest>=0.25',
     'coverage>=4.0',
     'isort>=4.3.0',
-    'invenio-admin>=1.0.0',
+    'invenio-admin>=1.2.0',
     'Flask-Menu>=0.5.1',
     'invenio-access>=1.0.0',
     'invenio-accounts>=1.0.0',
@@ -34,9 +34,8 @@ tests_require = [
 ]
 
 extras_require = {
-    ':python_version<"3.4"': ['enum34>=1.1.6'],
     'admin': [
-        'Flask-Admin>=1.3.0',
+        'invenio-admin>=1.2.0',
     ],
     'datacite': [
         'datacite>=0.1.0'
@@ -69,10 +68,10 @@ setup_requires = [
 ]
 
 install_requires = [
-    'Flask-BabelEx>=0.9.3',
-    'Flask>=0.11.1',
-    'six>=1.12.0',
-    'base32-lib>=1.0.1'
+    'base32-lib>=1.0.1',
+    'enum34>=1.1.6;python_version<"3.4"',
+    'invenio-base>=1.2.2',
+    'invenio-i18n>=1.2.0',
 ]
 
 packages = find_packages()
