@@ -16,7 +16,7 @@ from .providers.recordid import RecordIdProvider
 from .providers.recordid_v2 import RecordIdProviderV2
 
 
-def recid_minter_v2(record_uuid, data):
+def recid_minter_v2(record_uuid, data, with_obj_type='rec'):
     """Mint record identifiers with RecordIDProviderV2.
 
     This minter is recommended to be used when creating records to get
@@ -33,7 +33,7 @@ def recid_minter_v2(record_uuid, data):
     pid_field = current_app.config['PIDSTORE_RECID_FIELD']
     assert pid_field not in data
     provider = RecordIdProviderV2.create(
-        object_type='rec', object_uuid=record_uuid)
+        object_type=with_obj_type, object_uuid=record_uuid)
     data[pid_field] = provider.pid.pid_value
     return provider.pid
 

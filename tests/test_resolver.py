@@ -125,3 +125,45 @@ def test_resolver_deleted_object(app, db):
             pid_type='recid', object_type='rec', getter=records.get)
 
         assert pytest.raises(PIDDeletedError, resolver.resolve, '1')
+
+
+def test_resolver_not_registered_only(app, db):
+    """Test the resolver returns a new and reserved PID when specified."""
+
+    status = [
+        PIDStatus.NEW,
+        PIDStatus.RESERVED,
+        PIDStatus.REGISTERED
+    ]
+
+    with app.app_context():
+        rec_a = uuid.uuid4()
+        # Create pids for each status with and without object
+        for idx, s in enumerate(status, 1):
+            PersistentIdentifier.create('recid', idx*2 - 1, status=s)
+            PersistentIdentifier.create('recid', idx*2, status=s,
+                                        object_type='rec', object_uuid=rec_a)
+
+        db.session.commit()
+
+        # Start tests
+        resolver = Resolver(
+            pid_type='recid',
+            object_type='rec',
+            getter=lambda x: x,
+            registered_only=False)
+
+        # Resolve status new
+        pytest.raises(PIDMissingObjectError, resolver.resolve, '1')
+        pid, obj = resolver.resolve('2')
+        assert pid and obj == rec_a
+
+        # Resolve status reserved
+        pytest.raises(PIDMissingObjectError, resolver.resolve, '3')
+        pid, obj = resolver.resolve('4')
+        assert pid and obj == rec_a
+
+        # Resolve status registered
+        pytest.raises(PIDMissingObjectError, resolver.resolve, '5')
+        pid, obj = resolver.resolve('6')
+        assert pid and obj == rec_a
