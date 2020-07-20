@@ -9,7 +9,6 @@
 """Admin model views for PersistentIdentifier."""
 
 import uuid
-
 from flask import current_app, url_for
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.filters import FilterEqual

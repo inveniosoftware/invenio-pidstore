@@ -12,7 +12,6 @@
 from __future__ import absolute_import, print_function
 
 import uuid
-
 from click.testing import CliRunner
 from flask.cli import ScriptInfo
 

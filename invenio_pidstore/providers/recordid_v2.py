@@ -12,7 +12,6 @@
 from __future__ import absolute_import
 
 import copy
-
 from base32_lib import base32
 from flask import current_app
 

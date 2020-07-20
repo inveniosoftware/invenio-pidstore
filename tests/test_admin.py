@@ -10,7 +10,6 @@
 from __future__ import absolute_import, print_function
 
 import uuid
-
 from flask_admin import Admin, menu
 from invenio_db import db
 

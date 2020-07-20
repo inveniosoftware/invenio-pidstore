@@ -10,9 +10,8 @@
 
 from __future__ import absolute_import, print_function
 
-import uuid
-
 import pytest
+import uuid
 
 from invenio_pidstore import current_pidstore
 from invenio_pidstore.minters import recid_minter, recid_minter_v2
