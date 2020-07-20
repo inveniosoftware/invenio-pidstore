@@ -24,7 +24,8 @@ class Resolver(object):
     identifier.
     """
 
-    def __init__(self, pid_type=None, object_type=None, getter=None):
+    def __init__(self, pid_type=None, object_type=None, getter=None,
+                 registered_only=True):
         """Initialize resolver.
 
         :param pid_type: Persistent identifier type.
@@ -35,6 +36,7 @@ class Resolver(object):
         self.pid_type = pid_type
         self.object_type = object_type
         self.object_getter = getter
+        self.registered_only = registered_only
 
     def resolve(self, pid_value):
         """Resolve a persistent identifier to an internal object.
@@ -45,7 +47,10 @@ class Resolver(object):
         pid = PersistentIdentifier.get(self.pid_type, pid_value)
 
         if pid.is_new() or pid.is_reserved():
-            raise PIDUnregistered(pid)
+            if self.registered_only:
+                raise PIDUnregistered(pid)
+            else:
+                obj_id = pid.get_assigned_object(object_type=self.object_type)
 
         if pid.is_deleted():
             obj_id = pid.get_assigned_object(object_type=self.object_type)
