@@ -490,14 +490,14 @@ class PersistentIdentifier(db.Model, Timestamp):
         return self.status == PIDStatus.DELETED
 
     def is_new(self):
-        """Return true if the PIDhas not yet been registered or reserved.
+        """Return true if the PID is new.
 
         :returns: A boolean value.
         """
         return self.status == PIDStatus.NEW
 
     def is_reserved(self):
-        """Return true if the PID has not yet been reserved.
+        """Return true if the PID has been reserved.
 
         :returns: A boolean value.
         """
