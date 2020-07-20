@@ -28,7 +28,6 @@ To see more about providers see :mod:`invenio_pidstore.providers`.
 from __future__ import absolute_import, print_function
 
 from collections import namedtuple
-
 from flask import current_app
 
 from .providers.recordid import RecordIdProvider

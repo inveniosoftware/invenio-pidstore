@@ -11,10 +11,9 @@
 from __future__ import absolute_import, print_function
 
 import os
+import pytest
 import shutil
 import tempfile
-
-import pytest
 from flask import Flask
 from invenio_db import InvenioDB
 from sqlalchemy_utils.functions import create_database, database_exists

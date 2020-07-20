@@ -17,20 +17,13 @@ readme = open('README.rst').read()
 history = open('CHANGES.rst').read()
 
 tests_require = [
-    'attrs>=17.4.0',  # once pytest is upgraded this can be removed
-    'SQLAlchemy-Continuum>=1.2.1',
-    'check-manifest>=0.25',
-    'coverage>=4.0',
-    'isort>=4.3.0',
-    'invenio-admin>=1.2.0',
     'Flask-Menu>=0.5.1',
+    'invenio-admin>=1.2.0',
     'invenio-access>=1.0.0',
     'invenio-accounts>=1.0.0',
     'mock>=3.0.0',
-    'pydocstyle>=1.0.0',
-    'pytest-cov>=1.8.0',
-    'pytest-pep8>=1.0.6',
-    'pytest>=3.8.0,<5.0.0',
+    'pytest-invenio<=1.3.2',
+    'SQLAlchemy-Continuum>=1.2.1',
 ]
 
 extras_require = {

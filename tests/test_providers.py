@@ -11,9 +11,8 @@
 
 from __future__ import absolute_import, print_function
 
-import uuid
-
 import pytest
+import uuid
 from datacite.errors import DataCiteError, DataCiteGoneError, \
     DataCiteNoContentError, DataCiteNotFoundError, HttpError
 from mock import MagicMock, patch

@@ -10,11 +10,11 @@
 
 from __future__ import absolute_import, print_function
 
-import logging
-import uuid
 from enum import Enum
 
+import logging
 import six
+import uuid
 from flask_babelex import gettext
 from invenio_db import db
 from speaklater import make_lazy_gettext

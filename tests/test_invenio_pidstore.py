@@ -11,9 +11,8 @@
 
 from __future__ import absolute_import, print_function
 
-import uuid
-
 import pytest
+import uuid
 from mock import patch
 from sqlalchemy.exc import SQLAlchemyError
 

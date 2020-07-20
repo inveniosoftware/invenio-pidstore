@@ -10,9 +10,8 @@
 
 from __future__ import absolute_import, print_function
 
-import uuid
-
 import pytest
+import uuid
 
 from invenio_pidstore.errors import PIDDeletedError, PIDDoesNotExistError, \
     PIDMissingObjectError, PIDRedirectedError, PIDUnregistered
