@@ -38,8 +38,14 @@ class RecordIdProviderV2(BaseProvider):
     provide any additional features besides creation of record ids.
     """
 
-    default_status = PIDStatus.RESERVED
+    default_status_with_obj = PIDStatus.REGISTERED
     """Record IDs are by default registered immediately.
+
+    Default: :attr:`invenio_pidstore.models.PIDStatus.REGISTERED`
+    """
+
+    default_status = PIDStatus.RESERVED
+    """Record IDs with an object are by default reserved.
 
     Default: :attr:`invenio_pidstore.models.PIDStatus.RESERVED`
     """
@@ -91,7 +97,7 @@ class RecordIdProviderV2(BaseProvider):
         kwargs.setdefault('status', cls.default_status)
 
         if object_type and object_uuid:
-            kwargs['status'] = PIDStatus.REGISTERED
+            kwargs['status'] = cls.default_status_with_obj
 
         return super(RecordIdProviderV2, cls).create(
             object_type=object_type, object_uuid=object_uuid, **kwargs)
