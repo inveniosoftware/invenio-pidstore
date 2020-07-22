@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 1.2.1 (released 2020-07-22)
+
+- Support returning NEW and RESERVED PIDs by setting the `registered_only` flag.
+- Support setting default status for PIDs with object type and uuid.
+
 Version 1.2.0 (released 2020-03-09)
 
 - Change exception interpolation for better aggregation
