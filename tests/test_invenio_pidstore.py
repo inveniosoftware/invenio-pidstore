@@ -267,7 +267,7 @@ def test_delete(logger, app, db):
         assert PersistentIdentifier.query.count() == count
         assert logger.info.call_args[0][0] == "Deleted PID (removed)."
 
-        pid = PersistentIdentifier.create('rec', str(i+1))
+        pid = PersistentIdentifier.create('rec', str(i + 1))
         with patch('invenio_pidstore.models.db.session.begin_nested') as mock:
             mock.side_effect = SQLAlchemyError()
             pytest.raises(SQLAlchemyError, pid.delete)
@@ -290,9 +290,9 @@ def test_redirect(logger, app, db):
         # Can't redirect these statuses
         i = 10
         for s in [PIDStatus.NEW, PIDStatus.RESERVED, PIDStatus.DELETED, ]:
-                pid = PersistentIdentifier.create('rec', str(i), status=s)
-                i += 1
-                pytest.raises(PIDInvalidAction, pid.redirect, pid1)
+            pid = PersistentIdentifier.create('rec', str(i), status=s)
+            i += 1
+            pytest.raises(PIDInvalidAction, pid.redirect, pid1)
 
         pid = PersistentIdentifier.create(
             'rec', str(i), status=PIDStatus.REGISTERED)

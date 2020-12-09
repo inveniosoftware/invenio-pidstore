@@ -47,6 +47,7 @@ def app(request):
 def db(app):
     """Database fixture."""
     from invenio_db import db as db_
+
     if not database_exists(str(db_.engine.url)):
         create_database(str(db_.engine.url))
     db_.create_all()

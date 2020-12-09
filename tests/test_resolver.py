@@ -140,8 +140,8 @@ def test_resolver_not_registered_only(app, db):
         rec_a = uuid.uuid4()
         # Create pids for each status with and without object
         for idx, s in enumerate(status, 1):
-            PersistentIdentifier.create('recid', idx*2 - 1, status=s)
-            PersistentIdentifier.create('recid', idx*2, status=s,
+            PersistentIdentifier.create('recid', idx * 2 - 1, status=s)
+            PersistentIdentifier.create('recid', idx * 2, status=s,
                                         object_type='rec', object_uuid=rec_a)
 
         db.session.commit()
