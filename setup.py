@@ -10,7 +10,6 @@
 """Invenio module that stores and registers persistent identifiers."""
 
 import os
-
 from setuptools import find_packages, setup
 
 readme = open('README.rst').read()
@@ -20,9 +19,9 @@ tests_require = [
     'Flask-Menu>=0.5.1',
     'invenio-admin>=1.2.0',
     'invenio-access>=1.0.0',
-    'invenio-accounts>=1.0.0',
+    'invenio-accounts>=1.4.0',
     'mock>=3.0.0',
-    'pytest-invenio<=1.3.2',
+    'pytest-invenio>=1.4.0',
     'SQLAlchemy-Continuum>=1.2.1',
 ]
 
@@ -43,7 +42,7 @@ extras_require = {
         'invenio-db>=1.0.0',
     ],
     'docs': [
-        'Sphinx>=1.8.5',
+        'Sphinx>=3',
     ],
     'tests': tests_require,
 }
@@ -63,7 +62,7 @@ setup_requires = [
 install_requires = [
     'base32-lib>=1.0.1',
     'enum34>=1.1.6;python_version<"3.4"',
-    'invenio-base>=1.2.2',
+    'invenio-base>=1.2.3',
     'invenio-i18n>=1.2.0',
 ]
 
