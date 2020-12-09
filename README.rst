@@ -12,8 +12,8 @@
 .. image:: https://img.shields.io/github/license/inveniosoftware/invenio-pidstore.svg
         :target: https://github.com/inveniosoftware/invenio-pidstore/blob/master/LICENSE
 
-.. image:: https://img.shields.io/travis/inveniosoftware/invenio-pidstore.svg
-        :target: https://travis-ci.org/inveniosoftware/invenio-pidstore
+.. image:: https://github.com/inveniosoftware/invenio-pidstore/workflows/CI/badge.svg
+        :target: https://github.com/inveniosoftware/invenio-pidstore/actions?query=workflow%3ACI
 
 .. image:: https://img.shields.io/coveralls/inveniosoftware/invenio-pidstore.svg
         :target: https://coveralls.io/r/inveniosoftware/invenio-pidstore
