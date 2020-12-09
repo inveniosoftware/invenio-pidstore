@@ -53,7 +53,6 @@ SPHINX-END
 from __future__ import absolute_import, print_function
 
 import os
-
 from flask import Flask
 from flask_babelex import Babel
 from flask_menu import Menu
