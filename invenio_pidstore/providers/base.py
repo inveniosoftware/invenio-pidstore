@@ -71,7 +71,7 @@ class BaseProvider(object):
                                      pid_provider=cls.pid_provider),
             **kwargs)
 
-    def __init__(self, pid):
+    def __init__(self, pid, **kwargs):
         """Initialize provider using persistent identifier.
 
         :param pid: A :class:`invenio_pidstore.models.PersistentIdentifier`

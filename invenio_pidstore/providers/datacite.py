@@ -50,7 +50,7 @@ class DataCiteProvider(BaseProvider):
         return super(DataCiteProvider, cls).create(
             pid_value=pid_value, **kwargs)
 
-    def __init__(self, pid, client=None):
+    def __init__(self, pid, client=None, **kwargs):
         """Initialize provider.
 
         To use the default client, just configure the following variables:
