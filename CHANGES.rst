@@ -8,6 +8,13 @@
 Changes
 =======
 
+Version 1.2.2 (released 2021-01-19)
+
+- Fix a consistency issue in the providers API where the create() method takes
+  kwargs and passes them to __init__, but __init__ doesn't take kwargs by
+  default. This made it difficult to exchange providers. Now __init__ takes
+  kwargs by default.
+
 Version 1.2.1 (released 2020-07-22)
 
 - Support returning NEW and RESERVED PIDs by setting the `registered_only` flag.
