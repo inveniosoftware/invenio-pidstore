@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2022 RERO.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -51,8 +52,9 @@ def test_logger():
 def test_invenio_records():
     """Test extension initialization."""
     app = Flask('testapp')
-    with patch('invenio_pidstore.ext.pkg_resources'):
-        InvenioPIDStore(app)
+    with patch('invenio_pidstore.ext.importlib_metadata'):
+        with patch('invenio_pidstore.ext.importlib_resources'):
+            InvenioPIDStore(app)
     assert app.config['PIDSTORE_OBJECT_ENDPOINTS']
 
 

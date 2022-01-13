@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2022 RERO.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -10,7 +11,8 @@
 
 from __future__ import absolute_import, print_function
 
-import pkg_resources
+import importlib_metadata
+import importlib_resources
 
 from . import config
 from .cli import pid as cmd
@@ -52,8 +54,8 @@ class _PIDStoreState(object):
         :param name: Minter name.
         :param minter: The new minter.
         """
-        assert name not in self.minters
-        self.minters[name] = minter
+        if name not in self.minters:
+            self.minters[name] = minter
 
     def register_fetcher(self, name, fetcher):
         """Register a fetcher.
@@ -61,15 +63,15 @@ class _PIDStoreState(object):
         :param name: Fetcher name.
         :param fetcher: The new fetcher.
         """
-        assert name not in self.fetchers
-        self.fetchers[name] = fetcher
+        if name not in self.fetchers:
+            self.fetchers[name] = fetcher
 
     def load_minters_entry_point_group(self, entry_point_group):
         """Load minters from an entry point group.
 
         :param entry_point_group: The entrypoint group.
         """
-        for ep in pkg_resources.iter_entry_points(group=entry_point_group):
+        for ep in importlib_metadata.entry_points(group=entry_point_group):
             self.register_minter(ep.name, ep.load())
 
     def load_fetchers_entry_point_group(self, entry_point_group):
@@ -77,7 +79,7 @@ class _PIDStoreState(object):
 
         :param entry_point_group: The entrypoint group.
         """
-        for ep in pkg_resources.iter_entry_points(group=entry_point_group):
+        for ep in importlib_metadata.entry_points(group=entry_point_group):
             self.register_fetcher(ep.name, ep.load())
 
 
@@ -137,11 +139,11 @@ class InvenioPIDStore(object):
 
         # Initialize admin object link endpoints.
         try:
-            pkg_resources.get_distribution('invenio-records')
+            importlib_metadata.version('invenio-records')
             app.config.setdefault('PIDSTORE_OBJECT_ENDPOINTS', dict(
                 rec='recordmetadata.details_view',
             ))
-        except pkg_resources.DistributionNotFound:
+        except importlib_metadata.PackageNotFoundError:
             app.config.setdefault('PIDSTORE_OBJECT_ENDPOINTS', {})
 
         # Register template filter

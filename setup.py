@@ -3,6 +3,7 @@
 # This file is part of Invenio.
 # Copyright (C) 2015-2019 CERN.
 # Copyright (C) 2019 Northwestern University.
+# Copyright (C) 2022 RERO.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -22,7 +23,7 @@ tests_require = [
     'invenio-accounts>=1.4.0',
     'mock>=3.0.0',
     'pytest-invenio>=1.4.0',
-    'SQLAlchemy-Continuum>=1.2.1',
+    'SQLAlchemy-Continuum>=1.3.11',
 ]
 
 extras_require = {
@@ -33,16 +34,16 @@ extras_require = {
         'datacite>=0.1.0'
     ],
     'mysql': [
-        'invenio-db[mysql]>=1.0.0',
+        'invenio-db[mysql]>=1.0.9',
     ],
     'postgresql': [
-        'invenio-db[postgresql]>=1.0.0',
+        'invenio-db[postgresql]>=1.0.9',
     ],
     'sqlite': [
-        'invenio-db>=1.0.0',
+        'invenio-db>=1.0.9',
     ],
     'docs': [
-        'Sphinx>=3',
+        'Sphinx>=4.2.0',
     ],
     'tests': tests_require,
 }
@@ -61,8 +62,9 @@ setup_requires = [
 
 install_requires = [
     'base32-lib>=1.0.1',
-    'enum34>=1.1.6;python_version<"3.4"',
-    'invenio-base>=1.2.3',
+    'importlib_metadata>=4.4',
+    'importlib_resources>=5.0',
+    'invenio-base>=1.2.5',
     'invenio-i18n>=1.2.0',
 ]
 
