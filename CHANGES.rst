@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.2.3 (released 2022-02-28)
+
+- Replaces pkg_resources with importlib for entry points iteration.
+
 Version 1.2.2 (released 2021-01-19)
 
 - Fix a consistency issue in the providers API where the create() method takes
