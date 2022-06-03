@@ -43,7 +43,7 @@ extras_require = {
         'invenio-db>=1.0.9',
     ],
     'docs': [
-        'Sphinx>=4.2.0',
+        'Sphinx>=4.2.0,<5.0.0',
     ],
     'tests': tests_require,
 }
