@@ -12,8 +12,12 @@ from __future__ import absolute_import, print_function
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from .errors import PIDDeletedError, PIDMissingObjectError, \
-    PIDRedirectedError, PIDUnregistered
+from .errors import (
+    PIDDeletedError,
+    PIDMissingObjectError,
+    PIDRedirectedError,
+    PIDUnregistered,
+)
 from .models import PersistentIdentifier
 
 
@@ -24,8 +28,9 @@ class Resolver(object):
     identifier.
     """
 
-    def __init__(self, pid_type=None, object_type=None, getter=None,
-                 registered_only=True):
+    def __init__(
+        self, pid_type=None, object_type=None, getter=None, registered_only=True
+    ):
         """Initialize resolver.
 
         :param pid_type: Persistent identifier type.

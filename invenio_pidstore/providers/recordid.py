@@ -17,7 +17,7 @@ from .base import BaseProvider
 class RecordIdProvider(BaseProvider):
     """Record identifier provider."""
 
-    pid_type = 'recid'
+    pid_type = "recid"
     """Type of persistent identifier."""
 
     pid_provider = None
@@ -46,10 +46,11 @@ class RecordIdProvider(BaseProvider):
         :param kwargs: You specify the pid_value.
         """
         # Request next integer in recid sequence.
-        assert 'pid_value' not in kwargs
-        kwargs['pid_value'] = str(RecordIdentifier.next())
-        kwargs.setdefault('status', cls.default_status)
+        assert "pid_value" not in kwargs
+        kwargs["pid_value"] = str(RecordIdentifier.next())
+        kwargs.setdefault("status", cls.default_status)
         if object_type and object_uuid:
-            kwargs['status'] = PIDStatus.REGISTERED
+            kwargs["status"] = PIDStatus.REGISTERED
         return super(RecordIdProvider, cls).create(
-            object_type=object_type, object_uuid=object_uuid, **kwargs)
+            object_type=object_type, object_uuid=object_uuid, **kwargs
+        )

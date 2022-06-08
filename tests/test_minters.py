@@ -10,8 +10,9 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
 import uuid
+
+import pytest
 
 from invenio_pidstore import current_pidstore
 from invenio_pidstore.minters import recid_minter, recid_minter_v2
@@ -26,8 +27,8 @@ def test_recid_minter(app, db):
         pid = recid_minter(rec_uuid, data)
 
         assert pid
-        assert data[app.config['PIDSTORE_RECID_FIELD']] == pid.pid_value
-        assert pid.object_type == 'rec'
+        assert data[app.config["PIDSTORE_RECID_FIELD"]] == pid.pid_value
+        assert pid.object_type == "rec"
         assert pid.object_uuid == rec_uuid
 
 
@@ -36,20 +37,20 @@ def test_recid_minter_v2(app, db):
     with app.app_context():
         rec_uuid = uuid.uuid4()
         data = {}
-        recid_field = app.config['PIDSTORE_RECID_FIELD']
+        recid_field = app.config["PIDSTORE_RECID_FIELD"]
 
         pid = recid_minter_v2(rec_uuid, data)
 
         assert pid
         assert data[recid_field] == pid.pid_value
-        assert pid.object_type == 'rec'
+        assert pid.object_type == "rec"
         assert pid.object_uuid == rec_uuid
 
         with pytest.raises(AssertionError):
-            recid_minter_v2(rec_uuid, {recid_field: '1'})
+            recid_minter_v2(rec_uuid, {recid_field: "1"})
 
 
 def test_register_minter(app):
     """Test base provider."""
     with app.app_context():
-        current_pidstore.register_minter('anothername', recid_minter)
+        current_pidstore.register_minter("anothername", recid_minter)

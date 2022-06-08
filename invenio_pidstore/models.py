@@ -10,11 +10,11 @@
 
 from __future__ import absolute_import, print_function
 
+import logging
+import uuid
 from enum import Enum
 
-import logging
 import six
-import uuid
 from flask_babelex import gettext
 from invenio_db import db
 from speaklater import make_lazy_gettext
@@ -24,41 +24,45 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.models import Timestamp
 from sqlalchemy_utils.types import ChoiceType, UUIDType
 
-from .errors import PIDAlreadyExists, PIDDoesNotExistError, PIDInvalidAction, \
-    PIDObjectAlreadyAssigned
+from .errors import (
+    PIDAlreadyExists,
+    PIDDoesNotExistError,
+    PIDInvalidAction,
+    PIDObjectAlreadyAssigned,
+)
 
 _ = make_lazy_gettext(lambda: gettext)
 
-logger = logging.getLogger('invenio-pidstore')
+logger = logging.getLogger("invenio-pidstore")
 
 
 PID_STATUS_TITLES = {
-    'NEW': _('New'),
-    'RESERVED': _('Reserved'),
-    'REGISTERED': _('Registered'),
-    'REDIRECTED': _('Redirected'),
-    'DELETED': _('Deleted'),
+    "NEW": _("New"),
+    "RESERVED": _("Reserved"),
+    "REGISTERED": _("Registered"),
+    "REDIRECTED": _("Redirected"),
+    "DELETED": _("Deleted"),
 }
 
 
 class PIDStatus(Enum):
     """Constants for possible status of any given PID."""
 
-    __order__ = 'NEW RESERVED REGISTERED REDIRECTED DELETED'
+    __order__ = "NEW RESERVED REGISTERED REDIRECTED DELETED"
 
-    NEW = 'N'
+    NEW = "N"
     """PID has *not* yet been registered with the service provider."""
 
-    RESERVED = 'K'
+    RESERVED = "K"
     """PID reserved in the service provider but not yet fully registered."""
 
-    REGISTERED = 'R'
+    REGISTERED = "R"
     """PID has been registered with the service provider."""
 
-    REDIRECTED = 'M'
+    REDIRECTED = "M"
     """PID has been redirected to another persistent identifier."""
 
-    DELETED = 'D'
+    DELETED = "D"
     """PID has been deleted/inactivated with the service provider.
 
     This should happen very rarely, and must be kept track of, as the PID
@@ -91,11 +95,11 @@ class PersistentIdentifier(db.Model, Timestamp):
       * A persistent identifier has one and only one object.
     """
 
-    __tablename__ = 'pidstore_pid'
+    __tablename__ = "pidstore_pid"
     __table_args__ = (
-        db.Index('uidx_type_pid', 'pid_type', 'pid_value', unique=True),
-        db.Index('idx_status', 'status'),
-        db.Index('idx_object', 'object_type', 'object_uuid'),
+        db.Index("uidx_type_pid", "pid_type", "pid_value", unique=True),
+        db.Index("idx_status", "status"),
+        db.Index("idx_object", "object_type", "object_uuid"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -123,8 +127,15 @@ class PersistentIdentifier(db.Model, Timestamp):
     # Class methods
     #
     @classmethod
-    def create(cls, pid_type, pid_value, pid_provider=None,
-               status=PIDStatus.NEW, object_type=None, object_uuid=None,):
+    def create(
+        cls,
+        pid_type,
+        pid_value,
+        pid_provider=None,
+        status=PIDStatus.NEW,
+        object_type=None,
+        object_uuid=None,
+    ):
         """Create a new persistent identifier with specific type and value.
 
         :param pid_type: Persistent identifier type.
@@ -140,18 +151,23 @@ class PersistentIdentifier(db.Model, Timestamp):
         """
         try:
             with db.session.begin_nested():
-                obj = cls(pid_type=pid_type,
-                          pid_value=pid_value,
-                          pid_provider=pid_provider,
-                          status=status)
+                obj = cls(
+                    pid_type=pid_type,
+                    pid_value=pid_value,
+                    pid_provider=pid_provider,
+                    status=status,
+                )
                 if object_type and object_uuid:
                     obj.assign(object_type, object_uuid)
                 db.session.add(obj)
-            logger.info("Created PID {0}:{1}".format(pid_type, pid_value),
-                        extra={'pid': obj})
+            logger.info(
+                "Created PID {0}:{1}".format(pid_type, pid_value), extra={"pid": obj}
+            )
         except IntegrityError:
             logger.exception(
-                "PID already exists: %s:%s", pid_type, pid_value,
+                "PID already exists: %s:%s",
+                pid_type,
+                pid_value,
                 extra=dict(
                     pid_type=pid_type,
                     pid_value=pid_value,
@@ -159,11 +175,14 @@ class PersistentIdentifier(db.Model, Timestamp):
                     status=status,
                     object_type=object_type,
                     object_uuid=object_uuid,
-                ))
+                ),
+            )
             raise PIDAlreadyExists(pid_type=pid_type, pid_value=pid_value)
         except SQLAlchemyError:
             logger.exception(
-                "Failed to create PID: %s:%s", pid_type, pid_value,
+                "Failed to create PID: %s:%s",
+                pid_type,
+                pid_value,
                 extra=dict(
                     pid_type=pid_type,
                     pid_value=pid_value,
@@ -171,7 +190,8 @@ class PersistentIdentifier(db.Model, Timestamp):
                     status=status,
                     object_type=object_type,
                     object_uuid=object_uuid,
-                ))
+                ),
+            )
             raise
         return obj
 
@@ -190,7 +210,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         try:
             args = dict(pid_type=pid_type, pid_value=six.text_type(pid_value))
             if pid_provider:
-                args['pid_provider'] = pid_provider
+                args["pid_provider"] = pid_provider
             return cls.query.filter_by(**args).one()
         except NoResultFound:
             raise PIDDoesNotExistError(pid_type, pid_value)
@@ -209,9 +229,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         """
         try:
             return cls.query.filter_by(
-                pid_type=pid_type,
-                object_type=object_type,
-                object_uuid=object_uuid
+                pid_type=pid_type, object_type=object_type, object_uuid=object_uuid
             ).one()
         except NoResultFound:
             raise PIDDoesNotExistError(pid_type, None)
@@ -267,12 +285,10 @@ class PersistentIdentifier(db.Model, Timestamp):
 
         if self.object_type or self.object_uuid:
             # The object is already assigned to this pid.
-            if object_type == self.object_type and \
-               object_uuid == self.object_uuid:
+            if object_type == self.object_type and object_uuid == self.object_uuid:
                 return True
             if not overwrite:
-                raise PIDObjectAlreadyAssigned(object_type,
-                                               object_uuid)
+                raise PIDObjectAlreadyAssigned(object_type, object_uuid)
             self.unassign()
 
         try:
@@ -282,14 +298,13 @@ class PersistentIdentifier(db.Model, Timestamp):
                 db.session.add(self)
         except SQLAlchemyError:
             logger.exception(
-                "Failed to assign %s:%s",
-                object_type,
-                object_uuid,
-                extra=dict(pid=self)
+                "Failed to assign %s:%s", object_type, object_uuid, extra=dict(pid=self)
             )
             raise
-        logger.info("Assigned object {0}:{1}".format(
-            object_type, object_uuid), extra=dict(pid=self))
+        logger.info(
+            "Assigned object {0}:{1}".format(object_type, object_uuid),
+            extra=dict(pid=self),
+        )
         return True
 
     def unassign(self):
@@ -315,11 +330,9 @@ class PersistentIdentifier(db.Model, Timestamp):
                 self.object_uuid = None
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to unassign object.",
-                             extra=dict(pid=self))
+            logger.exception("Failed to unassign object.", extra=dict(pid=self))
             raise
-        logger.info("Unassigned object from {0}.".format(self),
-                    extra=dict(pid=self))
+        logger.info("Unassigned object from {0}.".format(self), extra=dict(pid=self))
         return True
 
     def get_redirect(self):
@@ -364,8 +377,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         except IntegrityError:
             raise PIDDoesNotExistError(pid.pid_type, pid.pid_value)
         except SQLAlchemyError:
-            logger.exception(
-                "Failed to redirect to %s", pid, extra=dict(pid=self))
+            logger.exception("Failed to redirect to %s", pid, extra=dict(pid=self))
             raise
         logger.info("Redirected PID to {0}".format(pid), extra=dict(pid=self))
         return True
@@ -381,8 +393,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         :returns: `True` if the PID is successfully reserved.
         """
         if not (self.is_new() or self.is_reserved()):
-            raise PIDInvalidAction(
-                "Persistent identifier is not new or reserved.")
+            raise PIDInvalidAction("Persistent identifier is not new or reserved.")
 
         try:
             with db.session.begin_nested():
@@ -404,8 +415,8 @@ class PersistentIdentifier(db.Model, Timestamp):
         """
         if self.is_registered() or self.is_deleted() or self.is_redirected():
             raise PIDInvalidAction(
-                "Persistent identifier has already been registered"
-                " or is deleted.")
+                "Persistent identifier has already been registered" " or is deleted."
+            )
 
         try:
             with db.session.begin_nested():
@@ -464,11 +475,9 @@ class PersistentIdentifier(db.Model, Timestamp):
                 self.status = status
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception(
-                "Failed to sync status %s.", status, extra=dict(pid=self))
+            logger.exception("Failed to sync status %s.", status, extra=dict(pid=self))
             raise
-        logger.info(
-            "Synced PID status to {0}.".format(status), extra=dict(pid=self))
+        logger.info("Synced PID status to {0}.".format(status), extra=dict(pid=self))
         return True
 
     def is_redirected(self):
@@ -506,9 +515,12 @@ class PersistentIdentifier(db.Model, Timestamp):
     def __repr__(self):
         """Get representation of object."""
         return "<PersistentIdentifier {0}:{1}{3} ({2})>".format(
-            self.pid_type, self.pid_value, self.status,
-            " / {0}:{1}".format(self.object_type, self.object_uuid) if
-            self.object_type else ""
+            self.pid_type,
+            self.pid_value,
+            self.status,
+            " / {0}:{1}".format(self.object_type, self.object_uuid)
+            if self.object_type
+            else "",
         )
 
 
@@ -527,18 +539,18 @@ class Redirect(db.Model, Timestamp):
         assert pid2.pid_value == pid.get_redirect().pid_value
     """
 
-    __tablename__ = 'pidstore_redirect'
+    __tablename__ = "pidstore_redirect"
     id = db.Column(UUIDType, default=uuid.uuid4, primary_key=True)
     """Id of redirect entry."""
 
     pid_id = db.Column(
         db.Integer,
-        db.ForeignKey(PersistentIdentifier.id, onupdate="CASCADE",
-                      ondelete="RESTRICT"),
-        nullable=False)
+        db.ForeignKey(PersistentIdentifier.id, onupdate="CASCADE", ondelete="RESTRICT"),
+        nullable=False,
+    )
     """Persistent identifier."""
 
-    pid = db.relationship(PersistentIdentifier, backref='redirects')
+    pid = db.relationship(PersistentIdentifier, backref="redirects")
     """Relationship to persistent identifier."""
 
 
@@ -553,11 +565,13 @@ class RecordIdentifier(db.Model):
     record identifiers, but instead use e.g. UUIDs as record identifiers.
     """
 
-    __tablename__ = 'pidstore_recid'
+    __tablename__ = "pidstore_recid"
 
     recid = db.Column(
         db.BigInteger().with_variant(db.Integer, "sqlite"),
-        primary_key=True, autoincrement=True)
+        primary_key=True,
+        autoincrement=True,
+    )
 
     @classmethod
     def next(cls):
@@ -589,11 +603,12 @@ class RecordIdentifier(db.Model):
 
         :param val: The value to be set.
         """
-        if db.engine.dialect.name == 'postgresql':  # pragma: no cover
+        if db.engine.dialect.name == "postgresql":  # pragma: no cover
             db.session.execute(
                 "SELECT setval(pg_get_serial_sequence("
-                "'{0}', 'recid'), :newval)".format(
-                    cls.__tablename__), dict(newval=val))
+                "'{0}', 'recid'), :newval)".format(cls.__tablename__),
+                dict(newval=val),
+            )
 
     @classmethod
     def insert(cls, val):
@@ -608,8 +623,8 @@ class RecordIdentifier(db.Model):
 
 
 __all__ = (
-    'PersistentIdentifier',
-    'PIDStatus',
-    'RecordIdentifier',
-    'Redirect',
+    "PersistentIdentifier",
+    "PIDStatus",
+    "RecordIdentifier",
+    "Redirect",
 )

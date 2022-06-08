@@ -53,6 +53,7 @@ SPHINX-END
 from __future__ import absolute_import, print_function
 
 import os
+
 from flask import Flask
 from flask_babelex import Babel
 from flask_menu import Menu
@@ -69,14 +70,16 @@ from invenio_pidstore import InvenioPIDStore
 app = Flask(__name__)
 app.config.update(
     DB_VERSIONING_USER_MODEL=None,
-    SECRET_KEY='test_key',
-    SECURITY_PASSWORD_HASH='pbkdf2_sha512',
+    SECRET_KEY="test_key",
+    SECURITY_PASSWORD_HASH="pbkdf2_sha512",
     SECURITY_PASSWORD_SALT="CHANGE_ME_ALSO",
     SECURITY_PASSWORD_SCHEMES=[
-        'pbkdf2_sha512', 'sha512_crypt', 'invenio_aes_encrypted_email'
+        "pbkdf2_sha512",
+        "sha512_crypt",
+        "invenio_aes_encrypted_email",
     ],
     SQLALCHEMY_DATABASE_URI=os.environ.get(
-        'SQLALCHEMY_DATABASE_URI', 'sqlite:///test.db'
+        "SQLALCHEMY_DATABASE_URI", "sqlite:///test.db"
     ),
     WTF_CSRF_ENABLED=False,
 )
