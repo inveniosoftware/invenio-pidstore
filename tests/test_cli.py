@@ -23,7 +23,7 @@ from invenio_pidstore.models import PersistentIdentifier, PIDStatus
 def test_pid_creation(app, db):
     """Test pid creation."""
     runner = CliRunner()
-    script_info = ScriptInfo(create_app=lambda info: app)
+    script_info = ScriptInfo(create_app=lambda: app)
 
     with runner.isolated_filesystem():
         with app.app_context():
@@ -133,7 +133,7 @@ def test_pid_creation(app, db):
 def test_pid_assign(app, db):
     """Test pid object assignment."""
     runner = CliRunner()
-    script_info = ScriptInfo(create_app=lambda info: app)
+    script_info = ScriptInfo(create_app=lambda: app)
 
     with runner.isolated_filesystem():
         # No assigned object
@@ -248,7 +248,7 @@ def test_pid_assign(app, db):
 def test_pid_unassign(app, db):
     """Test pid object unassignment."""
     runner = CliRunner()
-    script_info = ScriptInfo(create_app=lambda info: app)
+    script_info = ScriptInfo(create_app=lambda: app)
 
     with runner.isolated_filesystem():
         rec_uuid = uuid.uuid4()

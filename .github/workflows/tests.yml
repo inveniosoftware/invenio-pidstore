@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2020 CERN.
+# Copyright (C) 2022 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -28,25 +29,12 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-          python-version: [3.6, 3.7, 3.8, 3.9]
-          requirements-level: [min, pypi]
+          python-version: [3.7, 3.8, 3.9]
+          requirements-level: [pypi]
           cache-service: [redis]
-          db-service: [postgresql9, postgresql13, mysql5, mysql8]
-          exclude:
-          - python-version: 3.8
-            requirements-level: min
-
-          - python-version: 3.9
-            requirements-level: min
-
-          - db-service: postgresql13
-            python-version: 3.6
-
-          - db-service: mysql8
-            python-version: 3.6
-
+          db-service: [postgresql10, postgresql13, mysql5, mysql8]
           include:
-          - db-service: postgresql9
+          - db-service: postgresql10
             DB_EXTRAS: "postgresql"
 
           - db-service: postgresql13
