@@ -26,9 +26,11 @@ def process_status(ctx, param, value):
         return None
 
     if not hasattr(PIDStatus, value):
-        raise click.BadParameter('Status needs to be one of {0}.'.format(
-            ', '.join([s.name for s in PIDStatus])
-        ))
+        raise click.BadParameter(
+            "Status needs to be one of {0}.".format(
+                ", ".join([s.name for s in PIDStatus])
+            )
+        )
     return getattr(PIDStatus, value)
 
 
@@ -36,24 +38,25 @@ def process_status(ctx, param, value):
 # PIDStore management commands
 #
 
+
 @click.group()
 def pid():
     """PID-Store management commands."""
 
 
 @pid.command()
-@click.argument('pid_type')
-@click.argument('pid_value')
-@click.option('-s', '--status', default='NEW', callback=process_status)
-@click.option('-t', '--type', 'object_type', default=None)
-@click.option('-i', '--uuid', 'object_uuid', default=None)
+@click.argument("pid_type")
+@click.argument("pid_value")
+@click.option("-s", "--status", default="NEW", callback=process_status)
+@click.option("-t", "--type", "object_type", default=None)
+@click.option("-i", "--uuid", "object_uuid", default=None)
 @with_appcontext
 def create(pid_type, pid_value, status, object_type, object_uuid):
     """Create new persistent identifier."""
     from .models import PersistentIdentifier
 
     if bool(object_type) ^ bool(object_uuid):
-        raise click.BadParameter('Speficy both or any of --type and --uuid.')
+        raise click.BadParameter("Speficy both or any of --type and --uuid.")
 
     new_pid = PersistentIdentifier.create(
         pid_type,
@@ -63,22 +66,21 @@ def create(pid_type, pid_value, status, object_type, object_uuid):
         object_uuid=object_uuid,
     )
     db.session.commit()
-    click.echo(
-        '{0.pid_type} {0.pid_value} {0.pid_provider}'.format(new_pid)
-    )
+    click.echo("{0.pid_type} {0.pid_value} {0.pid_provider}".format(new_pid))
 
 
 @pid.command()
-@click.argument('pid_type')
-@click.argument('pid_value')
-@click.option('-s', '--status', default=None, callback=process_status)
-@click.option('-t', '--type', 'object_type', required=True)
-@click.option('-i', '--uuid', 'object_uuid', required=True)
-@click.option('--overwrite', is_flag=True, default=False)
+@click.argument("pid_type")
+@click.argument("pid_value")
+@click.option("-s", "--status", default=None, callback=process_status)
+@click.option("-t", "--type", "object_type", required=True)
+@click.option("-i", "--uuid", "object_uuid", required=True)
+@click.option("--overwrite", is_flag=True, default=False)
 @with_appcontext
 def assign(pid_type, pid_value, status, object_type, object_uuid, overwrite):
     """Assign persistent identifier."""
     from .models import PersistentIdentifier
+
     obj = PersistentIdentifier.get(pid_type, pid_value)
     if status is not None:
         obj.status = status
@@ -88,8 +90,8 @@ def assign(pid_type, pid_value, status, object_type, object_uuid, overwrite):
 
 
 @pid.command()
-@click.argument('pid_type')
-@click.argument('pid_value')
+@click.argument("pid_type")
+@click.argument("pid_value")
 @with_appcontext
 def unassign(pid_type, pid_value):
     """Unassign persistent identifier."""
@@ -101,9 +103,9 @@ def unassign(pid_type, pid_value):
     click.echo(obj.status)
 
 
-@pid.command('get')
-@click.argument('pid_type')
-@click.argument('pid_value')
+@pid.command("get")
+@click.argument("pid_type")
+@click.argument("pid_value")
 @with_appcontext
 def get_object(pid_type, pid_value):
     """Get an object behind persistent identifier."""
@@ -111,13 +113,13 @@ def get_object(pid_type, pid_value):
 
     obj = PersistentIdentifier.get(pid_type, pid_value)
     if obj.has_object():
-        click.echo('{0.object_type} {0.object_uuid} {0.status}'.format(obj))
+        click.echo("{0.object_type} {0.object_uuid} {0.status}".format(obj))
 
 
-@pid.command('dereference')
-@click.argument('object_type')
-@click.argument('object_uuid')
-@click.option('-s', '--status', default=None, callback=process_status)
+@pid.command("dereference")
+@click.argument("object_type")
+@click.argument("object_uuid")
+@click.option("-s", "--status", default=None, callback=process_status)
 @with_appcontext
 def dereference_object(object_type, object_uuid, status):
     """Show linked persistent identifier(s)."""
@@ -130,6 +132,4 @@ def dereference_object(object_type, object_uuid, status):
         pids = pids.filter_by(status=status)
 
     for found_pid in pids.all():
-        click.echo(
-            '{0.pid_type} {0.pid_value} {0.pid_provider}'.format(found_pid)
-        )
+        click.echo("{0.pid_type} {0.pid_value} {0.pid_provider}".format(found_pid))

@@ -26,8 +26,15 @@ class BaseProvider(object):
     """Default status for newly created PIDs by this provider."""
 
     @classmethod
-    def create(cls, pid_type=None, pid_value=None, object_type=None,
-               object_uuid=None, status=None, **kwargs):
+    def create(
+        cls,
+        pid_type=None,
+        pid_value=None,
+        object_type=None,
+        object_uuid=None,
+        status=None,
+        **kwargs
+    ):
         """Create a new instance for the given type and pid.
 
         :param pid_type: Persistent identifier type. (Default: None).
@@ -67,9 +74,11 @@ class BaseProvider(object):
             instance.
         """
         return cls(
-            PersistentIdentifier.get(pid_type or cls.pid_type, pid_value,
-                                     pid_provider=cls.pid_provider),
-            **kwargs)
+            PersistentIdentifier.get(
+                pid_type or cls.pid_type, pid_value, pid_provider=cls.pid_provider
+            ),
+            **kwargs
+        )
 
     def __init__(self, pid, **kwargs):
         """Initialize provider using persistent identifier.

@@ -30,10 +30,9 @@ def recid_minter_v2(record_uuid, data):
     :param data: The record metadata.
     :returns: A fresh `invenio_pidstore.models.PersistentIdentifier` instance.
     """
-    pid_field = current_app.config['PIDSTORE_RECID_FIELD']
+    pid_field = current_app.config["PIDSTORE_RECID_FIELD"]
     assert pid_field not in data
-    provider = RecordIdProviderV2.create(
-        object_type='rec', object_uuid=record_uuid)
+    provider = RecordIdProviderV2.create(object_type="rec", object_uuid=record_uuid)
     data[pid_field] = provider.pid.pid_value
     return provider.pid
 
@@ -63,9 +62,8 @@ def recid_minter(record_uuid, data):
     :param data: The record metadata.
     :returns: A fresh `invenio_pidstore.models.PersistentIdentifier` instance.
     """
-    pid_field = current_app.config['PIDSTORE_RECID_FIELD']
+    pid_field = current_app.config["PIDSTORE_RECID_FIELD"]
     assert pid_field not in data
-    provider = RecordIdProvider.create(
-        object_type='rec', object_uuid=record_uuid)
+    provider = RecordIdProvider.create(object_type="rec", object_uuid=record_uuid)
     data[pid_field] = provider.pid.pid_value
     return provider.pid

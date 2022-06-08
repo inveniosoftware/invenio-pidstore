@@ -26,7 +26,7 @@ def test_recid_fetcher(app, db):
         fetched_pid = recid_fetcher(rec_uuid, data)
         assert minted_pid.pid_value == fetched_pid.pid_value
         assert fetched_pid.pid_type == fetched_pid.provider.pid_type
-        assert fetched_pid.pid_type == 'recid'
+        assert fetched_pid.pid_type == "recid"
 
 
 def test_recid_fetcher_v2(app, db):
@@ -40,11 +40,11 @@ def test_recid_fetcher_v2(app, db):
 
         assert minted_pid.pid_value == fetched_pid.pid_value
         assert minted_pid.pid_type == fetched_pid.pid_type
-        assert fetched_pid.pid_type == 'recid'
+        assert fetched_pid.pid_type == "recid"
         assert fetched_pid.pid_value == minted_pid.pid_value
 
 
 def test_register_fetcher(app):
     """Test base provider."""
     with app.app_context():
-        current_pidstore.register_fetcher('anothername', recid_minter)
+        current_pidstore.register_fetcher("anothername", recid_minter)

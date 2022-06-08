@@ -12,8 +12,13 @@
 from __future__ import absolute_import
 
 from datacite import DataCiteMDSClient
-from datacite.errors import DataCiteError, DataCiteGoneError, \
-    DataCiteNoContentError, DataCiteNotFoundError, HttpError
+from datacite.errors import (
+    DataCiteError,
+    DataCiteGoneError,
+    DataCiteNoContentError,
+    DataCiteNotFoundError,
+    HttpError,
+)
 from flask import current_app
 
 from ..models import PIDStatus, logger
@@ -23,10 +28,10 @@ from .base import BaseProvider
 class DataCiteProvider(BaseProvider):
     """DOI provider using DataCite API."""
 
-    pid_type = 'doi'
+    pid_type = "doi"
     """Default persistent identifier type."""
 
-    pid_provider = 'datacite'
+    pid_provider = "datacite"
     """Persistent identifier provider name."""
 
     default_status = PIDStatus.NEW
@@ -47,8 +52,7 @@ class DataCiteProvider(BaseProvider):
             :class:`invenio_pidstore.providers.datacite.DataCiteProvider`
             instance.
         """
-        return super(DataCiteProvider, cls).create(
-            pid_value=pid_value, **kwargs)
+        return super(DataCiteProvider, cls).create(pid_value=pid_value, **kwargs)
 
     def __init__(self, pid, client=None, **kwargs):
         """Initialize provider.
@@ -75,12 +79,12 @@ class DataCiteProvider(BaseProvider):
             self.api = client
         else:
             self.api = DataCiteMDSClient(
-                username=current_app.config.get('PIDSTORE_DATACITE_USERNAME'),
-                password=current_app.config.get('PIDSTORE_DATACITE_PASSWORD'),
-                prefix=current_app.config.get('PIDSTORE_DATACITE_DOI_PREFIX'),
-                test_mode=current_app.config.get(
-                    'PIDSTORE_DATACITE_TESTMODE', False),
-                url=current_app.config.get('PIDSTORE_DATACITE_URL'))
+                username=current_app.config.get("PIDSTORE_DATACITE_USERNAME"),
+                password=current_app.config.get("PIDSTORE_DATACITE_PASSWORD"),
+                prefix=current_app.config.get("PIDSTORE_DATACITE_DOI_PREFIX"),
+                test_mode=current_app.config.get("PIDSTORE_DATACITE_TESTMODE", False),
+                url=current_app.config.get("PIDSTORE_DATACITE_URL"),
+            )
 
     def reserve(self, doc):
         """Reserve a DOI (amounts to upload metadata, but not to mint).
@@ -93,11 +97,9 @@ class DataCiteProvider(BaseProvider):
             self.pid.reserve()
             self.api.metadata_post(doc)
         except (DataCiteError, HttpError):
-            logger.exception("Failed to reserve in DataCite",
-                             extra=dict(pid=self.pid))
+            logger.exception("Failed to reserve in DataCite", extra=dict(pid=self.pid))
             raise
-        logger.info("Successfully reserved in DataCite",
-                    extra=dict(pid=self.pid))
+        logger.info("Successfully reserved in DataCite", extra=dict(pid=self.pid))
         return True
 
     def register(self, url, doc):
@@ -114,11 +116,9 @@ class DataCiteProvider(BaseProvider):
             # Mint DOI
             self.api.doi_post(self.pid.pid_value, url)
         except (DataCiteError, HttpError):
-            logger.exception("Failed to register in DataCite",
-                             extra=dict(pid=self.pid))
+            logger.exception("Failed to register in DataCite", extra=dict(pid=self.pid))
             raise
-        logger.info("Successfully registered in DataCite",
-                    extra=dict(pid=self.pid))
+        logger.info("Successfully registered in DataCite", extra=dict(pid=self.pid))
         return True
 
     def update(self, url, doc):
@@ -130,22 +130,19 @@ class DataCiteProvider(BaseProvider):
         :returns: `True` if is updated successfully.
         """
         if self.pid.is_deleted():
-            logger.info("Reactivate in DataCite",
-                        extra=dict(pid=self.pid))
+            logger.info("Reactivate in DataCite", extra=dict(pid=self.pid))
 
         try:
             # Set metadata
             self.api.metadata_post(doc)
             self.api.doi_post(self.pid.pid_value, url)
         except (DataCiteError, HttpError):
-            logger.exception("Failed to update in DataCite",
-                             extra=dict(pid=self.pid))
+            logger.exception("Failed to update in DataCite", extra=dict(pid=self.pid))
             raise
 
         if self.pid.is_deleted():
             self.pid.sync_status(PIDStatus.REGISTERED)
-        logger.info("Successfully updated in DataCite",
-                    extra=dict(pid=self.pid))
+        logger.info("Successfully updated in DataCite", extra=dict(pid=self.pid))
         return True
 
     def delete(self):
@@ -163,11 +160,9 @@ class DataCiteProvider(BaseProvider):
                 self.pid.delete()
                 self.api.metadata_delete(self.pid.pid_value)
         except (DataCiteError, HttpError):
-            logger.exception("Failed to delete in DataCite",
-                             extra=dict(pid=self.pid))
+            logger.exception("Failed to delete in DataCite", extra=dict(pid=self.pid))
             raise
-        logger.info("Successfully deleted in DataCite",
-                    extra=dict(pid=self.pid))
+        logger.info("Successfully deleted in DataCite", extra=dict(pid=self.pid))
         return True
 
     def sync_status(self):
@@ -199,8 +194,9 @@ class DataCiteProvider(BaseProvider):
                 except DataCiteNotFoundError:
                     pass
         except (DataCiteError, HttpError):
-            logger.exception("Failed to sync status from DataCite",
-                             extra=dict(pid=self.pid))
+            logger.exception(
+                "Failed to sync status from DataCite", extra=dict(pid=self.pid)
+            )
             raise
 
         if status is None:
@@ -208,6 +204,7 @@ class DataCiteProvider(BaseProvider):
 
         self.pid.sync_status(status)
 
-        logger.info("Successfully synced status from DataCite",
-                    extra=dict(pid=self.pid))
+        logger.info(
+            "Successfully synced status from DataCite", extra=dict(pid=self.pid)
+        )
         return True

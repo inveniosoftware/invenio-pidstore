@@ -12,6 +12,7 @@
 from __future__ import absolute_import
 
 import copy
+
 from base32_lib import base32
 from flask import current_app
 
@@ -28,7 +29,7 @@ class RecordIdProviderV2(BaseProvider):
     integer (:class:`invenio_pidstore.providers.recordid.RecordIdProvider`).
     """
 
-    pid_type = 'recid'
+    pid_type = "recid"
     """Type of persistent identifier."""
 
     pid_provider = None
@@ -55,23 +56,18 @@ class RecordIdProviderV2(BaseProvider):
         """Generate record id."""
         passed_options = options or {}
         # WHY: A new dict needs to be created to prevent side-effects
-        options = copy.deepcopy(current_app.config.get(
-            'PIDSTORE_RECORDID_OPTIONS', {}
-        ))
+        options = copy.deepcopy(current_app.config.get("PIDSTORE_RECORDID_OPTIONS", {}))
         options.update(passed_options)
-        length = options.get('length', 10)
-        split_every = options.get('split_every', 0)
-        checksum = options.get('checksum', True)
+        length = options.get("length", 10)
+        split_every = options.get("split_every", 0)
+        checksum = options.get("checksum", True)
 
         return base32.generate(
-            length=length,
-            split_every=split_every,
-            checksum=checksum
+            length=length, split_every=split_every, checksum=checksum
         )
 
     @classmethod
-    def create(cls, object_type=None, object_uuid=None, options=None,
-               **kwargs):
+    def create(cls, object_type=None, object_uuid=None, options=None, **kwargs):
         """Create a new record identifier.
 
         Note: if the object_type and object_uuid values are passed, then the
@@ -91,13 +87,14 @@ class RecordIdProviderV2(BaseProvider):
             parameters.
         :returns: A :class:`RecordIdProviderV2` instance.
         """
-        assert 'pid_value' not in kwargs
+        assert "pid_value" not in kwargs
 
-        kwargs['pid_value'] = cls.generate_id(options)
-        kwargs.setdefault('status', cls.default_status)
+        kwargs["pid_value"] = cls.generate_id(options)
+        kwargs.setdefault("status", cls.default_status)
 
         if object_type and object_uuid:
-            kwargs['status'] = cls.default_status_with_obj
+            kwargs["status"] = cls.default_status_with_obj
 
         return super(RecordIdProviderV2, cls).create(
-            object_type=object_type, object_uuid=object_uuid, **kwargs)
+            object_type=object_type, object_uuid=object_uuid, **kwargs
+        )

@@ -37,8 +37,9 @@ def pid_exists(value, pidtype=None):
 class _PIDStoreState(object):
     """Persistent identifier store state."""
 
-    def __init__(self, app, minters_entry_point_group=None,
-                 fetchers_entry_point_group=None):
+    def __init__(
+        self, app, minters_entry_point_group=None, fetchers_entry_point_group=None
+    ):
         """Initialize state."""
         self.app = app
         self.minters = {}
@@ -86,9 +87,12 @@ class _PIDStoreState(object):
 class InvenioPIDStore(object):
     """Invenio-PIDStore extension."""
 
-    def __init__(self, app=None,
-                 minters_entry_point_group='invenio_pidstore.minters',
-                 fetchers_entry_point_group='invenio_pidstore.fetchers'):
+    def __init__(
+        self,
+        app=None,
+        minters_entry_point_group="invenio_pidstore.minters",
+        fetchers_entry_point_group="invenio_pidstore.fetchers",
+    ):
         """Extension initialization.
 
         :param minters_entry_point_group: The entrypoint for minters.
@@ -98,12 +102,14 @@ class InvenioPIDStore(object):
         """
         if app:
             self._state = self.init_app(
-                app, minters_entry_point_group=minters_entry_point_group,
-                fetchers_entry_point_group=fetchers_entry_point_group
+                app,
+                minters_entry_point_group=minters_entry_point_group,
+                fetchers_entry_point_group=fetchers_entry_point_group,
             )
 
-    def init_app(self, app, minters_entry_point_group=None,
-                 fetchers_entry_point_group=None):
+    def init_app(
+        self, app, minters_entry_point_group=None, fetchers_entry_point_group=None
+    ):
         """Flask application initialization.
 
         Initialize:
@@ -132,22 +138,25 @@ class InvenioPIDStore(object):
         app.cli.add_command(cmd)
 
         # Initialize logger
-        app.config.setdefault('PIDSTORE_APP_LOGGER_HANDLERS', app.debug)
-        if app.config['PIDSTORE_APP_LOGGER_HANDLERS']:
+        app.config.setdefault("PIDSTORE_APP_LOGGER_HANDLERS", app.debug)
+        if app.config["PIDSTORE_APP_LOGGER_HANDLERS"]:
             for handler in app.logger.handlers:
                 logger.addHandler(handler)
 
         # Initialize admin object link endpoints.
         try:
-            importlib_metadata.version('invenio-records')
-            app.config.setdefault('PIDSTORE_OBJECT_ENDPOINTS', dict(
-                rec='recordmetadata.details_view',
-            ))
+            importlib_metadata.version("invenio-records")
+            app.config.setdefault(
+                "PIDSTORE_OBJECT_ENDPOINTS",
+                dict(
+                    rec="recordmetadata.details_view",
+                ),
+            )
         except importlib_metadata.PackageNotFoundError:
-            app.config.setdefault('PIDSTORE_OBJECT_ENDPOINTS', {})
+            app.config.setdefault("PIDSTORE_OBJECT_ENDPOINTS", {})
 
         # Register template filter
-        app.jinja_env.filters['pid_exists'] = pid_exists
+        app.jinja_env.filters["pid_exists"] = pid_exists
 
         # Initialize extension state.
         state = _PIDStoreState(
@@ -155,15 +164,16 @@ class InvenioPIDStore(object):
             minters_entry_point_group=minters_entry_point_group,
             fetchers_entry_point_group=fetchers_entry_point_group,
         )
-        app.extensions['invenio-pidstore'] = state
+        app.extensions["invenio-pidstore"] = state
         return state
 
     def init_config(self, app):
         """Initialize configuration."""
         for k in dir(config):
-            if k.startswith('PIDSTORE_') and k not in (
-                    'PIDSTORE_OBJECT_ENDPOINTS',
-                    'PIDSTORE_APP_LOGGER_HANDLERS'):
+            if k.startswith("PIDSTORE_") and k not in (
+                "PIDSTORE_OBJECT_ENDPOINTS",
+                "PIDSTORE_APP_LOGGER_HANDLERS",
+            ):
                 app.config.setdefault(k, getattr(config, k))
 
     def __getattr__(self, name):
