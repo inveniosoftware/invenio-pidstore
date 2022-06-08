@@ -367,6 +367,7 @@ from __future__ import absolute_import, print_function
 
 from .ext import InvenioPIDStore
 from .proxies import current_pidstore
-from .version import __version__
+
+__version__ = '1.2.3'
 
 __all__ = ('__version__', 'InvenioPIDStore', 'current_pidstore')
