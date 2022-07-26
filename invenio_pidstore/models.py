@@ -151,7 +151,7 @@ class PersistentIdentifier(db.Model, Timestamp):
                         extra={'pid': obj})
         except IntegrityError:
             logger.exception(
-                "PID already exists: {0}:{1}".format(pid_type, pid_value),
+                u"PID already exists: {0}:{1}".format(pid_type, pid_value),
                 extra=dict(
                     pid_type=pid_type,
                     pid_value=pid_value,
@@ -163,7 +163,7 @@ class PersistentIdentifier(db.Model, Timestamp):
             raise PIDAlreadyExists(pid_type=pid_type, pid_value=pid_value)
         except SQLAlchemyError:
             logger.exception(
-                "Failed to create PID: {0}:{1}".format(pid_type, pid_value),
+                u"Failed to create PID: {0}:{1}".format(pid_type, pid_value),
                 extra=dict(
                     pid_type=pid_type,
                     pid_value=pid_value,
@@ -281,7 +281,7 @@ class PersistentIdentifier(db.Model, Timestamp):
                 self.object_uuid = object_uuid
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to assign {0}:{1}".format(
+            logger.exception(u"Failed to assign {0}:{1}".format(
                 object_type, object_uuid), extra=dict(pid=self))
             raise
         logger.info(u"Assigned object {0}:{1}".format(
@@ -311,7 +311,7 @@ class PersistentIdentifier(db.Model, Timestamp):
                 self.object_uuid = None
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to unassign object.".format(self),
+            logger.exception(u"Failed to unassign object.".format(self),
                              extra=dict(pid=self))
             raise
         logger.info(u"Unassigned object from {0}.".format(self),
@@ -360,7 +360,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         except IntegrityError:
             raise PIDDoesNotExistError(pid.pid_type, pid.pid_value)
         except SQLAlchemyError:
-            logger.exception("Failed to redirect to {0}".format(
+            logger.exception(u"Failed to redirect to {0}".format(
                 pid), extra=dict(pid=self))
             raise
         logger.info(u"Redirected PID to {0}".format(pid), extra=dict(pid=self))
@@ -460,7 +460,7 @@ class PersistentIdentifier(db.Model, Timestamp):
                 self.status = status
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to sync status {0}.".format(status),
+            logger.exception(u"Failed to sync status {0}.".format(status),
                              extra=dict(pid=self))
             raise
         logger.info(u"Synced PID status to {0}.".format(status),
