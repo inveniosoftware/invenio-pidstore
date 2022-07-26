@@ -161,7 +161,7 @@ class PersistentIdentifier(db.Model, Timestamp):
                     obj.assign(object_type, object_uuid)
                 db.session.add(obj)
             logger.info(
-                "Created PID {0}:{1}".format(pid_type, pid_value), extra={"pid": obj}
+                u"Created PID {0}:{1}".format(pid_type, pid_value), extra={"pid": obj}
             )
         except IntegrityError:
             logger.exception(
@@ -332,7 +332,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         except SQLAlchemyError:
             logger.exception("Failed to unassign object.", extra=dict(pid=self))
             raise
-        logger.info("Unassigned object from {0}.".format(self), extra=dict(pid=self))
+        logger.info(u"Unassigned object from {0}.".format(self), extra=dict(pid=self))
         return True
 
     def get_redirect(self):
@@ -379,7 +379,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         except SQLAlchemyError:
             logger.exception("Failed to redirect to %s", pid, extra=dict(pid=self))
             raise
-        logger.info("Redirected PID to {0}".format(pid), extra=dict(pid=self))
+        logger.info(u"Redirected PID to {0}".format(pid), extra=dict(pid=self))
         return True
 
     def reserve(self):
@@ -477,7 +477,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         except SQLAlchemyError:
             logger.exception("Failed to sync status %s.", status, extra=dict(pid=self))
             raise
-        logger.info("Synced PID status to {0}.".format(status), extra=dict(pid=self))
+        logger.info(u"Synced PID status to {0}.".format(status), extra=dict(pid=self))
         return True
 
     def is_redirected(self):
