@@ -20,5 +20,6 @@ Contributors
 - Nicolas Harraudeau
 - Orestis Melkonian
 - Paulina Lach
+- Sam Arbid (KTH)
 - Sami Hiltunen
 - Tibor Simko
