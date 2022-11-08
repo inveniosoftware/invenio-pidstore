@@ -5,10 +5,9 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
 # 
 # Translators:
-# Alizee Pace <alizee.pace@gmail.com>, 2016
 # Tibor Simko <tibor.simko@cern.ch>, 2016
-# Hermann Schranzhofer <hermann.schranzhofer@tugraz.at>, 2021
-# chriz_uniba <christina.zeller@uni-bamberg.de>, 2022
+# Salaheddine Ben Ali <salaheddine.benali@cnudst.tn>, 2022
+# Bessem Aamira <bessemamira@gmail.com>, 2022
 # 
 #, fuzzy
 msgid ""
@@ -17,63 +16,63 @@ msgstr ""
 "Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
 "POT-Creation-Date: 2022-10-12 09:29+0000\n"
 "PO-Revision-Date: 2016-08-17 11:41+0000\n"
-"Last-Translator: chriz_uniba <christina.zeller@uni-bamberg.de>, 2022\n"
-"Language-Team: German (https://www.transifex.com/inveniosoftware/teams/23537/de/)\n"
+"Last-Translator: Bessem Aamira <bessemamira@gmail.com>, 2022\n"
+"Language-Team: Arabic (https://www.transifex.com/inveniosoftware/teams/23537/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.10.3\n"
-"Language: de\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: ar\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #: invenio_pidstore/admin.py:33
 msgid "View"
-msgstr "Ansicht"
+msgstr "عرض"
 
 #: invenio_pidstore/admin.py:66
 msgid "PID Type"
-msgstr "PID Typ"
+msgstr "نوع رمز‬ ‫المهمة‬"
 
 #: invenio_pidstore/admin.py:67
 msgid "PID"
-msgstr "PID"
+msgstr "‫رمز‬ ‫المهمة‬"
 
 #: invenio_pidstore/admin.py:68
 msgid "Provider"
-msgstr "AnbieterIn"
+msgstr "مزود"
 
 #: invenio_pidstore/admin.py:69 invenio_pidstore/admin.py:80
 msgid "Status"
-msgstr "Status"
+msgstr "الحالة"
 
 #: invenio_pidstore/admin.py:70
 msgid "Object Type"
-msgstr "Objekttyp"
+msgstr "نوع الشيء"
 
 #: invenio_pidstore/admin.py:71 invenio_pidstore/admin.py:77
 msgid "Object UUID"
-msgstr "Objekt UUID"
+msgstr "كائن UUID (المعرّف الفريد العالمي)"
 
 #: invenio_pidstore/admin.py:93
 msgid "Records"
-msgstr "Einträge"
+msgstr "السجلات"
 
 #: invenio_pidstore/models.py:40
 msgid "New"
-msgstr "Neu"
+msgstr "جديد"
 
 #: invenio_pidstore/models.py:41
 msgid "Reserved"
-msgstr "Reserviert"
+msgstr "محجوز"
 
 #: invenio_pidstore/models.py:42
 msgid "Registered"
-msgstr "Registriert"
+msgstr "مسجل"
 
 #: invenio_pidstore/models.py:43
 msgid "Redirected"
-msgstr "Umgeleitet"
+msgstr "تم التحوبل"
 
 #: invenio_pidstore/models.py:44
 msgid "Deleted"
-msgstr "Gelöscht"
+msgstr "تمّ الحذف"

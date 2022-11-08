@@ -1,73 +1,77 @@
 # Translations template for invenio-pidstore.
-# Copyright (C) 2016, 2017 CERN
+# Copyright (C) 2022 CERN
 # This file is distributed under the same license as the invenio-pidstore
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+# 
+# Translators:
+# Jiří Kunčar <jiri.kuncar@gmail.com>, 2016
+# Alizee Pace <alizee.pace@gmail.com>, 2016
 # 
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: invenio-pidstore 1.0.0b2\n"
+"Project-Id-Version: invenio-pidstore 1.2.3\n"
 "Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
-"POT-Creation-Date: 2016-08-17 11:42+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Jiří Kunčar <jiri.kuncar@gmail.com>, 2016\n"
+"POT-Creation-Date: 2022-10-12 09:29+0000\n"
+"PO-Revision-Date: 2016-08-17 11:41+0000\n"
+"Last-Translator: Alizee Pace <alizee.pace@gmail.com>, 2016\n"
 "Language-Team: French (https://www.transifex.com/inveniosoftware/teams/23537/fr/)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.3.4\n"
+"Generated-By: Babel 2.10.3\n"
 "Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
-#: invenio_pidstore/admin.py:45
+#: invenio_pidstore/admin.py:33
 msgid "View"
 msgstr "Affichage"
 
-#: invenio_pidstore/admin.py:70
+#: invenio_pidstore/admin.py:66
 msgid "PID Type"
 msgstr "Type de PID"
 
-#: invenio_pidstore/admin.py:71
+#: invenio_pidstore/admin.py:67
 msgid "PID"
 msgstr "PID"
 
-#: invenio_pidstore/admin.py:72
+#: invenio_pidstore/admin.py:68
 msgid "Provider"
 msgstr "Fournisseur"
 
-#: invenio_pidstore/admin.py:73 invenio_pidstore/admin.py:80
+#: invenio_pidstore/admin.py:69 invenio_pidstore/admin.py:80
 msgid "Status"
 msgstr "Statut"
 
-#: invenio_pidstore/admin.py:74
+#: invenio_pidstore/admin.py:70
 msgid "Object Type"
 msgstr "Type de l'objet"
 
-#: invenio_pidstore/admin.py:75 invenio_pidstore/admin.py:79
+#: invenio_pidstore/admin.py:71 invenio_pidstore/admin.py:77
 msgid "Object UUID"
 msgstr "UUID de l'objet"
 
-#: invenio_pidstore/admin.py:92
+#: invenio_pidstore/admin.py:93
 msgid "Records"
 msgstr "Notices"
 
-#: invenio_pidstore/models.py:52
+#: invenio_pidstore/models.py:40
 msgid "New"
 msgstr "Nouveau"
 
-#: invenio_pidstore/models.py:53
+#: invenio_pidstore/models.py:41
 msgid "Reserved"
 msgstr "Reservé"
 
-#: invenio_pidstore/models.py:54
+#: invenio_pidstore/models.py:42
 msgid "Registered"
 msgstr "Enregistré"
 
-#: invenio_pidstore/models.py:55
+#: invenio_pidstore/models.py:43
 msgid "Redirected"
 msgstr "Redirigé"
 
-#: invenio_pidstore/models.py:56
+#: invenio_pidstore/models.py:44
 msgid "Deleted"
 msgstr "Supprimé"
