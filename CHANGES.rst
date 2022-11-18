@@ -8,6 +8,13 @@
 Changes
 =======
 
+Version 1.2.4 (released 2022-11-18)
+
+- Add translations workflow
+- Add translations
+- Add code formatters
+- Update CI scripts
+
 Version 1.2.3 (released 2022-02-28)
 
 - Replaces pkg_resources with importlib for entry points iteration.
