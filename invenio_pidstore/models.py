@@ -15,8 +15,8 @@ import uuid
 from enum import Enum
 
 import six
-from flask_babelex import gettext
 from invenio_db import db
+from invenio_i18n import gettext
 from speaklater import make_lazy_gettext
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
