@@ -3,7 +3,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2020 CERN.
-# Copyright (C) 2022 Graz University of Technology.
+# Copyright (C) 2022-2023 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -22,7 +22,7 @@ trap cleanup EXIT
 
 
 python -m check_manifest
-python -m setup extract_messages --dry-run
+python -m setup extract_messages --output-file /dev/null
 python -m sphinx.cmd.build -qnNW docs docs/_build/html
 eval "$(docker-services-cli up --db ${DB:-postgresql} --cache ${CACHE:-redis} --env)"
 python -m pytest
