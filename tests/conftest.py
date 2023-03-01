@@ -17,6 +17,7 @@ import tempfile
 import pytest
 from flask import Flask
 from invenio_db import InvenioDB
+from invenio_i18n import InvenioI18N
 from sqlalchemy_utils.functions import create_database, database_exists
 
 from invenio_pidstore import InvenioPIDStore
@@ -29,6 +30,7 @@ def app(request):
     instance_path = tempfile.mkdtemp()
     app = Flask("testapp", instance_path=instance_path)
     InvenioDB(app)
+    InvenioI18N(app)
     InvenioPIDStore(app)
 
     app.config.update(
