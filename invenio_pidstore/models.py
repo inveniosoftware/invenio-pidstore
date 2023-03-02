@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2023 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -16,8 +17,7 @@ from enum import Enum
 
 import six
 from invenio_db import db
-from invenio_i18n import gettext
-from speaklater import make_lazy_gettext
+from invenio_i18n import lazy_gettext as _
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
@@ -30,8 +30,6 @@ from .errors import (
     PIDInvalidAction,
     PIDObjectAlreadyAssigned,
 )
-
-_ = make_lazy_gettext(lambda: gettext)
 
 logger = logging.getLogger("invenio-pidstore")
 
