@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 1.3.0 (released 2023-03-02)
+
+- Replace deprecated flask_babelex dependency and imports
+- Upgrade invenio-i18n
+
 Version 1.2.4 (released 2022-11-18)
 
 - Add translations workflow
