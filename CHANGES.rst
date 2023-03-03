@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version 1.3.1 (released 2023-03-02)
+
+- Remove unnecessary speaklater dependency references
+
 Version 1.3.0 (released 2023-03-02)
 
 - Replace deprecated flask_babelex dependency and imports
