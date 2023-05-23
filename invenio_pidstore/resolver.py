@@ -71,5 +71,7 @@ class Resolver(object):
         obj_id = pid.get_assigned_object(object_type=self.object_type)
         if not obj_id:
             raise PIDMissingObjectError(self.pid_type, pid_value)
-
-        return pid, self.object_getter(obj_id)
+        try:
+            return pid, self.object_getter(obj_id)
+        except NoResultFound:
+            raise NoResultFound(obj_id)
