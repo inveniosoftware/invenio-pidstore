@@ -4,6 +4,9 @@
 # project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
 # 
+# Translators:
+# Vasyl Ostrovskyi <vasyusya@yahoo.com>, 2023
+# 
 #, fuzzy
 msgid ""
 msgstr ""
@@ -11,7 +14,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
 "POT-Creation-Date: 2022-10-12 09:29+0000\n"
 "PO-Revision-Date: 2016-08-17 11:41+0000\n"
-"Language-Team: Ukrainian (https://www.transifex.com/inveniosoftware/teams/23537/uk/)\n"
+"Last-Translator: Vasyl Ostrovskyi <vasyusya@yahoo.com>, 2023\n"
+"Language-Team: Ukrainian (https://app.transifex.com/inveniosoftware/teams/23537/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -21,7 +25,7 @@ msgstr ""
 
 #: invenio_pidstore/admin.py:33
 msgid "View"
-msgstr ""
+msgstr "Переглянути"
 
 #: invenio_pidstore/admin.py:66
 msgid "PID Type"
@@ -37,7 +41,7 @@ msgstr ""
 
 #: invenio_pidstore/admin.py:69 invenio_pidstore/admin.py:80
 msgid "Status"
-msgstr ""
+msgstr "Статус"
 
 #: invenio_pidstore/admin.py:70
 msgid "Object Type"
