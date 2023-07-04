@@ -6,8 +6,8 @@
 # 
 # Translators:
 # Tibor Simko <tibor.simko@cern.ch>, 2016
-# Salaheddine Ben Ali <salaheddine.benali@cnudst.tn>, 2022
 # Bessem Aamira <bessemamira@gmail.com>, 2022
+# Salaheddine Ben Ali <salaheddine.benali@cnudst.tn>, 2022
 # 
 #, fuzzy
 msgid ""
@@ -16,8 +16,8 @@ msgstr ""
 "Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
 "POT-Creation-Date: 2022-10-12 09:29+0000\n"
 "PO-Revision-Date: 2016-08-17 11:41+0000\n"
-"Last-Translator: Bessem Aamira <bessemamira@gmail.com>, 2022\n"
-"Language-Team: Arabic (https://www.transifex.com/inveniosoftware/teams/23537/ar/)\n"
+"Last-Translator: Salaheddine Ben Ali <salaheddine.benali@cnudst.tn>, 2022\n"
+"Language-Team: Arabic (https://app.transifex.com/inveniosoftware/teams/23537/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -51,11 +51,11 @@ msgstr "نوع الشيء"
 
 #: invenio_pidstore/admin.py:71 invenio_pidstore/admin.py:77
 msgid "Object UUID"
-msgstr "كائن UUID (المعرّف الفريد العالمي)"
+msgstr "الشيئ UUID (المعرّف الفريد العالمي)"
 
 #: invenio_pidstore/admin.py:93
 msgid "Records"
-msgstr "السجلات"
+msgstr "التسجلات"
 
 #: invenio_pidstore/models.py:40
 msgid "New"
