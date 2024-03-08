@@ -60,7 +60,7 @@ class Resolver(object):
         if pid.is_deleted():
             obj_id = pid.get_assigned_object(object_type=self.object_type)
             try:
-                obj = self.object_getter(obj_id) if obj_id else None
+                obj = self.object_getter(obj_id, with_deleted=True) if obj_id else None
             except NoResultFound:
                 obj = None
             raise PIDDeletedError(pid, obj)
