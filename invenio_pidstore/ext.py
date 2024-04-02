@@ -3,6 +3,7 @@
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
 # Copyright (C) 2022 RERO.
+# Copyright (C) 2024 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -118,10 +119,6 @@ class InvenioPIDStore(object):
 
         * Initialize the logger (Default: `app.debug`).
 
-        * Initialize the default admin object link endpoint.
-            (Default: `{"rec": "recordmetadata.details_view"}` if
-            `invenio-records` is installed, otherwise `{}`).
-
         * Register the `pid_exists` template filter.
 
         * Initialize extension state.
@@ -142,18 +139,6 @@ class InvenioPIDStore(object):
         if app.config["PIDSTORE_APP_LOGGER_HANDLERS"]:
             for handler in app.logger.handlers:
                 logger.addHandler(handler)
-
-        # Initialize admin object link endpoints.
-        try:
-            importlib_metadata.version("invenio-records")
-            app.config.setdefault(
-                "PIDSTORE_OBJECT_ENDPOINTS",
-                dict(
-                    rec="recordmetadata.details_view",
-                ),
-            )
-        except importlib_metadata.PackageNotFoundError:
-            app.config.setdefault("PIDSTORE_OBJECT_ENDPOINTS", {})
 
         # Register template filter
         app.jinja_env.filters["pid_exists"] = pid_exists
