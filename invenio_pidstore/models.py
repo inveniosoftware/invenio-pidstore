@@ -516,9 +516,11 @@ class PersistentIdentifier(db.Model, Timestamp):
             self.pid_type,
             self.pid_value,
             self.status,
-            " / {0}:{1}".format(self.object_type, self.object_uuid)
-            if self.object_type
-            else "",
+            (
+                " / {0}:{1}".format(self.object_type, self.object_uuid)
+                if self.object_type
+                else ""
+            ),
         )
 
 
