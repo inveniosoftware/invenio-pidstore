@@ -2,7 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
-# Copyright (C) 2023 Graz University of Technology.
+# Copyright (C) 2023-2024 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -209,7 +209,7 @@ class PersistentIdentifier(db.Model, Timestamp):
             args = dict(pid_type=pid_type, pid_value=six.text_type(pid_value))
             if pid_provider:
                 args["pid_provider"] = pid_provider
-            return cls.query.filter_by(**args).one()
+            return db.session.query(cls).filter_by(**args).one()
         except NoResultFound:
             raise PIDDoesNotExistError(pid_type, pid_value)
 
@@ -226,9 +226,13 @@ class PersistentIdentifier(db.Model, Timestamp):
             instance.
         """
         try:
-            return cls.query.filter_by(
-                pid_type=pid_type, object_type=object_type, object_uuid=object_uuid
-            ).one()
+            return (
+                db.session.query(cls)
+                .filter_by(
+                    pid_type=pid_type, object_type=object_type, object_uuid=object_uuid
+                )
+                .one()
+            )
         except NoResultFound:
             raise PIDDoesNotExistError(pid_type, None)
 
@@ -320,7 +324,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         try:
             with db.session.begin_nested():
                 if self.is_redirected():
-                    db.session.delete(Redirect.query.get(self.object_uuid))
+                    db.session.delete(db.session.get(Redirect, self.object_uuid))
                     # Only registered PIDs can be redirected so we set it back
                     # to registered
                     self.status = PIDStatus.REGISTERED
@@ -339,7 +343,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         :returns: The :class:`invenio_pidstore.models.PersistentIdentifier`
             instance.
         """
-        return Redirect.query.get(self.object_uuid).pid
+        return db.session.get(Redirect, self.object_uuid).pid
 
     #
     # Status methods.
@@ -361,7 +365,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         try:
             with db.session.begin_nested():
                 if self.is_redirected():
-                    r = Redirect.query.get(self.object_uuid)
+                    r = db.session.get(Redirect, self.object_uuid)
                     r.pid = pid
                 else:
                     with db.session.begin_nested():
