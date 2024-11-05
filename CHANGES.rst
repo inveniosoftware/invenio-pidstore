@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version 1.3.2 (released 2024-11-05)
+
+- model: make forward compatible to sqlalchemy >= 2
+- i18n: push translations
+
 Version 1.3.1 (released 2023-03-02)
 
 - Remove unnecessary speaklater dependency references
