@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 2.0.0 (released 2024-12-05)
+
+- setup: bump invenio dependencies
+
 Version 1.3.4 (released 2024-12-05)
 
 - fix: add translation flag for publishing
