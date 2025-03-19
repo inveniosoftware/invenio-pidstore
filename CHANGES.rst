@@ -2,12 +2,17 @@
     This file is part of Invenio.
     Copyright (C) 2015-2020 CERN.
     Copyright (C) 2024 Graz University of Technology.
+    Copyright (C) 2025 KTH Royal Institute of Technology.
 
     Invenio is free software; you can redistribute it and/or modify it
     under the terms of the MIT License; see LICENSE file for more details.
 
 Changes
 =======
+
+Version 1.3.4 (released 2025-03-19)
+
+- i18n: mark missing strings for translations
 
 Version 1.3.3 (released 2024-11-28)
 
