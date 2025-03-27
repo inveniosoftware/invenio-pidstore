@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version 1.3.5 (released 2025-03-27)
+
+- i18n: mark missing strings for translations
+
 Version 1.3.3 (released 2024-11-28)
 
 - setup: pin dependencies
