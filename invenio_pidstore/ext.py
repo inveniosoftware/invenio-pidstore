@@ -11,8 +11,9 @@
 
 from __future__ import absolute_import, print_function
 
-import importlib_metadata
-import importlib_resources
+import importlib.metadata
+
+from invenio_base.utils import entry_points
 
 from . import config
 from .cli import pid as cmd
@@ -72,7 +73,7 @@ class _PIDStoreState(object):
 
         :param entry_point_group: The entrypoint group.
         """
-        for ep in importlib_metadata.entry_points(group=entry_point_group):
+        for ep in entry_points(group=entry_point_group):
             self.register_minter(ep.name, ep.load())
 
     def load_fetchers_entry_point_group(self, entry_point_group):
@@ -80,7 +81,7 @@ class _PIDStoreState(object):
 
         :param entry_point_group: The entrypoint group.
         """
-        for ep in importlib_metadata.entry_points(group=entry_point_group):
+        for ep in entry_points(group=entry_point_group):
             self.register_fetcher(ep.name, ep.load())
 
 
@@ -145,14 +146,14 @@ class InvenioPIDStore(object):
 
         # Initialize admin object link endpoints.
         try:
-            importlib_metadata.version("invenio-records")
+            importlib.metadata.version("invenio-records")
             app.config.setdefault(
                 "PIDSTORE_OBJECT_ENDPOINTS",
                 dict(
                     rec="recordmetadata.details_view",
                 ),
             )
-        except importlib_metadata.PackageNotFoundError:
+        except importlib.metadata.PackageNotFoundError:
             app.config.setdefault("PIDSTORE_OBJECT_ENDPOINTS", {})
 
         # Register template filter

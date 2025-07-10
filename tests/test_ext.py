@@ -55,8 +55,8 @@ def test_logger():
 def test_invenio_records():
     """Test extension initialization."""
     app = Flask("testapp")
-    with patch("invenio_pidstore.ext.importlib_metadata"):
-        with patch("invenio_pidstore.ext.importlib_resources"):
+    with patch("importlib.metadata"):
+        with patch("importlib.resources"):
             InvenioPIDStore(app)
     assert app.config["PIDSTORE_OBJECT_ENDPOINTS"]
 
