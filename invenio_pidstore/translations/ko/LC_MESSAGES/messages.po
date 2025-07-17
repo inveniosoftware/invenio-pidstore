@@ -5,8 +5,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
 # 
 # Translators:
-# Tibor Simko <tibor.simko@cern.ch>, 2016
-# Anna Sakoyan, 2025
+# Minjae Kwon, 2024
 # 
 #, fuzzy
 msgid ""
@@ -15,63 +14,63 @@ msgstr ""
 "Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
 "POT-Creation-Date: 2025-03-27 14:45+0000\n"
 "PO-Revision-Date: 2016-08-17 11:41+0000\n"
-"Last-Translator: Anna Sakoyan, 2025\n"
-"Language-Team: Russian (https://app.transifex.com/inveniosoftware/teams/23537/ru/)\n"
+"Last-Translator: Minjae Kwon, 2024\n"
+"Language-Team: Korean (https://app.transifex.com/inveniosoftware/teams/23537/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
-"Language: ru\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Language: ko\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: invenio_pidstore/admin.py:33
 msgid "View"
-msgstr "Просмотр"
+msgstr "보기"
 
 #: invenio_pidstore/admin.py:66
 msgid "PID Type"
-msgstr ""
+msgstr "PID 종류"
 
 #: invenio_pidstore/admin.py:67
 msgid "PID"
-msgstr ""
+msgstr "PID"
 
 #: invenio_pidstore/admin.py:68
 msgid "Provider"
-msgstr ""
+msgstr "제공자"
 
 #: invenio_pidstore/admin.py:69 invenio_pidstore/admin.py:80
 msgid "Status"
-msgstr "Статус"
+msgstr "상태"
 
 #: invenio_pidstore/admin.py:70
 msgid "Object Type"
-msgstr ""
+msgstr "오브젝트 종류"
 
 #: invenio_pidstore/admin.py:71 invenio_pidstore/admin.py:77
 msgid "Object UUID"
-msgstr ""
+msgstr "오브젝트 UUID"
 
 #: invenio_pidstore/admin.py:93
 msgid "Records"
-msgstr "Записи"
+msgstr ""
 
 #: invenio_pidstore/models.py:38
 msgid "New"
-msgstr "Новый"
+msgstr "신규"
 
 #: invenio_pidstore/models.py:39
 msgid "Reserved"
-msgstr ""
+msgstr "예약됨"
 
 #: invenio_pidstore/models.py:40
 msgid "Registered"
-msgstr ""
+msgstr "등록됨"
 
 #: invenio_pidstore/models.py:41
 msgid "Redirected"
-msgstr ""
+msgstr "리다이렉트됨"
 
 #: invenio_pidstore/models.py:42
 msgid "Deleted"
-msgstr "Удалено"
+msgstr "삭제됨"
