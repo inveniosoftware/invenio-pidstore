@@ -9,6 +9,10 @@
 Changes
 =======
 
+Version v2.2.0 (released 2025-07-17)
+
+- i18n: pulled translations
+
 Version 2.1.0 (released 2025-07-14)
 
 - chores: replaced importlib_xyz with importlib
