@@ -2,19 +2,16 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2025 Northwestern University.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
 """Click command-line interface for PIDStore management."""
 
-from __future__ import absolute_import, print_function
-
 import click
 from flask.cli import with_appcontext
 from invenio_db import db
-
-from .proxies import current_pidstore
 
 
 def process_status(ctx, param, value):
@@ -56,7 +53,7 @@ def create(pid_type, pid_value, status, object_type, object_uuid):
     from .models import PersistentIdentifier
 
     if bool(object_type) ^ bool(object_uuid):
-        raise click.BadParameter("Speficy both or any of --type and --uuid.")
+        raise click.BadParameter("Specify both --type and --uuid or neither.")
 
     new_pid = PersistentIdentifier.create(
         pid_type,
