@@ -2,7 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
-# Copyright (C) 2023-2024 Graz University of Technology.
+# Copyright (C) 2023-2026 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -21,7 +21,6 @@ from invenio_i18n import lazy_gettext as _
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy_utils.models import Timestamp
 from sqlalchemy_utils.types import ChoiceType, UUIDType
 
 from .errors import (
@@ -84,7 +83,7 @@ class PIDStatus(Enum):
         return PID_STATUS_TITLES[self.name]
 
 
-class PersistentIdentifier(db.Model, Timestamp):
+class PersistentIdentifier(db.Model, db.Timestamp):
     """Store and register persistent identifiers.
 
     Assumptions:
@@ -528,7 +527,7 @@ class PersistentIdentifier(db.Model, Timestamp):
         )
 
 
-class Redirect(db.Model, Timestamp):
+class Redirect(db.Model, db.Timestamp):
     """Redirect for a persistent identifier.
 
     You can redirect a PID to another one.
