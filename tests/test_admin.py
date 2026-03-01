@@ -2,6 +2,7 @@
 #
 # This file is part of Invenio.
 # Copyright (C) 2015-2018 CERN.
+# Copyright (C) 2026 Graz University of Technology.
 #
 # Invenio is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -18,9 +19,9 @@ from invenio_pidstore.admin import FilterUUID, object_formatter, pid_adminview
 from invenio_pidstore.models import PersistentIdentifier
 
 
-def test_admin(app):
+def test_admin(app_admin):
     """Test flask-admin interace."""
-    admin = Admin(app, name="AdminExt")
+    admin = Admin(app_admin, name="AdminExt")
 
     pid_kwargs = dict(pid_adminview)
 
