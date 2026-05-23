@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-#
-# This file is part of Invenio.
-# Copyright (C) 2015-2018 CERN.
-# Copyright (C) 2025 Northwestern University.
-#
-# Invenio is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
+# SPDX-FileCopyrightText: 2015-2018 CERN.
+# SPDX-FileCopyrightText: 2025 Northwestern University.
+# SPDX-License-Identifier: MIT
 
 """Click command-line interface for PIDStore management."""
 
