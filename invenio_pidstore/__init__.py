@@ -202,8 +202,8 @@ persistent identifier will throw a
 ...     status=PIDStatus.RESERVED)
 >>> resolver.resolve('13')
 Traceback (most recent call last):
-...
-invenio_pidstore.errors.PIDUnregistered: ...
+  ...
+invenio_pidstore.errors.PIDUnregistered
 
 Providers
 ---------
