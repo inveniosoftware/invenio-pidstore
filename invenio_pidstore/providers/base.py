@@ -28,7 +28,7 @@ class BaseProvider(object):
         object_type=None,
         object_uuid=None,
         status=None,
-        **kwargs
+        **kwargs,
     ):
         """Create a new instance for the given type and pid.
 
@@ -72,7 +72,7 @@ class BaseProvider(object):
             PersistentIdentifier.get(
                 pid_type or cls.pid_type, pid_value, pid_provider=cls.pid_provider
             ),
-            **kwargs
+            **kwargs,
         )
 
     def __init__(self, pid, **kwargs):
