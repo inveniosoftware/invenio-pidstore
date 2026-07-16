@@ -8,8 +8,6 @@ from __future__ import print_function
 
 import sys
 
-import sphinx.environment
-
 from invenio_pidstore import __version__
 
 # Plug example application into module path
