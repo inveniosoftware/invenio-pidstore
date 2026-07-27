@@ -5,8 +5,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 # 
 # Translators:
-# Tibor Simko <tibor.simko@cern.ch>, 2016
-# Karolina, 2022
+# Suthep Yonphimai <tomztt@gmail.com>, 2026
 # 
 #, fuzzy
 msgid ""
@@ -15,63 +14,63 @@ msgstr ""
 "Report-Msgid-Bugs-To: info@inveniosoftware.org\n"
 "POT-Creation-Date: 2026-06-22 20:32+0000\n"
 "PO-Revision-Date: 2016-08-17 11:41+0000\n"
-"Last-Translator: Karolina, 2022\n"
-"Language-Team: Polish (https://app.transifex.com/inveniosoftware/teams/23537/pl/)\n"
+"Last-Translator: Suthep Yonphimai <tomztt@gmail.com>, 2026\n"
+"Language-Team: Thai (https://app.transifex.com/inveniosoftware/teams/23537/th/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
-"Language: pl\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Language: th\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: invenio_pidstore/admin.py:28
 msgid "View"
-msgstr ""
+msgstr "ดู"
 
 #: invenio_pidstore/admin.py:61
 msgid "PID Type"
-msgstr ""
+msgstr "ประเภท PID"
 
 #: invenio_pidstore/admin.py:62
 msgid "PID"
-msgstr ""
+msgstr "PID"
 
 #: invenio_pidstore/admin.py:63
 msgid "Provider"
-msgstr ""
+msgstr "ผู้ให้บริการ"
 
 #: invenio_pidstore/admin.py:64 invenio_pidstore/admin.py:75
 msgid "Status"
-msgstr "Status"
+msgstr "สถานะ"
 
 #: invenio_pidstore/admin.py:65
 msgid "Object Type"
-msgstr ""
+msgstr "ประเภทวัตถุ"
 
 #: invenio_pidstore/admin.py:66 invenio_pidstore/admin.py:72
 msgid "Object UUID"
-msgstr ""
+msgstr "UUID ของวัตถุ"
 
 #: invenio_pidstore/admin.py:88
 msgid "Records"
-msgstr ""
+msgstr "ระเบียน"
 
 #: invenio_pidstore/models.py:32
 msgid "New"
-msgstr ""
+msgstr "ใหม่"
 
 #: invenio_pidstore/models.py:33
 msgid "Reserved"
-msgstr ""
+msgstr "สำรองแล้ว"
 
 #: invenio_pidstore/models.py:34
 msgid "Registered"
-msgstr ""
+msgstr "ลงทะเบียนแล้ว"
 
 #: invenio_pidstore/models.py:35
 msgid "Redirected"
-msgstr ""
+msgstr "เปลี่ยนเส้นทางแล้ว"
 
 #: invenio_pidstore/models.py:36
 msgid "Deleted"
-msgstr "usunięty"
+msgstr "ถูกลบแล้ว"
