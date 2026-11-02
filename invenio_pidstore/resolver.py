@@ -3,8 +3,6 @@
 
 """Internal resolver for persistent identifiers."""
 
-from __future__ import absolute_import, print_function
-
 from sqlalchemy.orm.exc import NoResultFound
 
 from .errors import (
@@ -16,7 +14,7 @@ from .errors import (
 from .models import PersistentIdentifier
 
 
-class Resolver(object):
+class Resolver:
     """Persistent identifier resolver.
 
     Helper class for retrieving an internal object for a given persistent

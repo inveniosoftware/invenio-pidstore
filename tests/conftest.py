@@ -3,8 +3,6 @@
 
 """Pytest configuration."""
 
-from __future__ import absolute_import, print_function
-
 import os
 import shutil
 import tempfile
@@ -18,7 +16,7 @@ from sqlalchemy_utils.functions import create_database, database_exists
 from invenio_pidstore import InvenioPIDStore
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def app(request):
     """Flask application fixture."""
     # Set temporary instance path for sqlite
@@ -42,7 +40,7 @@ def app(request):
     shutil.rmtree(instance_path)
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def db(app):
     """Database fixture."""
     from invenio_db import db as db_

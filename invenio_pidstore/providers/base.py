@@ -3,12 +3,10 @@
 
 """Module storing implementations of PID providers."""
 
-from __future__ import absolute_import, print_function
-
 from ..models import PersistentIdentifier, PIDStatus
 
 
-class BaseProvider(object):
+class BaseProvider:
     """Abstract class for persistent identifier provider classes."""
 
     pid_type = None
@@ -103,7 +101,6 @@ class BaseProvider(object):
 
     def update(self):
         """Update information about the persistent identifier."""
-        pass
 
     def delete(self):
         """Delete a persistent identifier.
@@ -114,4 +111,3 @@ class BaseProvider(object):
 
     def sync_status(self):
         """Synchronize PIDstatus with remote service provider."""
-        pass

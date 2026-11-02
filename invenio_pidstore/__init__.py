@@ -366,4 +366,4 @@ from .proxies import current_pidstore
 
 __version__ = "4.0.2"
 
-__all__ = ("__version__", "InvenioPIDStore", "current_pidstore")
+__all__ = ("InvenioPIDStore", "__version__", "current_pidstore")

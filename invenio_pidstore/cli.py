@@ -18,11 +18,8 @@ def process_status(ctx, param, value):
         return None
 
     if not hasattr(PIDStatus, value):
-        raise click.BadParameter(
-            "Status needs to be one of {0}.".format(
-                ", ".join([s.name for s in PIDStatus])
-            )
-        )
+        pid_status_values = ", ".join([s.name for s in PIDStatus])
+        raise click.BadParameter(f"Status needs to be one of {pid_status_values}.")
     return getattr(PIDStatus, value)
 
 
@@ -58,7 +55,7 @@ def create(pid_type, pid_value, status, object_type, object_uuid):
         object_uuid=object_uuid,
     )
     db.session.commit()
-    click.echo("{0.pid_type} {0.pid_value} {0.pid_provider}".format(new_pid))
+    click.echo(f"{new_pid.pid_type} {new_pid.pid_value} {new_pid.pid_provider}")
 
 
 @pid.command()
@@ -105,7 +102,7 @@ def get_object(pid_type, pid_value):
 
     obj = PersistentIdentifier.get(pid_type, pid_value)
     if obj.has_object():
-        click.echo("{0.object_type} {0.object_uuid} {0.status}".format(obj))
+        click.echo(f"{obj.object_type} {obj.object_uuid} {obj.status}")
 
 
 @pid.command("dereference")
@@ -124,4 +121,6 @@ def dereference_object(object_type, object_uuid, status):
         pids = pids.filter_by(status=status)
 
     for found_pid in pids.all():
-        click.echo("{0.pid_type} {0.pid_value} {0.pid_provider}".format(found_pid))
+        click.echo(
+            f"{found_pid.pid_type} {found_pid.pid_value} {found_pid.pid_provider}"
+        )

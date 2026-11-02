@@ -4,8 +4,6 @@
 
 """DataCite PID provider."""
 
-from __future__ import absolute_import
-
 import copy
 
 from base32_lib import base32
@@ -90,6 +88,6 @@ class RecordIdProviderV2(BaseProvider):
         if object_type and object_uuid:
             kwargs["status"] = cls.default_status_with_obj
 
-        return super(RecordIdProviderV2, cls).create(
+        return super().create(
             object_type=object_type, object_uuid=object_uuid, **kwargs
         )

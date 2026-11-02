@@ -3,8 +3,6 @@
 
 """Record ID provider."""
 
-from __future__ import absolute_import, print_function
-
 from ..models import PIDStatus, RecordIdentifier
 from .base import BaseProvider
 
@@ -46,6 +44,6 @@ class RecordIdProvider(BaseProvider):
         kwargs.setdefault("status", cls.default_status)
         if object_type and object_uuid:
             kwargs["status"] = PIDStatus.REGISTERED
-        return super(RecordIdProvider, cls).create(
+        return super().create(
             object_type=object_type, object_uuid=object_uuid, **kwargs
         )

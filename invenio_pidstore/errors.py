@@ -3,8 +3,6 @@
 
 """Errors for persistent identifiers."""
 
-from __future__ import absolute_import, print_function
-
 
 class PersistentIdentifierError(Exception):
     """Base class for PIDStore errors."""
@@ -17,7 +15,7 @@ class PIDValueError(PersistentIdentifierError):
         """Initialize exception."""
         self.pid_type = pid_type
         self.pid_value = pid_value
-        super(PIDValueError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class PIDDoesNotExistError(PIDValueError):
@@ -34,7 +32,7 @@ class ResolverError(PersistentIdentifierError):
     def __init__(self, pid, *args, **kwargs):
         """Initialize exception."""
         self.pid = pid
-        super(ResolverError, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class PIDDeletedError(ResolverError):
@@ -43,7 +41,7 @@ class PIDDeletedError(ResolverError):
     def __init__(self, pid, record, *args, **kwargs):
         """Initialize exception."""
         self.record = record
-        super(PIDDeletedError, self).__init__(pid, *args, **kwargs)
+        super().__init__(pid, *args, **kwargs)
 
 
 class PIDMissingObjectError(ResolverError):
@@ -60,7 +58,7 @@ class PIDRedirectedError(ResolverError):
     def __init__(self, pid, dest_pid, *args, **kwargs):
         """Initialize exception."""
         self.destination_pid = dest_pid
-        super(PIDRedirectedError, self).__init__(pid, *args, **kwargs)
+        super().__init__(pid, *args, **kwargs)
 
 
 class PIDObjectAlreadyAssigned(PersistentIdentifierError):

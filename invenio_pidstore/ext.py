@@ -4,8 +4,6 @@
 
 """Invenio module that stores and registers persistent identifiers."""
 
-from __future__ import absolute_import, print_function
-
 import importlib.metadata
 
 from invenio_base.utils import entry_points
@@ -30,7 +28,7 @@ def pid_exists(value, pidtype=None):
         return False
 
 
-class _PIDStoreState(object):
+class _PIDStoreState:
     """Persistent identifier store state."""
 
     def __init__(
@@ -80,7 +78,7 @@ class _PIDStoreState(object):
             self.register_fetcher(ep.name, ep.load())
 
 
-class InvenioPIDStore(object):
+class InvenioPIDStore:
     """Invenio-PIDStore extension."""
 
     def __init__(
@@ -144,9 +142,9 @@ class InvenioPIDStore(object):
             importlib.metadata.version("invenio-records")
             app.config.setdefault(
                 "PIDSTORE_OBJECT_ENDPOINTS",
-                dict(
-                    rec="recordmetadata.details_view",
-                ),
+                {
+                    "rec": "recordmetadata.details_view",
+                },
             )
         except importlib.metadata.PackageNotFoundError:
             app.config.setdefault("PIDSTORE_OBJECT_ENDPOINTS", {})

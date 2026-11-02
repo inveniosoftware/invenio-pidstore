@@ -4,12 +4,10 @@
 
 """Model tests."""
 
-from __future__ import absolute_import, print_function
-
 import uuid
+from unittest.mock import patch
 
 import pytest
-from mock import patch
 from sqlalchemy.exc import SQLAlchemyError
 
 from invenio_pidstore.errors import (
