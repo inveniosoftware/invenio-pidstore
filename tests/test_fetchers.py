@@ -3,8 +3,6 @@
 
 """Fetcher tests."""
 
-from __future__ import absolute_import, print_function
-
 import uuid
 
 from invenio_pidstore import current_pidstore

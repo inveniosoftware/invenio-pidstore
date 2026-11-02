@@ -4,9 +4,8 @@
 
 """Provider tests."""
 
-from __future__ import absolute_import, print_function
-
 import uuid
+from unittest.mock import MagicMock, patch
 
 import pytest
 from datacite.errors import (
@@ -16,7 +15,6 @@ from datacite.errors import (
     DataCiteNotFoundError,
     HttpError,
 )
-from mock import MagicMock, patch
 
 from invenio_pidstore.models import PIDStatus
 from invenio_pidstore.providers.base import BaseProvider

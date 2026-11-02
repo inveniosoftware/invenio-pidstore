@@ -5,10 +5,9 @@
 
 """Extension tests."""
 
-from __future__ import absolute_import, print_function
+from unittest.mock import patch
 
 from flask import Flask
-from mock import patch
 
 from invenio_pidstore import InvenioPIDStore
 from invenio_pidstore.models import PersistentIdentifier
@@ -50,9 +49,8 @@ def test_logger():
 def test_invenio_records():
     """Test extension initialization."""
     app = Flask("testapp")
-    with patch("importlib.metadata"):
-        with patch("importlib.resources"):
-            InvenioPIDStore(app)
+    with patch("importlib.metadata"), patch("importlib.resources"):
+        InvenioPIDStore(app)
     assert app.config["PIDSTORE_OBJECT_ENDPOINTS"]
 
 

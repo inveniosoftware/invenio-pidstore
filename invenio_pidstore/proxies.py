@@ -3,8 +3,6 @@
 
 """Define PIDStore proxies."""
 
-from __future__ import absolute_import
-
 from flask import current_app
 from werkzeug.local import LocalProxy
 

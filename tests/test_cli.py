@@ -4,8 +4,6 @@
 
 """CLI tests."""
 
-from __future__ import absolute_import, print_function
-
 import uuid
 
 from click.testing import CliRunner
@@ -265,7 +263,7 @@ def test_pid_unassign(app, db):
             obj=script_info,
         )
         assert 0 == result.exit_code
-        assert "rec {0} N\n".format(str(rec_uuid)) == result.output
+        assert f"rec {rec_uuid!s} N\n" == result.output
 
         result = runner.invoke(
             cmd,

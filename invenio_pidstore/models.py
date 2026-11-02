@@ -4,8 +4,6 @@
 
 """Persistent identifier store and registration."""
 
-from __future__ import absolute_import, print_function
-
 import logging
 import uuid
 from enum import Enum
@@ -151,22 +149,20 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                 if object_type and object_uuid:
                     obj.assign(object_type, object_uuid)
                 db.session.add(obj)
-            logger.info(
-                "Created PID {0}:{1}".format(pid_type, pid_value), extra={"pid": obj}
-            )
+            logger.info("Created PID %s:%s", pid_type, pid_value, extra={"pid": obj})
         except IntegrityError:
             logger.exception(
                 "PID already exists: %s:%s",
                 pid_type,
                 pid_value,
-                extra=dict(
-                    pid_type=pid_type,
-                    pid_value=pid_value,
-                    pid_provider=pid_provider,
-                    status=status,
-                    object_type=object_type,
-                    object_uuid=object_uuid,
-                ),
+                extra={
+                    "pid_type": pid_type,
+                    "pid_value": pid_value,
+                    "pid_provider": pid_provider,
+                    "status": status,
+                    "object_type": object_type,
+                    "object_uuid": object_uuid,
+                },
             )
             raise PIDAlreadyExists(pid_type=pid_type, pid_value=pid_value)
         except SQLAlchemyError:
@@ -174,14 +170,14 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                 "Failed to create PID: %s:%s",
                 pid_type,
                 pid_value,
-                extra=dict(
-                    pid_type=pid_type,
-                    pid_value=pid_value,
-                    pid_provider=pid_provider,
-                    status=status,
-                    object_type=object_type,
-                    object_uuid=object_uuid,
-                ),
+                extra={
+                    "pid_type": pid_type,
+                    "pid_value": pid_value,
+                    "pid_provider": pid_provider,
+                    "status": status,
+                    "object_type": object_type,
+                    "object_uuid": object_uuid,
+                },
             )
             raise
         return obj
@@ -199,7 +195,7 @@ class PersistentIdentifier(db.Model, db.Timestamp):
             instance.
         """
         try:
-            args = dict(pid_type=pid_type, pid_value=str(pid_value))
+            args = {"pid_type": pid_type, "pid_value": str(pid_value)}
             if pid_provider:
                 args["pid_provider"] = pid_provider
             return db.session.query(cls).filter_by(**args).one()
@@ -293,12 +289,14 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                 db.session.add(self)
         except SQLAlchemyError:
             logger.exception(
-                "Failed to assign %s:%s", object_type, object_uuid, extra=dict(pid=self)
+                "Failed to assign %s:%s", object_type, object_uuid, extra={"pid": self}
             )
             raise
         logger.info(
-            "Assigned object {0}:{1}".format(object_type, object_uuid),
-            extra=dict(pid=self),
+            "Assigned object %s:%s",
+            object_type,
+            object_uuid,
+            extra={"pid": self},
         )
         return True
 
@@ -325,9 +323,9 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                 self.object_uuid = None
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to unassign object.", extra=dict(pid=self))
+            logger.exception("Failed to unassign object.", extra={"pid": self})
             raise
-        logger.info("Unassigned object from {0}.".format(self), extra=dict(pid=self))
+        logger.info("Unassigned object from %s.", self, extra={"pid": self})
         return True
 
     def get_redirect(self):
@@ -372,9 +370,9 @@ class PersistentIdentifier(db.Model, db.Timestamp):
         except IntegrityError:
             raise PIDDoesNotExistError(pid.pid_type, pid.pid_value)
         except SQLAlchemyError:
-            logger.exception("Failed to redirect to %s", pid, extra=dict(pid=self))
+            logger.exception("Failed to redirect to %s", pid, extra={"pid": self})
             raise
-        logger.info("Redirected PID to {0}".format(pid), extra=dict(pid=self))
+        logger.info("Redirected PID to %s", pid, extra={"pid": self})
         return True
 
     def reserve(self):
@@ -395,9 +393,9 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                 self.status = PIDStatus.RESERVED
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to reserve PID.", extra=dict(pid=self))
+            logger.exception("Failed to reserve PID.", extra={"pid": self})
             raise
-        logger.info("Reserved PID.", extra=dict(pid=self))
+        logger.info("Reserved PID.", extra={"pid": self})
         return True
 
     def register(self):
@@ -418,9 +416,9 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                 self.status = PIDStatus.REGISTERED
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to register PID.", extra=dict(pid=self))
+            logger.exception("Failed to register PID.", extra={"pid": self})
             raise
-        logger.info("Registered PID.", extra=dict(pid=self))
+        logger.info("Registered PID.", extra={"pid": self})
         return True
 
     def delete(self):
@@ -444,13 +442,13 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                     self.status = PIDStatus.DELETED
                     db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to delete PID.", extra=dict(pid=self))
+            logger.exception("Failed to delete PID.", extra={"pid": self})
             raise
 
         if removed:
-            logger.info("Deleted PID (removed).", extra=dict(pid=self))
+            logger.info("Deleted PID (removed).", extra={"pid": self})
         else:
-            logger.info("Deleted PID.", extra=dict(pid=self))
+            logger.info("Deleted PID.", extra={"pid": self})
         return True
 
     def sync_status(self, status):
@@ -470,9 +468,9 @@ class PersistentIdentifier(db.Model, db.Timestamp):
                 self.status = status
                 db.session.add(self)
         except SQLAlchemyError:
-            logger.exception("Failed to sync status %s.", status, extra=dict(pid=self))
+            logger.exception("Failed to sync status %s.", status, extra={"pid": self})
             raise
-        logger.info("Synced PID status to {0}.".format(status), extra=dict(pid=self))
+        logger.info("Synced PID status to %s.", status, extra={"pid": self})
         return True
 
     def is_redirected(self):
@@ -509,16 +507,10 @@ class PersistentIdentifier(db.Model, db.Timestamp):
 
     def __repr__(self):
         """Get representation of object."""
-        return "<PersistentIdentifier {0}:{1}{3} ({2})>".format(
-            self.pid_type,
-            self.pid_value,
-            self.status,
-            (
-                " / {0}:{1}".format(self.object_type, self.object_uuid)
-                if self.object_type
-                else ""
-            ),
+        object_ref = (
+            f" / {self.object_type}:{self.object_uuid}" if self.object_type else ""
         )
+        return f"<PersistentIdentifier {self.pid_type}:{self.pid_value}{object_ref} ({self.status})>"
 
 
 class Redirect(db.Model, db.Timestamp):
@@ -603,8 +595,8 @@ class RecordIdentifier(db.Model):
         if db.engine.dialect.name == "postgresql":  # pragma: no cover
             db.session.execute(
                 "SELECT setval(pg_get_serial_sequence("
-                "'{0}', 'recid'), :newval)".format(cls.__tablename__),
-                dict(newval=val),
+                f"'{cls.__tablename__}', 'recid'), :newval)",
+                {"newval": val},
             )
 
     @classmethod
@@ -620,8 +612,8 @@ class RecordIdentifier(db.Model):
 
 
 __all__ = (
-    "PersistentIdentifier",
     "PIDStatus",
+    "PersistentIdentifier",
     "RecordIdentifier",
     "Redirect",
 )
