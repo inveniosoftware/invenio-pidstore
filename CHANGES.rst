@@ -9,6 +9,11 @@
 Changes
 =======
 
+Version v4.0.3 (released 2026-11-03)
+
+- chore: apply ruff linter fixes
+- chore: replace usage of `six` compatibility library
+
 Version v4.0.2 (released 2026-08-04)
 
 - fix(build): include mo files

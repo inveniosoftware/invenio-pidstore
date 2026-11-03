@@ -364,6 +364,6 @@ Above is equivalent to:
 from .ext import InvenioPIDStore
 from .proxies import current_pidstore
 
-__version__ = "4.0.2"
+__version__ = "4.0.3"
 
 __all__ = ("InvenioPIDStore", "__version__", "current_pidstore")
