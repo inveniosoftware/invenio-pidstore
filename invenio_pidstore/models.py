@@ -199,8 +199,8 @@ class PersistentIdentifier(db.Model, db.Timestamp):
             if pid_provider:
                 args["pid_provider"] = pid_provider
             return db.session.query(cls).filter_by(**args).one()
-        except NoResultFound:
-            raise PIDDoesNotExistError(pid_type, pid_value)
+        except NoResultFound as error
+            raise PIDDoesNotExistError(pid_type, pid_value) from error
 
     @classmethod
     def get_by_object(cls, pid_type, object_type, object_uuid):
