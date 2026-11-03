@@ -22,9 +22,6 @@ def app(request):
     # Set temporary instance path for sqlite
     instance_path = tempfile.mkdtemp()
     app = Flask("testapp", instance_path=instance_path)
-    InvenioDB(app)
-    InvenioI18N(app)
-    InvenioPIDStore(app)
 
     app.config.update(
         SQLALCHEMY_DATABASE_URI=os.environ.get(
@@ -32,6 +29,9 @@ def app(request):
         ),
         TESTING=True,
     )
+    InvenioDB(app)
+    InvenioI18N(app)
+    InvenioPIDStore(app)
 
     with app.app_context():
         yield app
@@ -45,8 +45,8 @@ def db(app):
     """Database fixture."""
     from invenio_db import db as db_
 
-    if not database_exists(str(db_.engine.url)):
-        create_database(str(db_.engine.url))
+    if not database_exists(db_.engine.url):
+        create_database(db_.engine.url)
     db_.create_all()
 
     yield db_
