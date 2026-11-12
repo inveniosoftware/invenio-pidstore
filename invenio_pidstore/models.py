@@ -10,7 +10,6 @@ import logging
 import uuid
 from enum import Enum
 
-import six
 from invenio_db import db
 from invenio_i18n import lazy_gettext as _
 from sqlalchemy import func
@@ -200,7 +199,7 @@ class PersistentIdentifier(db.Model, db.Timestamp):
             instance.
         """
         try:
-            args = dict(pid_type=pid_type, pid_value=six.text_type(pid_value))
+            args = dict(pid_type=pid_type, pid_value=str(pid_value))
             if pid_provider:
                 args["pid_provider"] = pid_provider
             return db.session.query(cls).filter_by(**args).one()
