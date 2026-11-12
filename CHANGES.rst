@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v3.1.1 (released 2026-11-12)
+
+- fix: removed six
+
 Version v3.1.0 (released 2026-07-28)
 
 - fix(ci): run tests on maint-*
