@@ -16,7 +16,6 @@ Invenio-PIDStore.
    installation
    configuration
    usage
-   examplesapp
 
 
 API Reference

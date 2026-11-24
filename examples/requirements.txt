@@ -1,4 +1,0 @@
-# SPDX-FileCopyrightText: 2018 CERN.
-# SPDX-License-Identifier: MIT
-
-invenio-records>=1.0.0b4
