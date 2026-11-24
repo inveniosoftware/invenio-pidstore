@@ -12,8 +12,6 @@ import sphinx.environment
 
 from invenio_pidstore import __version__
 
-# Plug example application into module path
-sys.path.append("examples")
 
 # -- General configuration ------------------------------------------------
 
