@@ -8,6 +8,7 @@ import uuid
 from unittest.mock import patch
 
 import pytest
+from invenio_db.utils import alembic_test_context
 from sqlalchemy.exc import SQLAlchemyError
 
 from invenio_pidstore.errors import (
@@ -67,6 +68,19 @@ def test_alembic(app, db):
 
     if db.engine.name == "sqlite":
         raise pytest.skip("Upgrades are not supported on SQLite.")
+
+    alembic_context = alembic_test_context()
+    original_include_object = alembic_context["include_object"]
+
+    def include_object(object_, name, type_, reflected, compare_to):
+        """Exclude models belonging to external test dependencies."""
+        table = object_ if type_ == "table" else getattr(object_, "table", None)
+        if table is not None and table.name.startswith(("access_", "accounts_")):
+            return False
+        return original_include_object(object_, name, type_, reflected, compare_to)
+
+    alembic_context["include_object"] = include_object
+    app.config["ALEMBIC_CONTEXT"] = alembic_context
 
     assert not ext.alembic.compare_metadata()
     db.drop_all()

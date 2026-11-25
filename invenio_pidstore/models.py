@@ -10,7 +10,7 @@ from enum import Enum
 
 from invenio_db import db
 from invenio_i18n import lazy_gettext as _
-from sqlalchemy import func
+from sqlalchemy import func, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy_utils.types import ChoiceType, UUIDType
@@ -594,8 +594,10 @@ class RecordIdentifier(db.Model):
         """
         if db.engine.dialect.name == "postgresql":  # pragma: no cover
             db.session.execute(
-                "SELECT setval(pg_get_serial_sequence("
-                f"'{cls.__tablename__}', 'recid'), :newval)",
+                text(
+                    "SELECT setval(pg_get_serial_sequence("
+                    f"'{cls.__tablename__}', 'recid'), :newval)"
+                ),
                 {"newval": val},
             )
 
