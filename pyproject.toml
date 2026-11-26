@@ -10,7 +10,7 @@
 name = "invenio-pidstore"
 description = "Invenio module that stores and registers persistent identifiers."
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = "MIT"
 authors = [
   { name = "CERN", email = "info@inveniosoftware.org" },
